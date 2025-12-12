@@ -1,0 +1,69 @@
+<!-- download.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Download &amp; Share | Norhaslini Abd Ghaffar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="top-bar-brand">NAG</div>
+      <nav class="top-bar-actions">
+        <a href="index.html" class="btn btn-secondary btn-sm">Home</a>
+      </nav>
+    </header>
+
+    <div class="breadcrumb">Home &rsaquo; Download &amp; Share</div>
+
+    <main class="page-main container">
+      <header class="page-header fade-in">
+        <h1>Download &amp; Share</h1>
+        <p class="page-subtitle">
+          Quick access to my resume and this digital portfolio during and after the interview.
+        </p>
+      </header>
+
+      <section class="download-section card fade-in">
+        <div class="download-layout">
+          <div class="download-icon-card">
+            <!-- You can replace this with an actual image if you prefer -->
+            <div class="resume-icon">
+              <div class="resume-icon-avatar">👤</div>
+              <div class="resume-icon-text">Resume</div>
+            </div>
+          </div>
+          <div class="download-actions">
+            <p class="download-text">
+              You can review my full resume and keep this portfolio link for follow-up.
+            </p>
+
+            <a href="Norhaslini Abd Ghaffar - Resume.pdf" class="btn btn-primary download-btn" download>
+              Download Resume (PDF)
+            </a>
+
+            <button type="button" class="btn btn-secondary download-btn" onclick="copyPortfolioLink()">
+              Copy Portfolio Link
+            </button>
+
+            <p class="download-hint">
+              Tip: When I’m presenting on my tablet, I can quickly tap these buttons for you.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-nav-actions fade-in">
+        <a href="index.html" class="btn btn-secondary">Back to Home</a>
+        <a href="index.html" class="btn btn-primary">Finish &amp; Return to Home</a>
+      </section>
+    </main>
+
+    <!-- Toast container created here, but scripts.js can also create it dynamically if missing -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+  </div>
+</body>
+</html>

@@ -1,180 +1,107 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Norhaslini | Quality Career Hub</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root {
-      --bg: #050812;
-      --card: #101426;
-      --accent: #f2c94c;
-      --text-main: #f7f7f7;
-      --text-muted: #a0a4b8;
-    }
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      background:radial-gradient(circle at top,#222842 0,#050812 60%);
-      color:var(--text-main);
-      min-height:100vh;
-      padding:16px 16px 24px;
-    }
-
-    .shell {
-      width:100%;
-      max-width:1100px;
-      margin:0 auto;
-      background:linear-gradient(145deg,#0b0f1c,#050812);
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,0.08);
-      box-shadow:0 18px 40px rgba(0,0,0,0.7);
-      padding:18px 20px 20px;
-    }
-
-    .header {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      margin-bottom:16px;
-      flex-wrap:wrap;
-    }
-
-    .name-block h1 {
-      margin:0 0 4px;
-      font-size:22px;
-    }
-    .name-block p {
-      margin:0;
-      font-size:13px;
-      color:var(--text-muted);
-    }
-
-    .tag {
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.22);
-      color:var(--text-muted);
-      white-space:nowrap;
-    }
-
-    .summary {
-      font-size:13px;
-      color:var(--text-muted);
-      line-height:1.5;
-      margin-bottom:16px;
-      max-width:720px;
-    }
-
-    .card-grid {
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-
-    .nav-card {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:12px 14px;
-      border-radius:14px;
-      background:var(--card);
-      border:1px solid rgba(255,255,255,0.08);
-      text-decoration:none;
-      color:var(--text-main);
-      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .nav-card:hover {
-      transform:translateY(-2px);
-      border-color:rgba(242,201,76,0.8);
-      box-shadow:0 10px 24px rgba(0,0,0,0.6);
-    }
-
-    .nav-main {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      max-width:80%;
-    }
-    .nav-title {
-      font-size:15px;
-      font-weight:600;
-    }
-    .nav-desc {
-      font-size:12px;
-      color:var(--text-muted);
-    }
-
-    .nav-pill {
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      background:rgba(0,0,0,0.3);
-      border:1px solid rgba(255,255,255,0.14);
-      color:var(--accent);
-      white-space:nowrap;
-    }
-
-    .footer-note {
-      margin-top:16px;
-      font-size:11px;
-      color:var(--text-muted);
-      text-align:right;
-    }
-
-    @media (min-width:720px) {
-      .card-grid {
-        grid-template-columns:1fr 1fr;
-      }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Norhaslini Abd Ghaffar | Interactive Interview Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js" defer></script>
 </head>
-<body>
-<div class="shell">
-  <header class="header">
-    <div class="name-block">
-      <h1>Norhaslini Abd Ghaffar</h1>
-      <p>Quality / QA–QC Lead · Path to Quality Manager & beyond</p>
-    </div>
-    <span class="tag">Quality Talent Map</span>
-  </header>
-
-  <p class="summary">
-    A visual way to show how my skills evolved from Quality Inspector to leading QA/QC teams –
-    and what I’m currently building for director-level quality roles.
-  </p>
-
-  <div class="card-grid">
-    <a class="nav-card" href="skills-tiers.html">
-      <div class="nav-main">
-        <span class="nav-title">Skillset & Competency Tiers</span>
-        <span class="nav-desc">
-          Tier 1–6 overview of hard skills, certifications and leadership exposure, grouped by career level.
-        </span>
+<body class="page-home">
+  <div class="app-shell">
+    <header class="home-header">
+      <div class="hero fade-in">
+        <div class="hero-profile">
+          <!-- Save your image as profile.jpg or update this path -->
+          <div class="hero-photo-ring">
+            <img src="profile.png" alt="Portrait of Norhaslini Abd Ghaffar" class="hero-photo">
+          </div>
+        </div>
+        <div class="hero-info">
+          <h1 class="hero-name">Norhaslini Abd Ghaffar</h1>
+          <p class="hero-title">Quality &amp; Laboratory Leader | Manufacturing &amp; Audits</p>
+          <p class="hero-summary">
+            10+ years in QA, QC, and laboratory operations, supporting chemical &amp; coatings
+            manufacturing with stable, in-spec products and audit-ready systems.
+          </p>
+          <p class="hero-summary">
+            Experienced with integrated management systems (ISO 9001, 14001, 45001, 50001), SPC,
+            Six Sigma, RCA, CAPA, and supplier quality – leading teams to reduce defects,
+            complaints, and rework.
+          </p>
+          <div class="hero-chips">
+            <span class="pill pill-core">Integrated Management Systems</span>
+            <span class="pill pill-core">SPC &amp; Data-Driven Quality</span>
+            <span class="pill">Supplier &amp; Audit Management</span>
+            <span class="pill">Continuous Improvement &amp; Lean</span>
+          </div>
+        </div>
       </div>
-      <span class="nav-pill">Table view</span>
-    </a>
+    </header>
 
-    <a class="nav-card" href="talent-tree.html">
-      <div class="nav-main">
-        <span class="nav-title">Talent Tree Map</span>
-        <span class="nav-desc">
-          Game-style skill tree connecting QMS, lab, data and leadership skills in one visual.
-        </span>
-      </div>
-      <span class="nav-pill">Interactive</span>
-    </a>
+    <main class="home-main">
+      <section class="nav-section fade-in">
+        <h2 class="section-title">Explore My Portfolio</h2>
+        <p class="section-subtitle">
+          Tap a panel to jump straight to the area you’d like to discuss during the interview.
+        </p>
+
+        <div class="nav-grid">
+          <a href="achievements.html" class="nav-card card">
+            <div class="nav-icon">🏆</div>
+            <h3 class="nav-title">Key Achievements</h3>
+            <p class="nav-desc">Results like defect reduction, audit scores, and customer impact.</p>
+          </a>
+
+          <a href="experience.html" class="nav-card card">
+            <div class="nav-icon">📍</div>
+            <h3 class="nav-title">Experience Timeline</h3>
+            <p class="nav-desc">From QC lab to QA/QC Assistant Manager and site quality lead roles.</p>
+          </a>
+
+          <a href="projects.html" class="nav-card card">
+            <div class="nav-icon">📊</div>
+            <h3 class="nav-title">Featured Projects</h3>
+            <p class="nav-desc">SPC system, lab optimisation, and supplier quality improvements.</p>
+          </a>
+
+          <a href="skills.html" class="nav-card card">
+            <div class="nav-icon">🧩</div>
+            <h3 class="nav-title">Skills &amp; Competency</h3>
+            <p class="nav-desc">Mapped to tiered career levels from inspector to manager.</p>
+          </a>
+
+          <a href="tech.html" class="nav-card card">
+            <div class="nav-icon">💻</div>
+            <h3 class="nav-title">Technical Skillset</h3>
+            <p class="nav-desc">SAP QM/MM/PP, LIMS, SPC tools, and data analysis platforms.</p>
+          </a>
+
+          <a href="talent-tree.html" class="nav-card card">
+            <div class="nav-icon">🌳</div>
+            <h3 class="nav-title">Talent Tree</h3>
+            <p class="nav-desc">Tiered map of unlocked, growing, and future quality skills.</p>
+          </a>
+
+          <a href="certs.html" class="nav-card card">
+            <div class="nav-icon">🎖️</div>
+            <h3 class="nav-title">Certificates &amp; Awards</h3>
+            <p class="nav-desc">Lean Six Sigma Black Belt, IMS auditors, Hibiscus Awards &amp; more.</p>
+          </a>
+
+          <a href="download.html" class="nav-card card">
+            <div class="nav-icon">⬇️</div>
+            <h3 class="nav-title">Download &amp; Share</h3>
+            <p class="nav-desc">Resume PDF and quick link for this portfolio.</p>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Interactive Interview Portfolio by <strong>Norhaslini Abd Ghaffar</strong></p>
+    </footer>
   </div>
-
-  <p class="footer-note">
-    Best viewed on desktop for full map · Mobile friendly for interview & LinkedIn link.
-  </p>
-</div>
 </body>
 </html>
