@@ -24,19 +24,18 @@
       background:radial-gradient(circle at top,#222842 0,#050812 60%);
       color:var(--text-main);
       min-height:100vh;
-      display:flex;
-      justify-content:center;
-      padding:16px;
+      padding:16px 16px 24px;
     }
 
     .wrapper {
       width:100%;
       max-width:900px;
+      margin:0 auto;
       background:linear-gradient(145deg,#0c101c,#050812);
       border-radius:20px;
       border:1px solid rgba(255,255,255,0.08);
       box-shadow:0 18px 40px rgba(0,0,0,0.75);
-      padding:16px 16px 18px;
+      padding:16px 18px 18px;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -173,7 +172,7 @@
     <div>
       <h1>Skillset & Competency Tiers</h1>
       <p>
-        Overview of key quality skills mapped from Tier 1 (Inspector) up to Tier 6 (Director-level),
+        Key quality skills mapped from Tier 1 (Inspector) up to Tier 6 (Director-level),
         including skills currently growing.
       </p>
     </div>
@@ -202,13 +201,13 @@
   </div>
 
   <p class="footer-note">
-    Note: Tier mapping is based on actual responsibilities held, not just job titles.
-    “Growing” skills are areas I’m actively studying or supporting, preparing for future roles.
+    Tier mapping is based on responsibility level, not just job titles.
+    “Growing” skills are areas I’m actively studying or supporting for future roles.
   </p>
 </div>
 
 <script>
-  // Same skill data as talent tree – status 'partial' for ISO 13485 & Strategic Quality Leadership
+  // Data (ISO 13485 & Strategic Quality Leadership = partial / in progress)
   const skillTree = [
     { id:"core", name:"Quality Career Core", tier:5, status:"unlocked" },
 
@@ -278,6 +277,8 @@
       thTier.textContent = tierLabel(tier).replace("Tier ", "T");
 
       const tdStatus = document.createElement("td");
+
+      // normal tiers (with nodes)
       if (unlocked.length) {
         const chip = document.createElement("span");
         chip.className = "status-chip status-unlocked";
@@ -297,11 +298,18 @@
         tdStatus.appendChild(chip);
       }
 
+      // khas untuk Tier 1 & 2 (tak ada node tapi memang dah lalui)
+      if (!tierNodes.length && (tier === 1 || tier === 2)) {
+        const chip = document.createElement("span");
+        chip.className = "status-chip status-unlocked";
+        chip.textContent = "experience completed";
+        tdStatus.appendChild(chip);
+      }
+
       const tdSkills = document.createElement("td");
       if (tierNodes.length) {
         tdSkills.textContent = tierNodes.map(n => n.name).join(", ");
       } else {
-        // Summary for early tiers
         if (tier === 1) {
           tdSkills.textContent =
             "In-process / final inspection, visual checks, sampling, basic QC testing and data recording.";
