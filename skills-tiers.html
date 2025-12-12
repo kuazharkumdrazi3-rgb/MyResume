@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skillset & Competency Tiers | Norhaslini</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050812;
+      --panel: #0c101c;
+      --panel-soft:#15192a;
+      --accent:#f2c94c;
+      --accent-soft:rgba(242,201,76,0.3);
+      --accent-partial:#56ccf2;
+      --text-main:#f7f7f7;
+      --text-muted:#9ea3b8;
+      --text-soft:#c3cadb;
+    }
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      background:radial-gradient(circle at top,#222842 0,#050812 60%);
+      color:var(--text-main);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:16px;
+    }
+
+    .wrapper {
+      width:100%;
+      max-width:900px;
+      background:linear-gradient(145deg,#0c101c,#050812);
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 18px 40px rgba(0,0,0,0.75);
+      padding:16px 16px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    header h1 {
+      margin:0 0 4px;
+      font-size:18px;
+    }
+    header p {
+      margin:0;
+      font-size:12px;
+      color:var(--text-muted);
+    }
+    .back-link {
+      font-size:11px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.18);
+      color:var(--text-soft);
+      text-decoration:none;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      background:rgba(0,0,0,0.35);
+      white-space:nowrap;
+    }
+
+    .legend {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:11px;
+      color:var(--text-muted);
+    }
+    .chip-dot {
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      margin-right:4px;
+      display:inline-block;
+    }
+    .d-unlocked {background:var(--accent); box-shadow:0 0 8px var(--accent-soft);}
+    .d-partial {background:var(--accent-partial); box-shadow:0 0 8px rgba(86,204,242,0.4);}
+    .d-locked {background:#4f4f4f;}
+
+    .table-shell {
+      margin-top:4px;
+      border-radius:14px;
+      background:var(--panel-soft);
+      border:1px solid rgba(255,255,255,0.06);
+      overflow:hidden;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+      color:var(--text-muted);
+    }
+    thead {
+      background:rgba(255,255,255,0.02);
+    }
+    th, td {
+      padding:6px 8px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+      vertical-align:top;
+    }
+    th {
+      text-align:left;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      font-size:11px;
+      color:var(--text-soft);
+    }
+    tr:last-child th,
+    tr:last-child td {
+      border-bottom:none;
+    }
+
+    .tier-label {
+      font-weight:600;
+      color:var(--text-soft);
+      white-space:nowrap;
+    }
+
+    .status-chip {
+      display:inline-block;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.15);
+      font-size:10px;
+      margin-right:4px;
+    }
+    .status-unlocked {
+      border-color:rgba(242,201,76,0.9);
+      color:var(--accent);
+    }
+    .status-partial {
+      border-color:rgba(86,204,242,0.9);
+      color:var(--accent-partial);
+    }
+    .status-locked {
+      border-color:rgba(255,255,255,0.25);
+      color:var(--text-muted);
+    }
+
+    .row-active {
+      background:rgba(242,201,76,0.06);
+    }
+
+    .footer-note {
+      margin-top:6px;
+      font-size:11px;
+      color:var(--text-muted);
+    }
+
+    @media (max-width:640px){
+      body{padding:10px;}
+      .wrapper{padding:12px;}
+      th:nth-child(3),td:nth-child(3){font-size:11px;}
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div>
+      <h1>Skillset & Competency Tiers</h1>
+      <p>
+        Overview of key quality skills mapped from Tier 1 (Inspector) up to Tier 6 (Director-level),
+        including skills currently growing.
+      </p>
+    </div>
+    <a href="index.html" class="back-link">← Back</a>
+  </header>
+
+  <div class="legend">
+    <span><span class="chip-dot d-unlocked"></span>Unlocked – used in past roles</span>
+    <span><span class="chip-dot d-partial"></span>Growing – currently in progress</span>
+    <span><span class="chip-dot d-locked"></span>Future – mapped for next tier</span>
+  </div>
+
+  <div class="table-shell">
+    <table>
+      <thead>
+      <tr>
+        <th>Tier</th>
+        <th>Status</th>
+        <th>Key skills & competencies</th>
+      </tr>
+      </thead>
+      <tbody id="tier-table-body">
+      <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <p class="footer-note">
+    Note: Tier mapping is based on actual responsibilities held, not just job titles.
+    “Growing” skills are areas I’m actively studying or supporting, preparing for future roles.
+  </p>
+</div>
+
+<script>
+  // Same skill data as talent tree – status 'partial' for ISO 13485 & Strategic Quality Leadership
+  const skillTree = [
+    { id:"core", name:"Quality Career Core", tier:5, status:"unlocked" },
+
+    // Quality Systems & Compliance
+    { id:"iso9001",   name:"ISO 9001 QMS",                   tier:4, status:"unlocked" },
+    { id:"internal-audit", name:"Internal Auditing",        tier:4, status:"unlocked" },
+    { id:"doc-control",    name:"Documentation Control",    tier:3, status:"unlocked" },
+    { id:"capa-systems",   name:"Deviation & CAPA",         tier:4, status:"unlocked" },
+    { id:"risk-qms",       name:"Risk-Based QMS",           tier:5, status:"unlocked" },
+    { id:"halal",          name:"Halal Certification Management", tier:6, status:"locked" },
+    { id:"haccp",          name:"HACCP / Food Safety",      tier:6, status:"locked" },
+    { id:"iso13485",       name:"ISO 13485 / Medical Device", tier:6, status:"partial" }, // in progress
+    { id:"iso17025",       name:"ISO 17025 Lab Accreditation", tier:6, status:"locked" },
+
+    // Lab, Testing & Data
+    { id:"lab-ops",        name:"QC Lab Operations",        tier:3, status:"unlocked" },
+    { id:"spc",            name:"SPC & Process Monitoring", tier:4, status:"unlocked" },
+    { id:"qc-tools",       name:"7 QC Tools",               tier:4, status:"unlocked" },
+    { id:"data-trend",     name:"Data Trending & Reporting",tier:4, status:"unlocked" },
+    { id:"advanced-data",  name:"Advanced Data Interpretation", tier:5, status:"unlocked" },
+    { id:"doe",            name:"Design of Experiments (DoE)", tier:5, status:"unlocked" },
+
+    // Problem Solving & Improvement
+    { id:"rca",            name:"Root Cause Analysis",      tier:4, status:"unlocked" },
+    { id:"fmea",           name:"FMEA / PFMEA",             tier:4, status:"unlocked" },
+    { id:"ci-projects",    name:"Continuous Improvement Projects", tier:4, status:"unlocked" },
+    { id:"plant-strategy", name:"Plant-wide Quality Strategy", tier:6, status:"locked" },
+
+    // Leadership & People
+    { id:"team-lead",      name:"Team Leadership (QA/QC/Lab)", tier:5, status:"unlocked" },
+    { id:"xf-comm",        name:"Cross-functional Communication", tier:3, status:"unlocked" },
+    { id:"coaching",       name:"Coaching & Mentoring",     tier:4, status:"unlocked" },
+    { id:"culture",        name:"Quality Culture Building", tier:5, status:"unlocked" },
+    { id:"director-lead",  name:"Strategic Quality Leadership", tier:6, status:"partial" } // in progress
+  ];
+
+  const tierTableBody = document.getElementById("tier-table-body");
+
+  function tierLabel(tier) {
+    switch (tier) {
+      case 1: return "Tier 1 · Inspector";
+      case 2: return "Tier 2 · Supervisor";
+      case 3: return "Tier 3 · Executive";
+      case 4: return "Tier 4 · Engineer";
+      case 5: return "Tier 5 · Manager";
+      case 6: return "Tier 6 · Director-level";
+      default: return "Tier ?";
+    }
+  }
+
+  function buildTierTable(activeTier=null) {
+    const tiers = [1,2,3,4,5,6];
+    tierTableBody.innerHTML = "";
+
+    tiers.forEach(tier => {
+      const tierNodes = skillTree.filter(n => n.tier === tier);
+
+      const unlocked = tierNodes.filter(n => n.status === "unlocked");
+      const partial  = tierNodes.filter(n => n.status === "partial");
+      const locked   = tierNodes.filter(n => n.status === "locked");
+
+      const tr = document.createElement("tr");
+      if (tier === activeTier) tr.classList.add("row-active");
+
+      const thTier = document.createElement("th");
+      thTier.className = "tier-label";
+      thTier.textContent = tierLabel(tier).replace("Tier ", "T");
+
+      const tdStatus = document.createElement("td");
+      if (unlocked.length) {
+        const chip = document.createElement("span");
+        chip.className = "status-chip status-unlocked";
+        chip.textContent = `${unlocked.length} unlocked`;
+        tdStatus.appendChild(chip);
+      }
+      if (partial.length) {
+        const chip = document.createElement("span");
+        chip.className = "status-chip status-partial";
+        chip.textContent = `${partial.length} growing`;
+        tdStatus.appendChild(chip);
+      }
+      if (locked.length) {
+        const chip = document.createElement("span");
+        chip.className = "status-chip status-locked";
+        chip.textContent = `${locked.length} future`;
+        tdStatus.appendChild(chip);
+      }
+
+      const tdSkills = document.createElement("td");
+      if (tierNodes.length) {
+        tdSkills.textContent = tierNodes.map(n => n.name).join(", ");
+      } else {
+        // Summary for early tiers
+        if (tier === 1) {
+          tdSkills.textContent =
+            "In-process / final inspection, visual checks, sampling, basic QC testing and data recording.";
+        } else if (tier === 2) {
+          tdSkills.textContent =
+            "Shift / line supervision, follow-up on defects, coordinating rework, operator training and basic reporting.";
+        } else {
+          tdSkills.textContent = "";
+        }
+      }
+
+      tr.appendChild(thTier);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdSkills);
+      tierTableBody.appendChild(tr);
+    });
+  }
+
+  buildTierTable();
+</script>
+</body>
+</html>
