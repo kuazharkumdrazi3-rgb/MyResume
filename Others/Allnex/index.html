@@ -1,242 +1,127 @@
+<!-- /others/allnex/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Allnex | JPP Vault</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Reuse the Career theme -->
-  <link rel="stylesheet" href="../../career/styles.css" />
-
-  <style>
-    :root { color-scheme: dark; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      min-height:100vh;
-      background:#0b1220;
-      color:#e7eefc;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .wrap{
-      width:min(1100px, 94vw);
-      padding:28px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:18px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      padding:18px 18px;
-      border-radius:18px;
-      background: rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 14px 35px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .title h1{
-      margin:0 0 6px 0;
-      font-size:1.6rem;
-      letter-spacing:0.2px;
-    }
-
-    .title p{
-      margin:0;
-      opacity:0.85;
-      line-height:1.45;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-    }
-
-    .mini-btn{
-      cursor:pointer;
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.04);
-      color:#e7eefc;
-      text-decoration:none;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      white-space:nowrap;
-      font-size:0.95rem;
-    }
-
-    .mini-btn:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
-      border-color: rgba(120,180,255,0.55);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:16px;
-    }
-
-    .card{
-      padding:20px 20px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.05);
-      box-shadow: 0 14px 35px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .card:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 22px 55px rgba(0,0,0,0.5);
-      border-color: rgba(120,180,255,0.55);
-    }
-
-    .card h2{
-      margin:0;
-      font-size:1.15rem;
-      color:#f1f6ff;
-    }
-
-    .card p{
-      margin:0;
-      opacity:0.86;
-      line-height:1.55;
-      flex:1;
-    }
-
-    .go{
-      margin-top:6px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.04);
-      color:#e7eefc;
-      cursor:pointer;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      text-decoration:none;
-      width: fit-content;
-    }
-
-    .go:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
-      border-color: rgba(120,180,255,0.55);
-    }
-
-    .hint{
-      opacity:0.75;
-      font-size:0.95rem;
-      margin-top:2px;
-    }
-
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-      .actions{ justify-content:flex-start; }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Reuse Others styling -->
+  <link rel="stylesheet" href="../../Career/styles.css">
+  <script src="../../Career/scripts.js" defer></script>
 </head>
 
-<body>
-  <div class="wrap">
+<body class="page-home">
+  <div class="app-shell">
 
-    <div class="topbar">
-      <div class="title">
-        <h1>Allnex – JPP Evidence Vault</h1>
-        <p>
-          Master categories for reference during discussion
-        </p>
+    <header class="home-header">
+      <div class="hero fade-in">
+        <div class="hero-profile">
+          <div class="hero-photo-ring">
+            <img src="../../Career/profile.png" alt="Portrait of Norhaslini Abd Ghaffar" class="hero-photo">
+          </div>
+        </div>
+
+        <div class="hero-info">
+          <h1 class="hero-name">Norhaslini Abd Ghaffar</h1>
+          <!-- Removed hero-title, hero-summary, and hero-chips as requested -->
+        </div>
       </div>
+    </header>
 
-      <div class="actions">
-        <a class="mini-btn" href="../index.html">← Back to Others</a>
-        <a class="mini-btn" href="../../index.html">🏠 Home</a>
-      </div>
-    </div>
+    <main class="home-main">
+      <section class="nav-section fade-in">
+        <h2 class="section-title">Allnex – Quick Reference to Discussion</h2>
 
-    <div class="grid">
+        <div class="nav-grid">
 
-      <div class="card">
-        <h2>1) Case Dashboard</h2>
-        <p>Quick counter pack: key issues, what to say, and top 10 evidence links.</p>
-        <a class="go" href="dashboard.html">Open Dashboard →</a>
-      </div>
+          <!-- Dashboard -->
+          <a href="dashboard.html" class="nav-card card">
+            <div class="nav-icon">⚡</div>
+            <h3 class="nav-title">Case Dashboard</h3>
+            <p class="nav-desc">Fast counter pack: key points + top evidence links for JPP / HR discussions.</p>
+          </a>
 
-      <div class="card">
-        <h2>2) Timeline & Key Dates</h2>
-        <p>Chronological events with evidence buttons: date → event → what it proves.</p>
-        <a class="go" href="timeline.html">Open Timeline →</a>
-      </div>
+          <!-- Timeline -->
+          <a href="timeline.html" class="nav-card card">
+            <div class="nav-icon">🗓️</div>
+            <h3 class="nav-title">Timeline &amp; Key Dates</h3>
+            <p class="nav-desc">Chronological events: date → what happened → what it proves → evidence.</p>
+          </a>
 
-      <div class="card">
-        <h2>3) Payments & Calculations</h2>
-        <p>Notice/in-lieu, garden leave, severance, ex-gratia, outstanding payments (side-by-side).</p>
-        <a class="go" href="calculations.html">Open Calculations →</a>
-      </div>
+          <!-- Calculations -->
+          <a href="calculations.html" class="nav-card card">
+            <div class="nav-icon">🧮</div>
+            <h3 class="nav-title">Payments &amp; Calculations</h3>
+            <p class="nav-desc">Notice / in-lieu, garden leave, severance, ex-gratia, outstanding items.</p>
+          </a>
 
-      <div class="card">
-        <h2>4) Company Communications</h2>
-        <p>Email/WhatsApp/Teams threads grouped by topic, with direct proof links.</p>
-        <a class="go" href="communications.html">Open Communications →</a>
-      </div>
+          <!-- Communications -->
+          <a href="communications.html" class="nav-card card">
+            <div class="nav-icon">✉️</div>
+            <h3 class="nav-title">Company Communications</h3>
+            <p class="nav-desc">Email/WhatsApp/Teams grouped by topic with direct proof links.</p>
+          </a>
 
-      <div class="card">
-        <h2>5) Internal Vacancy & Rejection</h2>
-        <p>Evidence of internal application + rejection reason (SuccessFactors / messages).</p>
-        <a class="go" href="internal-vacancy.html">Open Internal Vacancy →</a>
-      </div>
+          <!-- Internal vacancy -->
+          <a href="internal-vacancy.html" class="nav-card card">
+            <div class="nav-icon">🧾</div>
+            <h3 class="nav-title">Internal Vacancy &amp; Rejection</h3>
+            <p class="nav-desc">Evidence of internal application + rejection reason (SuccessFactors/messages).</p>
+          </a>
 
-      <div class="card">
-        <h2>6) Handover & License Constraints</h2>
-        <p>“License tied to employee name” constraints and what it means for handover.</p>
-        <a class="go" href="handover-license.html">Open Handover →</a>
-      </div>
+          <!-- Handover/license -->
+          <a href="handover-license.html" class="nav-card card">
+            <div class="nav-icon">🔒</div>
+            <h3 class="nav-title">Handover &amp; License Constraints</h3>
+            <p class="nav-desc">“License tied to employee name” constraints and supporting references.</p>
+          </a>
 
-      <div class="card">
-        <h2>7) Policies / Contract / Terms</h2>
-        <p>Contract clause, redundancy policy, handbook/SOP extracts, and references.</p>
-        <a class="go" href="policies.html">Open Policies →</a>
-      </div>
+          <!-- Policies -->
+          <a href="policies.html" class="nav-card card">
+            <div class="nav-icon">📚</div>
+            <h3 class="nav-title">Policies / Contract / Terms</h3>
+            <p class="nav-desc">Contract clause, redundancy policy, handbook/SOP extracts &amp; references.</p>
+          </a>
 
-      <div class="card">
-        <h2>8) Evidence Library (Register)</h2>
-        <p>Master evidence list with EV-IDs, tags, dates, and file links (searchable).</p>
-        <a class="go" href="evidence-register.html">Open Evidence Register →</a>
-      </div>
+          <!-- Evidence register -->
+          <a href="evidence-register.html" class="nav-card card">
+            <div class="nav-icon">🗂️</div>
+            <h3 class="nav-title">Evidence Library (Register)</h3>
+            <p class="nav-desc">Master list with EV-IDs, tags, dates, and file links (searchable).</p>
+          </a>
 
-      <div class="card">
-        <h2>9) Meeting Notes (JPP / HR)</h2>
-        <p>Notes per meeting: what they said → your response → next actions + linked proof.</p>
-        <a class="go" href="meeting-notes.html">Open Meeting Notes →</a>
-      </div>
+          <!-- Meeting notes -->
+          <a href="meeting-notes.html" class="nav-card card">
+            <div class="nav-icon">🧠</div>
+            <h3 class="nav-title">Meeting Notes (JPP / HR)</h3>
+            <p class="nav-desc">What they said → your response → actions + linked evidence.</p>
+          </a>
 
-      <div class="card">
-        <h2>10) Draft Statements / Talking Points</h2>
-        <p>Short scripts to answer HR/JPP consistently without over-explaining.</p>
-        <a class="go" href="talking-points.html">Open Talking Points →</a>
-      </div>
+          <!-- Talking points -->
+          <a href="talking-points.html" class="nav-card card">
+            <div class="nav-icon">🗣️</div>
+            <h3 class="nav-title">Draft Statements / Talking Points</h3>
+            <p class="nav-desc">Short scripts to answer consistently without over-explaining.</p>
+          </a>
 
-    </div>
+          <!-- Back -->
+          <a href="../index.html" class="nav-card card">
+            <div class="nav-icon">⬅️</div>
+            <h3 class="nav-title">Back to Others</h3>
+            <p class="nav-desc">Return to Others Vault</p>
+          </a>
+
+          <!-- Home -->
+          <a href="../../index.html" class="nav-card card">
+            <div class="nav-icon">🏠</div>
+            <h3 class="nav-title">Home</h3>
+            <p class="nav-desc">Return to main selection</p>
+          </a>
+
+        </div>
+      </section>
+    </main>
+
   </div>
 </body>
 </html>
