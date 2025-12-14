@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Others | Vault</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Reuse the Career theme (CSS lives in /career) -->
+  <link rel="stylesheet" href="../career/styles.css" />
+
+  <style>
+    :root { color-scheme: dark; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background:#0b1220;
+      color:#e7eefc;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:min(1100px, 94vw);
+      padding:28px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      padding:18px;
+      border-radius:18px;
+      background: rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .title h1{
+      margin:0 0 6px 0;
+      font-size:1.6rem;
+      letter-spacing:0.2px;
+    }
+
+    .title p{
+      margin:0;
+      opacity:0.85;
+      line-height:1.45;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .mini-btn{
+      cursor:pointer;
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color:#e7eefc;
+      text-decoration:none;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      white-space:nowrap;
+      font-size:0.95rem;
+    }
+
+    .mini-btn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      border-color: rgba(120,180,255,0.55);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+
+    .card{
+      padding:20px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 22px 55px rgba(0,0,0,0.5);
+      border-color: rgba(120,180,255,0.55);
+    }
+
+    .card h2{
+      margin:0;
+      font-size:1.15rem;
+      color:#f1f6ff;
+    }
+
+    .card p{
+      margin:0;
+      opacity:0.86;
+      line-height:1.55;
+      flex:1;
+    }
+
+    .go{
+      margin-top:6px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color:#e7eefc;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      text-decoration:none;
+      width: fit-content;
+    }
+
+    .go:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      border-color: rgba(120,180,255,0.55);
+    }
+
+    .hint{
+      opacity:0.75;
+      font-size:0.95rem;
+      margin-top:2px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .actions{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="title">
+        <h1>Others</h1>
+        <p>
+          A structured vault for non-career materials: case files, templates, notes,
+          and anything you want to show quickly during discussions.
+        </p>
+        <div class="hint">Keep everything offline-friendly (PDF/images) for fast access.</div>
+      </div>
+
+      <div class="actions">
+        <a class="mini-btn" href="../index.html">🏠 Home</a>
+        <a class="mini-btn" href="../career/index.html">Career</a>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <h2>Allnex</h2>
+        <p>
+          Preparation for discussion
+        </p>
+        <a class="go" href="allnex/index.html">Open Allnex Vault →</a>
+      </div>
+
+      
+    </div>
+  </div>
+</body>
+</html>
