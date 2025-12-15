@@ -1,0 +1,724 @@
+<!-- /others/allnex/retrenchment_selection.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Allnex | Retrenchment Selection & Overlap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- USE Career assets -->
+  <link rel="stylesheet" href="../../Career/styles.css" />
+  <script src="../../Career/scripts.js" defer></script>
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    .split-wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      width: 100%;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .left-panel { background: rgba(255,255,255,0.04); }
+
+    .doc-item {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all .15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .doc-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(120,180,255,0.55);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+    .doc-item.active {
+      border-color: rgba(120,180,255,0.75);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    }
+
+    .doc-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      font-size: 18px;
+    }
+
+    .doc-title { font-weight: 800; margin: 0; }
+    .doc-desc { margin: 2px 0 0; opacity: 0.8; font-size: 0.93rem; line-height: 1.25rem; }
+
+    .viewer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      margin-bottom: 10px;
+    }
+    .viewer-title { font-weight: 800; opacity: 0.95; }
+
+    .viewer-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mini-btn {
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color: #e7eefc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .mini-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(120,180,255,0.55);
+    }
+
+    .right-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .tab-btn {
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color: #e7eefc;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all .15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn:hover { transform: translateY(-2px); border-color: rgba(120,180,255,0.55); }
+    .tab-btn.active { border-color: rgba(120,180,255,0.85); box-shadow: 0 10px 24px rgba(0,0,0,0.35); }
+
+    .content-box {
+      border-radius: 12px;
+      background: rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.10);
+      padding: 12px;
+    }
+
+    .hint {
+      opacity: 0.78;
+      font-size: 0.95rem;
+      line-height: 1.35rem;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(120,180,255,0.10);
+      border: 1px solid rgba(120,180,255,0.25);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .callout {
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(120,180,255,0.22);
+      background: rgba(120,180,255,0.08);
+      margin: 10px 0;
+    }
+    .callout b { display: block; margin-bottom: 6px; }
+
+    .list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .list li { margin: 6px 0; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .pill {
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      opacity: 0.92;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .ev-card {
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .ev-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(120,180,255,0.55);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+    .ev-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .ev-id { font-weight: 800; }
+    .ev-type { opacity: 0.75; font-size: 0.85rem; }
+    .ev-title { margin: 6px 0 0; opacity: 0.92; font-size: 0.95rem; line-height: 1.25rem; }
+
+    .viewer-shell {
+      height: 68vh;
+      overflow: auto;
+      padding: 8px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .status {
+      opacity: 0.78;
+      font-size: 0.95rem;
+      padding: 10px;
+    }
+
+    .pdf-page { display: grid; place-items: center; margin-bottom: 12px; }
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .img-wrap { display: grid; place-items: center; padding: 10px; }
+    .img-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    table.simple {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.02);
+    }
+    table.simple th, table.simple td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      vertical-align: top;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    table.simple th { opacity: 0.9; background: rgba(255,255,255,0.03); }
+    table.simple tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 980px) {
+      .split-wrap { grid-template-columns: 1fr; }
+      .viewer-shell { height: 66vh; }
+      .evidence-grid { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body class="page-home">
+  <div class="app-shell">
+    <main class="home-main">
+      <section class="nav-section fade-in">
+        <h2 class="section-title">Retrenchment Selection &amp; Overlap</h2>
+
+        <div class="split-wrap">
+
+          <!-- LEFT: Sections -->
+          <div class="panel left-panel" id="docList">
+
+            <div class="doc-item active" data-key="intro">
+              <div class="doc-icon">🧭</div>
+              <div>
+                <p class="doc-title">0) Purpose: “I overlap with who?”</p>
+                <p class="doc-desc">Selection pool logic + how to read this folder</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="overlap">
+              <div class="doc-icon">🔁</div>
+              <div>
+                <p class="doc-title">1) Regional ↔ Site Overlap</p>
+                <p class="doc-desc">Evidence of site-level decisions / involvement</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="raci">
+              <div class="doc-icon">📌</div>
+              <div>
+                <p class="doc-title">2) RACI &amp; Same Pool</p>
+                <p class="doc-desc">Interchangeability check (who belongs in the pool)</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="lifo">
+              <div class="doc-icon">🗓️</div>
+              <div>
+                <p class="doc-title">3) LIFO Check</p>
+                <p class="doc-desc">Join/Rejoin dates: You, Izudin, Zakir, Ain</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="contradiction">
+              <div class="doc-icon">⚖️</div>
+              <div>
+                <p class="doc-title">4) Non-Interchangeable Contradiction</p>
+                <p class="doc-desc">If not overlap → specialised → not redundant</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="redeploy">
+              <div class="doc-icon">🧩</div>
+              <div>
+                <p class="doc-title">5) Redeployment Missing</p>
+                <p class="doc-desc">Internal vacancy + rejection + no documentation</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="replacement">
+              <div class="doc-icon">👤</div>
+              <div>
+                <p class="doc-title">6) New QM Replacement Issue</p>
+                <p class="doc-desc">Work continues → replacement ≠ redundancy</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="missingdocs">
+              <div class="doc-icon">❌</div>
+              <div>
+                <p class="doc-title">7) Missing Selection Documents</p>
+                <p class="doc-desc">No scoring matrix, no selection matrix, etc.</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="onepager">
+              <div class="doc-icon">📝</div>
+              <div>
+                <p class="doc-title">8) One-Page Summary (JPP)</p>
+                <p class="doc-desc">Plug-and-play statement + key bullets</p>
+              </div>
+            </div>
+
+            <div class="doc-item" data-key="questions">
+              <div class="doc-icon">🎯</div>
+              <div>
+                <p class="doc-title">9) Question Bank (JPP/HR)</p>
+                <p class="doc-desc">Why Ain retained, why me retrenched (force admissions)</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: Content + Evidence Viewer -->
+          <div class="panel">
+            <div class="viewer-head">
+              <div class="viewer-title" id="viewerTitle">Purpose: “I overlap with who?”</div>
+              <div class="viewer-actions">
+                <a class="mini-btn" href="index.html">⬅ Allnex</a>
+                <a class="mini-btn" href="../index.html">Others</a>
+                <a class="mini-btn" href="../../index.html">🏠 Home</a>
+              </div>
+            </div>
+
+            <div class="right-grid">
+              <div class="tabs">
+                <button class="tab-btn active" id="tabSummary">Summary</button>
+                <button class="tab-btn" id="tabEvidence">Evidence Viewer</button>
+              </div>
+
+              <!-- Summary -->
+              <div class="content-box" id="summaryBox"></div>
+
+              <!-- Evidence Viewer -->
+              <div class="content-box" id="evidenceBox" style="display:none;">
+                <div class="kicker">📎 Evidence Viewer</div>
+                <div class="hint" style="margin-bottom:10px;">
+                  Click an evidence card from the Summary tab to open it here (PDF or image).
+                </div>
+                <div class="viewer-shell" id="assetViewer">
+                  <div class="status">No evidence opened yet.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    // ====== CONFIG: update your local evidence paths here ======
+    // Suggested folder: /others/allnex/docs/selection/
+    const EVIDENCE = {
+      // Ain overlap examples (replace with your real files)
+      "AIN-01": { type: "image", title: "Site decision evidence (example)", src: "docs/selection/AIN-01.png" },
+      "AIN-02": { type: "pdf",   title: "Site instruction / approval evidence (example)", src: "docs/selection/AIN-02.pdf" },
+
+      // LIFO / employment date proofs (replace)
+      "LIFO-01": { type: "pdf", title: "Employment / confirmation letter (example)", src: "docs/selection/LIFO-01.pdf" },
+
+      // Internal vacancy / rejection proofs (replace)
+      "RD-01": { type: "image", title: "SuccessFactors rejection screenshot (example)", src: "docs/selection/RD-01.png" },
+
+      // Handbook excerpt (optional)
+      "HB-01": { type: "pdf", title: "HR Handbook excerpt (Retrenchment / Notice) (optional)", src: "docs/selection/HB-01.pdf" },
+
+      // New QM evidence (replace)
+      "QM-01": { type: "pdf", title: "New Quality Manager announcement / org update (example)", src: "docs/selection/QM-01.pdf" }
+    };
+
+    // ====== CONTENT (structured to answer “I overlap with who?”) ======
+    const SECTIONS = {
+      intro: {
+        title: 'Purpose: “I overlap with who?”',
+        html: `
+          <div class="kicker">🧭 Folder Objective</div>
+          <div class="callout">
+            <b>Core Question This Folder Answers</b>
+            <div class="hint"><b>“Who did I overlap with, and why should that person be included in the selection pool?”</b></div>
+          </div>
+
+          <div class="two-col">
+            <div class="content-box">
+              <b>How to Use (JPP-friendly)</b>
+              <ul class="list">
+                <li>Start at <b>Regional ↔ Site Overlap</b> (shows who belongs in the pool).</li>
+                <li>Then <b>RACI & Same Pool</b> (confirms overlap via responsibilities/authority).</li>
+                <li>Then <b>LIFO Check</b> (if same pool, LIFO must be explained).</li>
+                <li>Finally <b>Replacement</b> + <b>Missing Docs</b> (shows redundancy claim is inconsistent).</li>
+              </ul>
+              <div class="pill-row">
+                <span class="pill">Focus: functions</span>
+                <span class="pill">Not titles</span>
+                <span class="pill">Decision authority</span>
+                <span class="pill">Documentation</span>
+              </div>
+            </div>
+
+            <div class="content-box">
+              <b>Key Principles (simple)</b>
+              <ul class="list">
+                <li><b>Overlap</b> is based on actual work and site-level decision involvement.</li>
+                <li>If overlap exists, a <b>comparison</b> must be done (pool + criteria + scoring).</li>
+                <li>If work continues and is reassigned / rehired, it suggests <b>replacement</b>, not redundancy.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="callout">
+            <b>Quick Claim</b>
+            <div class="hint">I overlapped with <b>Ain</b> due to site-level quality decision involvement. No comparison, scoring, or exclusion rationale was disclosed.</div>
+          </div>
+        `
+      },
+
+      overlap: {
+        title: "Regional ↔ Site Overlap",
+        html: `
+          <div class="kicker">🔁 Overlap Evidence</div>
+          <div class="hint">Overlap is determined by <b>actual functions</b> and <b>site-level decision involvement</b>, not job titles.</div>
+
+          <div class="callout">
+            <b>What you must show here</b>
+            <ul class="list">
+              <li>Ain gave site-level quality decisions / approvals / instructions.</li>
+              <li>Ain’s involvement affected site disposition, audit actions, or operational quality outcomes.</li>
+              <li>This creates functional overlap → inclusion in the selection pool is required (or written exclusion rationale).</li>
+            </ul>
+          </div>
+
+          <div class="content-box">
+            <b>Evidence Cards (click to open)</b>
+            <div class="evidence-grid" style="margin-top:10px;">
+              ${evCard("AIN-01","image","Site decision / instruction affecting site quality")}
+              ${evCard("AIN-02","pdf","Email/approval / document showing site-level involvement")}
+            </div>
+          </div>
+
+          <div class="callout">
+            <b>Conclusion</b>
+            <div class="hint">Ain’s site-level decision involvement establishes functional overlap; excluding her from the selection pool requires a documented rationale.</div>
+          </div>
+        `
+      },
+
+      raci: {
+        title: "RACI & Same Pool",
+        html: `
+          <div class="kicker">📌 Same Pool Test</div>
+          <div class="hint">RACI helps show <b>who is Responsible/Accountable</b> for the same site-quality activities.</div>
+
+          <div class="content-box">
+            <b>Mini RACI (edit to match your real duties)</b>
+            <div class="hint" style="margin:6px 0 10px;">R = Responsible, A = Accountable, C = Consulted</div>
+
+            <table class="simple">
+              <thead>
+                <tr>
+                  <th>Key Site Quality Activity</th>
+                  <th>You</th>
+                  <th>Ain (Regional)</th>
+                  <th>New QM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Site quality decision / disposition</td>
+                  <td>R/A</td>
+                  <td>C / A (if evidenced)</td>
+                  <td>A</td>
+                </tr>
+                <tr>
+                  <td>Audit support / closure actions</td>
+                  <td>R</td>
+                  <td>C</td>
+                  <td>A</td>
+                </tr>
+                <tr>
+                  <td>Site quality escalation & approvals</td>
+                  <td>R</td>
+                  <td>A / C</td>
+                  <td>A</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout">
+              <b>Conclusion</b>
+              <div class="hint">Shared accountability/consultation for site-quality decisions supports the same selection pool (functional overlap).</div>
+            </div>
+          </div>
+        `
+      },
+
+      lifo: {
+        title: "LIFO Check",
+        html: `
+          <div class="kicker">🗓️ LIFO Check</div>
+          <div class="hint">If Ain is within the same pool (due to overlap), then LIFO must be <b>explained and documented</b>.</div>
+
+          <div class="content-box">
+            <b>Join / Rejoin Dates (edit the dates)</b>
+            <table class="simple" style="margin-top:10px;">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Join/Rejoin Date</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>You</b></td>
+                  <td>Site Quality</td>
+                  <td>[DD MMM YYYY]</td>
+                  <td>Continuous service: [X years Y months]</td>
+                </tr>
+                <tr>
+                  <td>Izudin</td>
+                  <td>[Role]</td>
+                  <td>[DD MMM YYYY]</td>
+                  <td>[Optional note]</td>
+                </tr>
+                <tr>
+                  <td>Zakir</td>
+                  <td>[Role]</td>
+                  <td>[DD MMM YYYY]</td>
+                  <td>[Optional note]</td>
+                </tr>
+                <tr>
+                  <td><b>Ain</b></td>
+                  <td>Regional Quality</td>
+                  <td>[DD MMM YYYY]</td>
+                  <td>Joined after me (later-joined)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout">
+              <b>Key Point</b>
+              <div class="hint">No written selection pool list, LIFO application, or exclusion rationale for Ain was disclosed.</div>
+            </div>
+
+            <div class="content-box">
+              <b>Evidence</b>
+              <div class="evidence-grid" style="margin-top:10px;">
+                ${evCard("LIFO-01","pdf","Employment / confirmation proof (dates)")}
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      contradiction: {
+        title: "Non-Interchangeable Contradiction",
+        html: `
+          <div class="kicker">⚖️ Contradiction Check</div>
+          <div class="callout">
+            <b>Logic</b>
+            <div class="hint">
+              If the Company claims my skills are <b>non-interchangeable</b>, it implies my role is <b>specialised</b>.
+              A specialised role is less likely to be genuinely redundant <b>if the same functions continue</b>.
+            </div>
+          </div>
+
+          <div class="content-box">
+            <b>Use this logic ladder (JPP-friendly)</b>
+            <ul class="list">
+              <li>If Ain is truly specialised → why overlap exists (site decisions)?</li>
+              <li>If overlap exists → why no comparison / scoring / exclusion rationale?</li>
+              <li>If work continues → why retrench?</li>
+              <li>If eliminated → why rehire / appoint new QM doing the same core functions?</li>
+            </ul>
+          </div>
+
+          <div class="callout">
+            <b>Conclusion</b>
+            <div class="hint">The story cannot be: “specialised + no overlap + redundancy + replacement” all at once. One of them must be untrue.</div>
+          </div>
+        `
+      },
+
+      redeploy: {
+        title: "Redeployment Missing",
+        html: `
+          <div class="kicker">🧩 Redeployment Assessment (Missing)</div>
+          <div class="hint">If an internal vacancy existed, redeployment should be assessed and documented before retrenchment.</div>
+
+          <div class="callout">
+            <b>Facts to show here</b>
+            <ul class="list">
+              <li>Internal vacancy existed.</li>
+              <li>I applied.</li>
+              <li>Application was rejected.</li>
+              <li>No rejection letter / no documented justification was provided.</li>
+              <li>No redeployment assessment was shared.</li>
+            </ul>
+          </div>
+
+          <div class="content-box">
+            <b>Evidence (click to open)</b>
+            <div class="evidence-grid" style="margin-top:10px;">
+              ${evCard("RD-01","image","SuccessFactors rejection / proof of application")}
+              ${evCard("HB-01","pdf","Handbook excerpt (optional support reference)")}
+            </div>
+            <div class="hint" style="margin-top:10px;">
+              <b>Note (safe positioning):</b> handbook is used as <i>support reference</i> only; key issue is the absence of redeployment assessment/documentation.
+            </div>
+          </div>
+        `
+      },
+
+      replacement: {
+        title: "New QM Replacement Issue",
+        html: `
+          <div class="kicker">👤 Replacement vs Redundancy</div>
+
+          <div class="two-col">
+            <div class="content-box">
+              <b>Before (Claimant)</b>
+              <ul class="list">
+                <li>Handled site quality day-to-day decisions</li>
+                <li>Supported audit actions & closures</li>
+                <li>Managed site issue escalation and follow-through</li>
+              </ul>
+            </div>
+            <div class="content-box">
+              <b>After (New Quality Manager)</b>
+              <ul class="list">
+                <li>Same core site-quality functions continue</li>
+                <li>Work is reassigned / continues under new appointment</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="callout">
+            <b>Conclusion</b>
+            <div class="hint">Continuation of the same core functions under a new hire suggests <b>replacement</b>, not genuine redundancy.</div>
+          </div>
+
+          <div class="content-box">
+            <b>Evidence</b>
+            <div class="evidence-grid" style="margin-top:10px;">
+              ${evCard("QM-01","pdf","New QM appointment / org update / announcement")}
+            </div>
+          </div>
+        `
+      },
+
+      missingdocs: {
+        title: "Missing Selection Documents",
+        html: `
+          <div class="kicker">❌ Missing Documents Checklist</div>
+          <div class="hint">In a fair selection exercise, the employer should be able to produce contemporaneous documents. Items below were not disclosed/provided.</div>
+
+          <table class="simple" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Document / Item</th>
+                <th>Status</th>
+                <th>Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Selection pool definition (who was compared)</td><td><b>Not provided</b></td><td>Determines who should be included (overlap test)</td></tr>
+              <tr><td>Comparison list (You vs X, Y, Z)</td><td><b>Not provided</b></td><td>Shows fairness & consistency in selection</td></tr>
+              <tr><td>Scoring matrix</td><td><b>Not provided</b></td><td>Shows objective cr
