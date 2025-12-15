@@ -49,12 +49,19 @@
       text-decoration: none;
       color: inherit;
       transition: all .15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .doc-item:hover {
       transform: translateY(-2px);
       border-color: rgba(120,180,255,0.55);
       box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+
+    .doc-item.active {
+      border-color: rgba(120,180,255,0.75);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
     }
 
     .doc-icon {
@@ -97,6 +104,7 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .mini-btn {
@@ -108,6 +116,7 @@
       text-decoration: none;
       font-size: 0.9rem;
       transition: all .15s ease;
+      white-space: nowrap;
     }
 
     .mini-btn:hover {
@@ -115,12 +124,21 @@
       border-color: rgba(120,180,255,0.55);
     }
 
+    /* Use EMBED instead of IFRAME (more Android-friendly) */
     #pdfFrame {
       width: 100%;
       height: 72vh;
       border: none;
       border-radius: 12px;
       margin-top: 10px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .hint {
+      margin-top: 8px;
+      opacity: 0.72;
+      font-size: 0.9rem;
+      line-height: 1.35;
     }
 
     @media (max-width: 980px) {
@@ -132,17 +150,16 @@
 
 <body class="page-home">
   <div class="app-shell">
-
-
     <main class="home-main">
       <section class="nav-section fade-in">
-        <h2 class="section-title">Retrenchment Notice & Documents</h2>
+        <h2 class="section-title">Retrenchment Notice &amp; Documents</h2>
 
         <div class="split-wrap">
 
           <!-- LEFT -->
-          <div class="panel left-panel">
-            <a class="doc-item" data-pdf="docs/Retrenchment_Notice.pdf" data-title="Retrenchment Letter">
+          <div class="panel left-panel" id="docList">
+            <a class="doc-item" href="docs/Retrenchment_Notice.pdf"
+               data-pdf="docs/Retrenchment_Notice.pdf" data-title="Retrenchment Letter">
               <div class="doc-icon">📄</div>
               <div>
                 <p class="doc-title">1) Retrenchment Letter</p>
@@ -150,7 +167,8 @@
               </div>
             </a>
 
-            <a class="doc-item" data-pdf="docs/deed_of_release.pdf" data-title="Deed of Release">
+            <a class="doc-item" href="docs/deed_of_release.pdf"
+               data-pdf="docs/deed_of_release.pdf" data-title="Deed of Release">
               <div class="doc-icon">🧾</div>
               <div>
                 <p class="doc-title">2) Deed of Release</p>
@@ -158,11 +176,12 @@
               </div>
             </a>
 
-            <a class="doc-item" data-pdf="docs/payment_calculation.pdf" data-title="Calculation of Payment">
+            <a class="doc-item" href="docs/payment_calculation.pdf"
+               data-pdf="docs/payment_calculation.pdf" data-title="Calculation of Payment">
               <div class="doc-icon">🧮</div>
               <div>
                 <p class="doc-title">3) Calculation of Payment</p>
-                <p class="doc-desc">Notice, in-lieu & other payments</p>
+                <p class="doc-desc">Notice, in-lieu &amp; other payments</p>
               </div>
             </a>
           </div>
@@ -171,14 +190,23 @@
           <div class="panel right-panel">
             <div class="viewer-head">
               <div class="viewer-title" id="viewerTitle">Select a document</div>
+
               <div class="viewer-actions">
+                <!-- Fullscreen/new tab fallback (tablet-safe) -->
+                <a class="mini-btn" id="openPdfBtn" href="#" target="_blank" rel="noopener">Open Fullscreen ↗</a>
+
                 <a class="mini-btn" href="index.html">⬅ Allnex</a>
                 <a class="mini-btn" href="../index.html">Others</a>
                 <a class="mini-btn" href="../../index.html">🏠 Home</a>
               </div>
             </div>
 
-            <iframe id="pdfFrame"></iframe>
+            <div class="hint">
+              If the PDF doesn’t render inline on Android, use <b>Open Fullscreen ↗</b>.
+            </div>
+
+            <!-- EMBED is more likely to work than iframe on Android -->
+            <embed id="pdfFrame" type="application/pdf" src="">
           </div>
 
         </div>
@@ -190,13 +218,36 @@
     const items = document.querySelectorAll('.doc-item');
     const frame = document.getElementById('pdfFrame');
     const title = document.getElementById('viewerTitle');
+    const openBtn = document.getElementById('openPdfBtn');
+
+    function setActive(el) {
+      items.forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function loadPdf(el) {
+      const pdf = el.dataset.pdf;
+      const t = el.dataset.title || 'Document';
+
+      // Try inline first
+      frame.setAttribute('src', pdf);
+      title.textContent = t;
+
+      // Always set fullscreen link as fallback
+      openBtn.href = pdf;
+
+      setActive(el);
+    }
 
     items.forEach(item => {
-      item.addEventListener('click', () => {
-        frame.src = item.dataset.pdf;
-        title.textContent = item.dataset.title;
+      item.addEventListener('click', (e) => {
+        e.preventDefault(); // prevent Android from immediately opening new tab
+        loadPdf(item);
       });
     });
+
+    // Auto-load first doc on open (better tablet UX)
+    if (items.length) loadPdf(items[0]);
   </script>
 </body>
 </html>
