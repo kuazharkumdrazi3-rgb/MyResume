@@ -2,792 +2,1031 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plant Visit Planner – Full</title>
+  <title>Plant Visit Planner – Revamp (No Google iFrame)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
+
+  <!-- Leaflet (NO Google iframe, fixes X-Frame-Options blocking) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
   <style>
-    :root {
-      --bg: #0b0e14;
-      --bg-card: #151a24;
-      --bg-card-hover: #1e2532;
-      --border: #2a3245;
-      --accent: #8b5cf6; /* Violet */
-      --accent-hover: #7c3aed;
-      --success: #10b981;
-      --danger: #ef4444;
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
+    :root{
+      --bg:#070A10;
+      --panel:#0D1220;
+      --panel2:#111A2E;
+      --border:#22304F;
+      --muted:#A7B2D6;
+      --text:#F3F6FF;
+      --accent:#7C3AED;
+      --accent2:#22C55E;
+      --warn:#F59E0B;
+      --danger:#EF4444;
+      --chip:#0B1020;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
     }
 
-    * { box-sizing: border-box; outline: none; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text-main);
-      height: 100vh;
-      overflow: hidden;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(124,58,237,.20), transparent 60%),
+        radial-gradient(900px 600px at 80% 0%, rgba(34,197,94,.16), transparent 55%),
+        radial-gradient(900px 700px at 40% 100%, rgba(59,130,246,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      overflow:hidden; /* we manage scroll inside panels */
     }
 
-    .page {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      max-width: 1600px;
+    .app{
+      height:100vh;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      max-width: 1700px;
       margin: 0 auto;
-      min-height: 0;
+      padding: 14px;
+      gap: 12px;
+      min-height:0;
     }
 
-    /* HEADER */
-    header {
-      padding: 1rem;
-      display: flex;
+    /* Top bar */
+    .topbar{
+      background: linear-gradient(180deg, rgba(17,26,46,.95), rgba(13,18,32,.92));
+      border:1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+      display:flex;
+      align-items:center;
       justify-content: space-between;
-      align-items: center;
-      background: var(--bg);
-      flex-shrink: 0;
       gap: 12px;
     }
-    h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-    .progress-container {
-      flex: 1;
-      max-width: 300px;
-      background: #1f2937;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
+    .brand{
+      display:flex;align-items:center;gap:10px;min-width:220px;
     }
-    .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.3s ease; }
-
-    /* CONTENT */
-    .content-grid {
-      display: flex;
-      flex: 1;
-      padding: 0.5rem 1rem 1rem 1rem;
-      gap: 1rem;
-      overflow: hidden;
-      min-height: 0; /* IMPORTANT for scroll inside flex */
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: radial-gradient(circle at 30% 25%, rgba(124,58,237,.7), rgba(34,197,94,.25), rgba(255,255,255,.06));
+      border: 1px solid rgba(255,255,255,.08);
     }
+    .brand h1{margin:0;font-size: 15px;letter-spacing:.3px}
+    .brand .sub{color:var(--muted);font-size: 12px;margin-top:2px}
 
-    /* LEFT PANEL */
-    .panel-list {
-      flex: 0 0 450px;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-card);
+    .actions{
+      display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 9px 12px;
       border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      min-height: 0; /* IMPORTANT */
-    }
-
-    .list-controls {
-      padding: 1rem;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      z-index: 10;
-      flex-shrink: 0;
-    }
-    .search-box {
-      width: 100%;
-      background: #0f1219;
-      border: 1px solid var(--border);
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      color: var(--text-main);
-    }
-
-    .button-group { display: flex; gap: 0.5rem; }
-    .btn {
-      flex: 1;
-      background: #2d3748;
-      color: var(--text-main);
-      border: none;
-      padding: 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s, opacity 0.2s;
-      white-space: nowrap;
-    }
-    .btn:hover { background: #4a5568; }
-    .btn:disabled { cursor: not-allowed; opacity: 0.5; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: var(--accent-hover); }
-
-    .status-bar {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
-      min-height: 1.2em;
-    }
-
-    .list-scroll {
-      flex: 1;
-      overflow-y: auto; /* scrollable list */
-      padding: 0.5rem;
-      min-height: 0; /* IMPORTANT */
-      scroll-behavior: smooth;
-    }
-
-    /* CARDS */
-    .plant-card {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      background: var(--bg-card-hover);
-      border: 1px solid transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .plant-card:hover { border-color: var(--border); transform: translateY(-1px); }
-    .plant-card.selected { border-color: var(--accent); background: rgba(139, 92, 246, 0.12); }
-    .plant-card.visited { opacity: 0.55; background: #10131b; }
-    .plant-card.visited .plant-name { text-decoration: line-through; }
-
-    .plant-order {
-      width: 26px;
-      height: 26px;
-      background: #000;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.72rem;
       font-weight: 800;
-      color: var(--accent);
-      flex-shrink: 0;
+      font-size: 12px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+      display:inline-flex;align-items:center;gap:8px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.20); background: rgba(255,255,255,.09);}
+    .btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+    .btn-primary{
+      background: rgba(124,58,237,.20);
+      border-color: rgba(124,58,237,.45);
+    }
+    .btn-good{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.40);
+    }
+    .btn-danger{
+      background: rgba(239,68,68,.14);
+      border-color: rgba(239,68,68,.35);
     }
 
-    .plant-info { flex: 1; min-width: 0; }
-    .plant-name { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .plant-details { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .dist-badge {
-      display: inline-block;
-      background: #1f2937;
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: #a78bfa;
-      margin-right: 6px;
-      font-weight: 800;
+    .pill{
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding: 6px 10px;
+      border-radius: 999px;
+      display:inline-flex;align-items:center;gap:6px;
+      white-space:nowrap;
     }
-    .dist-badge.pending { color: #9ca3af; }
-    .dist-badge.err { color: #fecaca; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.25); }
+    .pill b{color:var(--text)}
+    .sep{width:1px;height:32px;background:rgba(255,255,255,.08); margin:0 2px;}
 
-    .action-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--accent);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 700;
+    /* Main layout */
+    .main{
+      min-height:0;
+      display:grid;
+      grid-template-columns: 460px 1fr;
+      gap: 12px;
     }
-    .action-btn:hover { background: var(--accent); color: #0b0e14; border-color: var(--accent); }
 
-    .check-circle {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid #4b5563;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
+    .panel{
+      min-height:0;
+      background: linear-gradient(180deg, rgba(17,26,46,.92), rgba(13,18,32,.92));
+      border:1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
-    .check-circle:hover { border-color: var(--text-main); }
-    .check-circle.checked { background: var(--success); border-color: var(--success); }
-    .check-circle.checked::after { content: '✓'; font-size: 14px; color: #06120d; font-weight: 900; }
 
-    /* MAP PANEL */
-    .panel-map {
-      flex: 1;
-      background: var(--bg-card);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      min-height: 0; /* IMPORTANT */
-    }
-    .map-header {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-card);
-      flex-shrink: 0;
+    /* Left: list */
+    .list-header{
+      padding: 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      flex-direction:column;
       gap: 10px;
+      flex-shrink:0;
     }
-    .map-title { font-size: 0.9rem; color: var(--text-muted); }
-    .map-title b { color: var(--accent); }
+    .search{
+      display:flex; gap:8px; align-items:center;
+    }
+    .search input{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-weight: 650;
+    }
 
-    iframe { width: 100%; height: 100%; border: none; }
+    .chips{
+      display:flex;flex-wrap:wrap;gap:8px;
+    }
+    .chip{
+      cursor:pointer;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      display:inline-flex; align-items:center; gap:6px;
+      user-select:none;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .chip.active{
+      background: rgba(124,58,237,.18);
+      border-color: rgba(124,58,237,.45);
+      color: var(--text);
+    }
 
-    @media (max-width: 900px) {
-      body { overflow: auto; }
-      .content-grid { flex-direction: column; overflow-y: auto; }
-      .panel-list { flex: none; height: 52vh; width: 100%; }
-      .panel-map { flex: none; height: 48vh; width: 100%; }
+    .list{
+      /* THIS is the scroll container */
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      padding: 10px;
+    }
+
+    .card{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      margin-bottom: 8px;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      cursor:pointer;
+    }
+    .card:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+    }
+    .card.selected{
+      border-color: rgba(124,58,237,.55);
+      background: rgba(124,58,237,.12);
+    }
+    .card.visited{
+      opacity: .58;
+      background: rgba(0,0,0,.18);
+    }
+    .n{
+      width:32px;height:32px;border-radius: 12px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight: 900; font-size: 12px;
+      color: var(--text);
+      background: rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.10);
+      flex-shrink:0;
+    }
+    .meta{min-width:0; flex:1}
+    .meta .name{
+      font-weight: 900;
+      font-size: 13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .meta .addr{
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .badge{
+      font-size: 11px;
+      font-weight: 900;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: var(--muted);
+      flex-shrink:0;
+      max-width: 120px;
+      text-overflow: ellipsis;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+    .badge.good{color: #86efac; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12);}
+    .badge.wait{color: #c7d2fe; border-color: rgba(99,102,241,.35); background: rgba(99,102,241,.10);}
+    .badge.warn{color: #fde68a; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10);}
+    .badge.err{color: #fecaca; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10);}
+
+    .tick{
+      width: 28px; height: 28px; border-radius: 10px;
+      border:1px solid rgba(255,255,255,.14);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;
+      font-weight: 900;
+      color: var(--muted);
+      background: rgba(0,0,0,.20);
+      cursor:pointer;
+      user-select:none;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .tick.on{
+      color:#04130b;
+      background: rgba(34,197,94,.95);
+      border-color: rgba(34,197,94,.95);
+    }
+
+    /* Right: map + details */
+    .map-wrap{
+      position:relative;
+      flex:1;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .map-top{
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.18);
+    }
+    .titleblock{min-width:0}
+    .titleblock .t1{
+      font-weight: 950;
+      font-size: 13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .titleblock .t2{
+      margin-top:2px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .map-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    #map{
+      flex:1;
+      min-height:0;
+      background: #0a0d14;
+    }
+
+    /* Footer status */
+    .footer{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer .left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .footer .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .dot{
+      width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.20);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .dot.good{background: rgba(34,197,94,.9); border-color: rgba(34,197,94,.9);}
+    .dot.warn{background: rgba(245,158,11,.9); border-color: rgba(245,158,11,.9);}
+    .dot.err{background: rgba(239,68,68,.9); border-color: rgba(239,68,68,.9);}
+
+    /* Mobile */
+    @media (max-width: 980px){
+      body{overflow:auto}
+      .app{height:auto; overflow:visible}
+      .main{grid-template-columns: 1fr; }
+      .panel{height: 52vh;}
+      .panel.mapPanel{height: 48vh;}
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
-    <header>
-      <h1>🏭 Visit Planner <span style="font-size:0.6em; opacity:0.55; font-weight:500; vertical-align:middle; border:1px solid #333; padding:2px 6px; border-radius:4px;">Full List</span></h1>
-      <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-    </header>
-
-    <div class="content-grid">
-      <div class="panel-list">
-        <div class="list-controls">
-          <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search company or area...">
-          <div class="button-group">
-            <button id="btnRefreshGPS" class="btn btn-primary">1. Update GPS</button>
-            <button id="btnSort" class="btn">2. Driving Distance</button>
-            <button id="btnClear" class="btn">Reset</button>
-          </div>
-          <div class="status-bar" id="statusText">Ready</div>
-        </div>
-        <div class="list-scroll" id="plantList"></div>
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Plant Visit Planner</h1>
+        <div class="sub">Revamp UI • Leaflet Map • OSRM driving distance</div>
       </div>
+    </div>
 
-      <div class="panel-map">
-        <div class="map-header">
-          <div class="map-title">Target: <b id="currentCompanyLabel">None</b></div>
-          <button class="action-btn" id="btnWaze">Open Waze</button>
+    <div class="sep"></div>
+
+    <div class="pill" id="pillGPS">📍 GPS: <b>Not set</b></div>
+    <div class="pill" id="pillProgress">✅ Visited: <b>0</b>/<span id="totalCount">0</span></div>
+
+    <div class="sep"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btnGPS">Update GPS</button>
+      <button class="btn btn-good" id="btnSortDrive">Sort Unvisited by Driving Distance</button>
+      <button class="btn" id="btnShowAll">Show All</button>
+      <button class="btn" id="btnShowUnvisited">Unvisited Only</button>
+      <button class="btn btn-danger" id="btnReset">Reset Visited</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- LEFT LIST -->
+    <div class="panel">
+      <div class="list-header">
+        <div class="search">
+          <input id="q" placeholder="Search company / address…" />
         </div>
-        <iframe id="mapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="chips">
+          <div class="chip active" id="chipAll">All</div>
+          <div class="chip" id="chipUnvisited">Unvisited</div>
+          <div class="chip" id="chipVisited">Visited</div>
+          <div class="chip" id="chipHasDistance">Has distance</div>
+          <div class="chip" id="chipNoDistance">No distance</div>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+
+    <!-- RIGHT MAP -->
+    <div class="panel mapPanel">
+      <div class="map-wrap">
+        <div class="map-top">
+          <div class="titleblock">
+            <div class="t1" id="selTitle">Select a plant</div>
+            <div class="t2" id="selSub">Map + route will appear here (no Google iframe)</div>
+          </div>
+          <div class="map-actions">
+            <button class="btn" id="btnRoute">Draw Route</button>
+            <button class="btn" id="btnOpenOSM">Open OSM</button>
+            <button class="btn" id="btnOpenGoogle">Open Google</button>
+            <button class="btn" id="btnWaze">Waze</button>
+          </div>
+        </div>
+        <div id="map"></div>
       </div>
     </div>
   </div>
 
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="left">
+      <span class="dot" id="netDot"></span>
+      <span id="status">Ready.</span>
+    </div>
+    <div class="right">
+      <span class="pill">Distance source: <b>OSRM (driving)</b></span>
+      <span class="pill">Map source: <b>OpenStreetMap tiles</b></span>
+    </div>
+  </div>
+</div>
+
 <script>
-  // --- FULL DATASET ---
-  // (Your list below kept as-is; NO haversine usage anywhere.)
+  /**************************************************************
+   *  DATA (keep your array; add more companies yourself later)
+   **************************************************************/
   const plants = [
-    { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8258, lng: 101.8105 },
-    { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8214, lng: 101.8083 },
-    { id: "ouji_sekken", order: 3, name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", area: "Lot 759(B3), Nilai Industrial Estate, 71800 Nilai, Negeri Sembilan", lat: 2.8350, lng: 101.8150 },
-    { id: "alps_electric", order: 4, name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", area: "Lot 109, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8228, lng: 101.8075 },
-    { id: "k_plastics", order: 5, name: "K-Plastics Industries Sdn Bhd", area: "Lot 24, Jalan Permata 1/2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8200, lng: 101.8100 },
-    { id: "pca_group", order: 6, name: "PCA Group Sdn Bhd", area: "Lot 50, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8310, lng: 101.8185 },
-    { id: "johnson_matthey", order: 7, name: "Johnson Matthey Sdn. Bhd.", area: "Lot 12, Jalan 2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8125, lng: 101.7925 },
-    { id: "meditech_gloves", order: 8, name: "Meditech Gloves Sdn. Bhd.", area: "Lot 23, Jalan Seriemas 1, Kota Seriemas, 71800 Nilai, Negeri Sembilan", lat: 2.7680, lng: 101.7650 },
-    { id: "future_plastic", order: 9, name: "Future Plastic Industries Sdn. Bhd.", area: "Lot 1608, Jalan Nilai 3/10, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8550, lng: 101.7950 },
-    { id: "jujutsu_industries", order: 10, name: "Jujutsu Industries Sdn Bhd", area: "Lot 83, Jalan Permata 2/3, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8330, lng: 101.8160 },
-    { id: "polyplus_packages", order: 11, name: "Polyplus Packages Sdn. Bhd.", area: "Lot 18, Jalan Permata 1/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8250, lng: 101.8120 },
-    { id: "jebsen_jessen", order: 12, name: "Jebsen & Jessen Packaging Sdn Bhd", area: "Lot 3297, Jalan Permata 2/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8340, lng: 101.8170 },
-    { id: "lti_industries", order: 13, name: "LTI Industries Sdn Bhd", area: "Lot 16, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8240, lng: 101.8110 },
-    { id: "harta_packaging", order: 14, name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", area: "Lot 6, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8400, lng: 101.8200 },
-    { id: "skf_bearing", order: 15, name: "SKF Bearing Industries (M) Sdn Bhd", area: "Lot 79, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8265, lng: 101.8135 },
-    { id: "akzo_nobel", order: 16, name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", area: "Lot 5827, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8300, lng: 101.8150 },
-    { id: "mapei_nilai", order: 17, name: "Mapei Malaysia Nilai Plant", area: "D3A, Lot 28, Jalan Industri 3/4, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8520, lng: 101.7980 },
-    { id: "gf_one", order: 18, name: "GF One Chemicals Sdn. Bhd.", area: "Lot 12A, Jalan Nilai 3/7, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8500, lng: 101.7950 },
-    { id: "dansoon", order: 19, name: "Dansoon Chemicals Sdn. Bhd.", area: "No. 5, Jalan Nilai 3/8, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8480, lng: 101.7960 },
-    { id: "chuanplus", order: 20, name: "Chuanplus Industries Sdn. Bhd.", area: "Lot 27, Jalan Nilai 3/1, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8530, lng: 101.7970 },
-    { id: "av_manufacturing", order: 21, name: "AV Manufacturing Sdn. Bhd.", area: "Lot 19, Jalan Nilai 3/5, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8510, lng: 101.7990 },
-    { id: "yec_chemical", order: 22, name: "YEC Chemical Compounds Sdn Bhd", area: "No. 16, Jalan Nilai 3/2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat: 2.8500, lng: 101.7980 },
-    { id: "vivasil_paints", order: 23, name: "Vivasil Paints ( M ) Sdn Bhd", area: "No. 38, Jalan KIP 2, Taman Perindustrian KIP, 52200 Kuala Lumpur / Nilai 3 Ops", lat: 2.6800, lng: 101.9500 },
-    { id: "dongnam", order: 24, name: "Dongnam Sdn. Bhd.", area: "Lot 106, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8230, lng: 101.8080 },
-    { id: "see_sen", order: 25, name: "See Sen Chemical Berhad", area: "Lot 82, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8280, lng: 101.8140 },
-    { id: "cenviro", order: 26, name: "Cenviro Sdn Bhd", area: "Ladang Tanah Merah A3 Division, Bukit Pelanduk, 71900 Port Dickson, Negeri Sembilan", lat: 2.7500, lng: 101.8500 },
-    { id: "schmidt_clemens", order: 27, name: "Schmidt + Clemens (Asia) Sdn. Bhd.", area: "Lot 1928, Jalan Sendayan, Kawasan Perindustrian Sendayan, 71950 Seremban, Negeri Sembilan", lat: 2.7650, lng: 101.8900 },
-    { id: "jaewon_frontier", order: 28, name: "Jaewon Frontier (M) Sdn Bhd", area: "Lot 55, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8320, lng: 101.8165 },
-    { id: "tecford_precision", order: 29, name: "Tecford Precision Sdn Bhd", area: "Lot 138, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8250, lng: 101.8125 },
-    { id: "fibertex", order: 30, name: "Fibertex Personal Care Sdn. Bhd.", area: "Lot 72, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8350, lng: 101.8180 },
-    { id: "sugihara_grand", order: 31, name: "Sugihara Grand Industries (Sendayan Plant) Sdn Bhd", area: "Lot 11, Jalan Tech Valley 1, Sendayan Tech Valley, 71950 Seremban, Negeri Sembilan", lat: 2.6680, lng: 101.8850 },
-    { id: "bluetech_env", order: 32, name: "Bluetech Environmental Technology Sdn Bhd", area: "No. 12, Jalan Toman 2, Kemayan Square, 70200 Seremban, Negeri Sembilan", lat: 2.6950, lng: 101.9250 },
-    { id: "cbt_petroleum", order: 33, name: "CBT Petroleum Sdn Bhd", area: "Lot 3835, Jalan Labu, Batu 3 1/2, 70200 Seremban, Negeri Sembilan", lat: 2.7200, lng: 101.9400 },
-    { id: "goodmaid", order: 34, name: "Goodmaid Chemicals Corporation Sdn Bhd", area: "Lot 27B, Lorong Bunga Tanjung 3/1, Senawang Industrial Park, 70400 Seremban, Negeri Sembilan", lat: 2.6850, lng: 101.9800 },
-    { id: "ansell_seremban", order: 35, name: "Ansell Seremban Sdn Bhd", area: "Lot 80, Air Hitam Industrial Estate, 72120 Jempol, Negeri Sembilan", lat: 2.6800, lng: 101.9850 },
-    { id: "toyochem_seremban", order: 36, name: "Toyochem Specialty Chemicals Sdn Bhd", area: "Lot 29, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6900, lng: 101.9750 },
-    { id: "aica_malaysia", order: 37, name: "Aica Malaysia Sdn. Bhd.", area: "Lot 38, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6880, lng: 101.9780 },
-    { id: "sumitomo_env", order: 38, name: "Sumitomo Chemical Enviro-Agro Asia Pacific Sdn. Bhd.", area: "Lot 60, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6850, lng: 101.9800 },
-    { id: "careplus", order: 39, name: "Careplus (M) Sdn Bhd", area: "Lot 17479, Lorong Senawang 3/2, Kawasan Perindustrian Senawang, 70450 Seremban, Negeri Sembilan", lat: 2.6820, lng: 101.9820 },
-    { id: "bostik", order: 40, name: "Bostik Malaysia Sdn Bhd", area: "Lot 22, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6880, lng: 101.9760 },
-    { id: "aegis_materials", order: 41, name: "Aegis Materials (M) Sdn. Bhd.", area: "Lot 45, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6860, lng: 101.9780 },
-    { id: "sun_rubber", order: 42, name: "Sun Rubber Industry Sdn. Bhd.", area: "Lot 68, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6840, lng: 101.9800 },
-    { id: "conquest_chem", order: 43, name: "Conquest Chemical Supply Sdn. Bhd.", area: "No. 49, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6900, lng: 101.9750 },
-    { id: "ogosin_chem", order: 44, name: "Ogosin Chemical Industries Sdn. Bhd.", area: "No. 11, Jalan Lombong Emas 4, Seremban Light Industrial Park, 70200 Seremban, Negeri Sembilan", lat: 2.7300, lng: 101.9350 },
-    { id: "allied_specialty", order: 45, name: "Allied Specialty Compounds", area: "Lot 26, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6850, lng: 101.9800 },
-    { id: "ecogreen_monomer", order: 46, name: "Ecogreen Monomer Sdn Bhd", area: "Lot 23, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6880, lng: 101.9760 },
-    { id: "sanyu_jushi", order: 47, name: "Sanyu Jushi Sdn. Bhd.", area: "Lot 18, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6860, lng: 101.9780 },
-    { id: "gb_industries", order: 48, name: "G.B. Industries Sdn Bhd", area: "Lot 72, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6840, lng: 101.9800 },
-    { id: "maytech", order: 49, name: "Maytech Cleanroom Manufacturing Sdn Bhd", area: "Lot 25, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6850, lng: 101.9800 },
-    { id: "growchem_senawang", order: 50, name: "Growchem Sdn Bhd", area: "Lot 15, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6880, lng: 101.9760 },
-    { id: "cp_chemie", order: 51, name: "Cp Chemie Resources (M) Sdn Bhd", area: "Lot 33, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6900, lng: 101.9750 },
-    { id: "ccp_century", order: 52, name: "Ccp Century Chemical Paints & Hardware Trading S.B", area: "No. 12, Jalan SS 13/3E, Subang Jaya Industrial Estate, 47500 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5500 },
-    { id: "m_xell", order: 53, name: "M-Xell Chemicals Sdn Bhd", area: "No. 58, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6850, lng: 101.9800 },
-    { id: "goldstab", order: 54, name: "Goldstab Additives Sdn Bhd", area: "Lot 21, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", lat: 2.6880, lng: 101.9760 },
-    { id: "zhe_ma", order: 55, name: "Zhe Ma Advance Material Technology Sdn. Bhd.", area: "Lot 108, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8220, lng: 101.8080 },
-    { id: "dia_chemical", order: 56, name: "Dia-Chemical Sdn. Bhd.", area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 2.9900, lng: 101.5600 },
-    { id: "asachem_sa", order: 57, name: "Asachem (M) Sdn. Bhd.", area: "Lot 10, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0300, lng: 101.4800 },
-    { id: "inventec", order: 58, name: "Inventec Performance Chemicals South East Asia Sdn Bhd", area: "Lot 10, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat: 2.8400, lng: 101.8200 },
-    { id: "bt_chemicals", order: 59, name: "BT Chemicals Sdn Bhd", area: "No. 8, Jalan TP 5A, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "pro_chem", order: 60, name: "Pro-Chem Industrial Sdn Bhd", area: "No. 6, Jalan TPP 6/6, Taman Perindustrian Puchong, 47100 Puchong, Selangor", lat: 3.0500, lng: 101.5000 },
-    { id: "helios_chem", order: 61, name: "Helios Chemicals Sdn Bhd", area: "No. 9, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "cyto_tech", order: 62, name: "Cyto Tech Sdn Bhd", area: "No. 15, Jalan TPP 1/1, Taman Perindustrian Puchong, 47100 Puchong, Selangor", lat: 2.9800, lng: 101.5800 },
-    { id: "hexachem", order: 63, name: "Hexachem (M) Sdn. Bhd.", area: "No. 22, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 2.9900, lng: 101.5600 },
-    { id: "tech_lab", order: 64, name: "Tech-Lab Manufacturing Sdn Bhd", area: "No. 48, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", lat: 3.0150, lng: 101.5850 },
-    { id: "qemrich", order: 65, name: "Qemrich Sdn Bhd", area: "No. 2, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0000, lng: 101.5500 },
-    { id: "kraiburg_tpe", order: 66, name: "KRAIBURG TPE Technology (M) Sdn Bhd", area: "Lot 1839, Jalan KPB 6, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", lat: 3.0350, lng: 101.7650 },
-    { id: "leivy", order: 67, name: "Leivy Laboratories Sdn. Bhd", area: "No. 9, Jalan KPB 5, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", lat: 3.0300, lng: 101.7700 },
-    { id: "guppy_plastic", order: 68, name: "Guppy Plastic Industries Sdn Bhd", area: "Lot 19, Jalan KPB 3, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", lat: 3.0280, lng: 101.7680 },
-    { id: "miracon", order: 69, name: "Miracon (M) Sdn Bhd", area: "No. 20, Jalan KPB 11, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", lat: 3.0320, lng: 101.7720 },
-    { id: "imec_hygiene", order: 70, name: "iMEC Hygiene Sdn. Bhd.", area: "No. 36, Jalan Kajang Jaya 7, Taman Kajang Jaya, 43000 Kajang, Selangor", lat: 2.9850, lng: 101.7200 },
-    { id: "ysp_industries", order: 71, name: "Y.S.P Industries (M) Sdn Bhd", area: "Lot 3, 5 & 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9450, lng: 101.7850 },
-    { id: "duopharma", order: 72, name: "Duopharma Manufacturing (Bangi) Sdn Bhd", area: "Lot 2, 4, 6, 8 & 10, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9400, lng: 101.7800 },
-    { id: "etika_beverages", order: 73, name: "Etika Beverages Sdn Bhd", area: "Lot 5, Jalan P/13, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9420, lng: 101.7820 },
-    { id: "texchem_life", order: 74, name: "Texchem Life Science Sdn Bhd", area: "No. 5, Jalan P/1, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9380, lng: 101.7780 },
-    { id: "denso", order: 75, name: "Denso (M) Sdn Bhd", area: "Lot 2, Jalan P/1, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9410, lng: 101.7790 },
-    { id: "ccm_polymers", order: 76, name: "Ccm Polymers Sdn Bhd", area: "Lot 3, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9350, lng: 101.7750 },
-    { id: "compounding_colouring", order: 77, name: "Compounding & Colouring Sdn Bhd", area: "Lot 1, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9360, lng: 101.7760 },
-    { id: "stenta_films", order: 78, name: "Stenta Films (M) Sdn Bhd", area: "Lot 8, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9390, lng: 101.7770 },
-    { id: "tesa_tapes", order: 79, name: "Tesa Tapes (M) Sdn Bhd", area: "Lot 7, Jalan P/5, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9400, lng: 101.7800 },
-    { id: "sapura_industrial", order: 80, name: "Sapura Industrial Berhad", area: "Lot 2 & 4, Jalan P/11, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9420, lng: 101.7810 },
-    { id: "pharmaniaga", order: 81, name: "Pharmaniaga Manufacturing Bhd", area: "Lot 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9450, lng: 101.7830 },
-    { id: "mlm_packaging", order: 82, name: "Mlm Packaging Sdn Bhd", area: "No. 5, Jalan TP 2, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 2.9800, lng: 101.5500 },
-    { id: "alsey_kimia", order: 83, name: "Alsey Kimia (M) Sdn Bhd", area: "No. 12, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5300 },
-    { id: "ichem_solution", order: 84, name: "i-Chem Solution Sdn Bhd", area: "No. 2, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", lat: 2.9850, lng: 101.5650 },
-    { id: "chembond", order: 85, name: "Chembond Chemicals(Malaysia) Sdn Bhd", area: "No. 15, Jalan Utarid U5/15, Seksyen U5, 40150 Shah Alam, Selangor", lat: 3.0500, lng: 101.4800 },
-    { id: "hb_laboratories", order: 86, name: "HB Laboratories Sdn Bhd", area: "No. 8, Jalan Utarid U5/26, Seksyen U5, 40150 Shah Alam, Selangor", lat: 3.0400, lng: 101.5000 },
-    { id: "ferrovic", order: 87, name: "Ferrovic Corporation (M) Sdn. Bhd.", area: "No. 18, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5200 },
-    { id: "pavilion_coating", order: 88, name: "Pavilion Coating (M) Sdn Bhd", area: "No. 6, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "edenor_oleo", order: 89, name: "Edenor Oleochemicals (M) Sdn Bhd", area: "Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat: 2.9150, lng: 101.4550 },
-    { id: "primechem", order: 90, name: "Primechem Malaysia Sdn Bhd", area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "unigreen", order: 91, name: "Unigreen Chemicals Sdn. Bhd.", area: "Lot 12, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", lat: 3.0000, lng: 101.4200 },
-    { id: "synerchem", order: 92, name: "Synerchem Group", area: "No. 2, Jalan Anggerik Mokara 31/48, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 3.0500, lng: 101.5500 },
-    { id: "bio_enviro", order: 93, name: "Bio Enviro Industries Sdn Bhd", area: "No. 8, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5300 },
-    { id: "cb_palm", order: 94, name: "Cb Palm Industrial Sdn. Bhd.", area: "Lot 15, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9500, lng: 101.4000 },
-    { id: "plantic_lab", order: 95, name: "Plantic Lab Sdn Bhd", area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5200 },
-    { id: "mildef", order: 96, name: "Mildef International Technologies Sdn Bhd", area: "Lot 26, Jalan 6, Kawasan Perindustrian Cheras Jaya, 43200 Balakong, Selangor", lat: 2.9600, lng: 101.7500 },
-    { id: "techbond", order: 97, name: "Techbond Manufacturing Sdn Bhd", area: "No. 10, Jalan U1/20, Hicom Glenmarie Industrial Park, 40150 Shah Alam, Selangor", lat: 3.0300, lng: 101.5300 },
-    { id: "wasco_thermal", order: 98, name: "Wasco Thermal Sdn. Bhd", area: "Lot 9, Jalan Kemajuan, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0600, lng: 101.5000 },
-    { id: "hicom_diecastings", order: 99, name: "Hicom Diecastings Sdn Bhd", area: "Lot 16, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0200, lng: 101.5400 },
-    { id: "mettube", order: 100, name: "Mettube Sdn Bhd", area: "Lot 5, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "afcona", order: 101, name: "Afcona Chemicals Sdn Bhd", area: "Lot 3, Jalan Anggerik Mokara 31/64, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 2.9800, lng: 101.4000 },
-    { id: "apex_packaging", order: 102, name: "Apex Packaging Sdn Bhd", area: "Lot 888, Jalan Subang 9, Taman Perindustrian Subang, 47620 Subang Jaya, Selangor", lat: 2.9150, lng: 101.4550 },
-    { id: "shintako", order: 103, name: "Shintako (M) Sdn Bhd", area: "Lot 18, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0300, lng: 101.4800 },
-    { id: "kaizen_packaging", order: 104, name: "Kaizen Packaging Sdn Bhd", area: "No. 2, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "nichia_malaysia", order: 105, name: "Nichia (Malaysia) Sdn Bhd", area: "Lot 10, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat: 2.9450, lng: 101.7850 },
-    { id: "igl_coatings", order: 106, name: "Igl Coatings Headquarters", area: "No. 10, Jalan Astaka U8/82, Bukit Jelutong, 40150 Shah Alam, Selangor", lat: 3.0800, lng: 101.5800 },
-    { id: "jj_asia", order: 107, name: "Jj Asia Manufacturing (M) Sdn Bhd", area: "Lot 5, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 2.9800, lng: 101.4000 },
-    { id: "mre_group", order: 108, name: "Mre Group Of Companies", area: "No. 15, Jalan Anggerik Mokara 31/48, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 3.0500, lng: 101.5500 },
-    { id: "suka_chemicals", order: 109, name: "Suka Chemicals (M) Sdn Bhd", area: "Lot 1115, Jalan Subang 10, Taman Perindustrian Subang, 47620 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "fnholdings", order: 110, name: "Fraser & Neave Holdings Bhd", area: "1, Jalan Bukit Belimbing 26/38, Persiaran Kuala Selangor, Seksyen 26, 40400 Shah Alam, Selangor", lat: 3.0600, lng: 101.5800 },
-    { id: "malaysian_diecast", order: 111, name: "Malaysian Die-Casting Industries Sdn. Bhd.", area: "Lot 6, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", lat: 3.0300, lng: 101.5300 },
-    { id: "globechem", order: 112, name: "Globechem Sdn Bhd", area: "No. 9, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5400 },
-    { id: "finn_chem", order: 113, name: "Finn Chemicals Sdn. Bhd.", area: "No. 3, Jalan TPP 1, Taman Perindustrian Putra, 47130 Puchong, Selangor", lat: 3.0000, lng: 101.5500 },
-    { id: "japan_chemical", order: 114, name: "Japan Chemical (M) Sdn Bhd", area: "Lot 7, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat: 2.9150, lng: 101.4550 },
-    { id: "gme_chemicals", order: 115, name: "Gme Chemicals (M) Sdn Bhd", area: "No. 8, Jalan TP 2, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "malayan_adhesives", order: 116, name: "Malayan Adhesives And Chemicals Sdn Bhd", area: "No. 9, Jalan Utas 15/7, Seksyen 15, 40200 Shah Alam, Selangor", lat: 3.0600, lng: 101.5400 },
-    { id: "krischem", order: 117, name: "Krischem Sdn. Bhd.", area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "arobenz", order: 118, name: "Arobenz Chemicals Sdn Bhd", area: "No. 6, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", lat: 2.9900, lng: 101.5600 },
-    { id: "ken_rich", order: 119, name: "Ken-Rich Chemical Sdn Bhd.", area: "No. 2, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "dpi_chemicals", order: 120, name: "Dpi Chemicals Sdn Bhd", area: "No. 15, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "archem", order: 121, name: "Archem Malaysia Sdn Bhd", area: "Lot 22, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9600, lng: 101.4000 },
-    { id: "gladron", order: 122, name: "Gladron Chemicals Sdn. Bhd.", area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0300, lng: 101.5300 },
-    { id: "clariant", order: 123, name: "Clariant (Malaysia) Sdn Bhd", area: "Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat: 2.9150, lng: 101.4550 },
-    { id: "zextron", order: 124, name: "Zextron Chemical Industries (M) Sdn Bhd", area: "No. 18, Jalan TPP 1, Taman Perindustrian Putra, 47130 Puchong, Selangor", lat: 3.0000, lng: 101.5500 },
-    { id: "fujikura", order: 125, name: "Fujikura Chemicals Sdn Bhd", area: "Lot 9, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 2.9800, lng: 101.4000 },
-    { id: "jintai", order: 126, name: "Jintai (M) Sdn Bhd", area: "Lot 5, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9600, lng: 101.4000 },
-    { id: "tmk_chemical", order: 127, name: "Tmk Chemical Banting Sdn Bhd", area: "Lot 36, Jalan Cempaka 2, Kawasan Perindustrian Telok Panglima Garang, 42500 Telok Panglima Garang, Selangor", lat: 2.8000, lng: 101.5000 },
-    { id: "kc_chemicals", order: 128, name: "KC Chemicals (M) Sdn Bhd", area: "No. 2, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "sunenergy", order: 129, name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", area: "No. 8, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "ccm_berhad", order: 130, name: "Chemical Company Of Malaysia Berhad", area: "No. 1, Jalan Utas 15/7, Seksyen 15, 40200 Shah Alam, Selangor", lat: 3.0600, lng: 101.5400 },
-    { id: "olen_port", order: 131, name: "Olen Port Klang Sdn Bhd", area: "Lot 12, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat: 2.9150, lng: 101.4550 },
-    { id: "mey_chern", order: 132, name: "Mey Chern Chemical Sdn Bhd", area: "Lot 5, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", lat: 3.0000, lng: 101.4200 },
-    { id: "acme_chemicals", order: 133, name: "Acme Chemicals (M) Sdn Bhd", area: "Lot 18, Jalan Solok Sultan Hishamuddin 6, Kawasan Perusahaan Selat Klang Utara, 42000 Port Klang, Selangor", lat: 2.9200, lng: 101.4600 },
-    { id: "nylex_specialty", order: 134, name: "Nylex Specialty Chemicals Sdn. Bhd.", area: "Lot 593, Persiaran Raja Lumu, Kawasan Perusahaan Pandamaran, 42000 Port Klang, Selangor", lat: 2.9200, lng: 101.4600 },
-    { id: "nexuschem", order: 135, name: "Nexuschem Engineering Sdn Bhd", area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "govi_chemicals", order: 136, name: "GOVI Chemicals Sdn. Bhd", area: "Lot 18, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9500, lng: 101.4000 },
-    { id: "mitsui_poly", order: 137, name: "Mitsui Chemicals Polyurethanes Malaysia Sdn. Bhd.", area: "Lot 20, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 2.9800, lng: 101.4000 },
-    { id: "lyondellbasell", order: 138, name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", area: "No. 15, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0100, lng: 101.5200 },
-    { id: "zagro_chem", order: 139, name: "Zagro Chemicals Sdn. Bhd.", area: "No. 18, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0300, lng: 101.5300 },
-    { id: "southern_acids", order: 140, name: "Southern Acids Industries Sdn. Bhd.", area: "Golconda Estate, Persiaran Hamzah Alang, 42200 Kapar, Selangor", lat: 2.9900, lng: 101.4300 },
-    { id: "klh_telok", order: 141, name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", area: "Lot 23, Jalan Ikan Mata Duyung, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9600, lng: 101.4000 },
-    { id: "pkg_gemilang", order: 142, name: "Perusahaan Kimia Gemilang Sdn. Bhd.", area: "Lot 9, Jalan TUDM, Kampung Baru Subang, 40150 Shah Alam, Selangor", lat: 2.9900, lng: 101.4300 },
-    { id: "formosa_prosonic", order: 143, name: "Formosa Prosonic Chemicals Sdn Bhd", area: "Lot 12, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", lat: 2.9200, lng: 101.4600 },
-    { id: "w_clay", order: 144, name: "The W Clay Industries Sdn. Bhd.", area: "Lot 38, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9500, lng: 101.4000 },
-    { id: "synergy_chem", order: 145, name: "Synergy Chemicals Sdn Bhd", area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", lat: 3.0200, lng: 101.5300 },
-    { id: "ksc_chem", order: 146, name: "Ksc Chemical (Malaysia) Sdn. Bhd.", area: "Lot 9, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", lat: 2.9800, lng: 101.4000 },
-    { id: "tg_chem", order: 147, name: "Tg Chemical (M) Sdn Bhd", area: "Lot 18, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9600, lng: 101.4000 },
-    { id: "mah_sing", order: 148, name: "Mah Sing Plastics Industries Sdn Bhd", area: "Lot 8, Jalan Pandan, Pandan Indah, 55100 Kuala Lumpur", lat: 3.0100, lng: 101.5200 },
-    { id: "growchem_pi", order: 149, name: "Growchem Sdn Bhd (Pulau Indah Plant)", area: "Lot 22, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "yara_industrial", order: 150, name: "Yara International (M)Sdn Bhd - Industrial", area: "Lot 1, Jalan Perigi Nanas 7/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "mewah_oils", order: 151, name: "Mewah Oils Sdn Bhd", area: "Lot 40, Section 4, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "mitsui_scientex", order: 152, name: "Mitsui Chemicals Scientex Sdn. Bhd.", area: "Lot 12, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", lat: 2.9600, lng: 101.4000 },
-    { id: "hextar", order: 153, name: "Hextar Chemicals Sdn Bhd", area: "Lot 5, Jalan Perigi Nanas 7/3, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "ascendchem", order: 154, name: "Ascendchem Sdn Bhd Pulau Indah", area: "Lot 3, Jalan Perigi Nanas 7/2, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "topmark", order: 155, name: "Topmark Petroleum Products Sdn. Bhd.", area: "Lot 16, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "cargill", order: 156, name: "Cargill Palm Products Sdn Bhd", area: "Lot 220, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Pulau Indah Plant)", lat: 2.9800, lng: 101.3300 },
-    { id: "chevron_pi", order: 157, name: "Chevron Pulau Indah Terminal", area: "Lot 15, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "concord_chem", order: 158, name: "Concord Chemicals Corporation Sdn. Bhd.", area: "Lot 19, Jalan Perigi Nanas 7/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "adhes_packaging", order: 159, name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", area: "Lot 5, Jalan Perigi Nanas 7/3, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "klk_oleomas", order: 160, name: "Kl-Kepong Oleomas Sdn. Bhd.", area: "Lot 1, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "gamalux", order: 161, name: "Gamalux Sdn Bhd (Factory)", area: "Lot 6, Jalan Perigi Nanas 7/2, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", lat: 2.9400, lng: 101.3500 },
-    { id: "ancom_nylex", order: 162, name: "Ancom Nylex Terminals Sdn Bhd", area: "Lot 22, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Port Klang Terminals)", lat: 2.9800, lng: 101.3300 },
-    { id: "intco_malaysia", order: 163, name: "Intco Malaysia Sdn Bhd", area: "Lot 1, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Klang Plant)", lat: 2.9800, lng: 101.3300 },
-    { id: "dh_hygiene", order: 164, name: "Dh Hygience (Melaka) Sdn Bhd", area: "Lot 12, Jalan Paya Rumput Indah 1, Taman Paya Rumput Indah, 76450 Melaka", lat: 2.2700, lng: 102.1500 },
-    { id: "tech_latex", order: 165, name: "Tech-Latex Scientific Sdn. Bhd.", area: "Lot 8, Jalan IKS M1, Taman IKS Merdeka, 75350 Batu Berendam, Melaka", lat: 2.2900, lng: 102.1800 },
-    { id: "yakuhin", order: 166, name: "Yakuhin Industries (M) Sdn Bhd", area: "Lot 38, Jalan Usaha 10, Kawasan Perindustrian Ayer Keroh, 75450 Ayer Keroh, Melaka", lat: 2.2800, lng: 102.2000 },
-    { id: "air_liquide", order: 167, name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area: "Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka", lat: 2.2500, lng: 102.1500 }
+    { id:"aureumaex", name:"Aureumaex Precision Plastics (M) Sdn Bhd", area:"Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat:2.8258, lng:101.8105 },
+    { id:"ichikoh", name:"Ichikoh (M) Sdn. Bhd.", area:"Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat:2.8214, lng:101.8083 },
+    { id:"johnson_matthey", name:"Johnson Matthey Sdn. Bhd.", area:"Lot 12, Jalan 2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat:2.8125, lng:101.7925 },
+    { id:"mapei_nilai", name:"Mapei Malaysia Nilai Plant", area:"D3A, Lot 28, Jalan Industri 3/4, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat:2.8520, lng:101.7980 },
+    { id:"asachem_sa", name:"Asachem (M) Sdn. Bhd.", area:"Lot 10, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", lat:3.0300, lng:101.4800 },
+    { id:"edenor_oleo", name:"Edenor Oleochemicals (M) Sdn Bhd", area:"Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat:2.9150, lng:101.4550 },
+    { id:"ysp_industries", name:"Y.S.P Industries (M) Sdn Bhd", area:"Lot 3, 5 & 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat:2.9450, lng:101.7850 },
+    { id:"duopharma", name:"Duopharma Manufacturing (Bangi) Sdn Bhd", area:"Lot 2, 4, 6, 8 & 10, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat:2.9400, lng:101.7800 },
+    { id:"chembond", name:"Chembond Chemicals(Malaysia) Sdn Bhd", area:"No. 15, Jalan Utarid U5/15, Seksyen U5, 40150 Shah Alam, Selangor", lat:3.0500, lng:101.4800 },
+    { id:"air_liquide", name:"Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area:"Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka", lat:2.2500, lng:102.1500 }
   ];
 
-  // --- STATE ---
-  const VISITED_KEY = "plant_visit_osrm_v2";
-  const GPS_KEY = "plant_visit_last_gps_v1";
+  /**************************************************************
+   *  STORAGE + STATE
+   **************************************************************/
+  const VISITED_KEY = "pv_revamp_visited_v1";
+  const GPS_KEY     = "pv_revamp_gps_v1";
 
   let visited = {};
-  let userCoords = null;
-  let selectedId = null;
+  try { visited = JSON.parse(localStorage.getItem(VISITED_KEY) || "{}"); } catch { visited = {}; }
 
-  let isCalculating = false;
-  let calcAbort = false;
-
-  // --- UI ELEMENTS ---
-  const listEl = document.getElementById("plantList");
-  const mapFrame = document.getElementById("mapFrame");
-  const labelEl = document.getElementById("currentCompanyLabel");
-  const statusText = document.getElementById("statusText");
-  const btnGPS = document.getElementById("btnRefreshGPS");
-  const btnCalc = document.getElementById("btnSort");
-
-  try { visited = JSON.parse(localStorage.getItem(VISITED_KEY) || "{}"); } catch {}
+  let user = null;
   try {
-    const last = JSON.parse(localStorage.getItem(GPS_KEY) || "null");
-    if (last && typeof last.lat === "number" && typeof last.lng === "number") userCoords = last;
+    const tmp = JSON.parse(localStorage.getItem(GPS_KEY) || "null");
+    if (tmp && typeof tmp.lat === "number" && typeof tmp.lng === "number") user = tmp;
   } catch {}
 
-  // --- HELPERS ---
-  function km1(meters) { return (meters / 1000).toFixed(1); }
+  let selectedId = null;
+  let routeLine = null;
+  let userMarker = null;
+  let plantMarker = null;
 
-  function saveVisited() {
+  let filterMode = "all"; // all | unvisited | visited
+  let filterDist = "any"; // any | has | no
+  let unvisitedOnlyQuick = false;
+
+  let isBusy = false;
+
+  /**************************************************************
+   *  UI ELEMENTS
+   **************************************************************/
+  const elList = document.getElementById("list");
+  const elQ = document.getElementById("q");
+  const elStatus = document.getElementById("status");
+  const elGPSPill = document.getElementById("pillGPS");
+  const elProgress = document.getElementById("pillProgress");
+  const elTotal = document.getElementById("totalCount");
+  const elSelTitle = document.getElementById("selTitle");
+  const elSelSub = document.getElementById("selSub");
+  const netDot = document.getElementById("netDot");
+
+  const btnGPS = document.getElementById("btnGPS");
+  const btnSortDrive = document.getElementById("btnSortDrive");
+  const btnShowAll = document.getElementById("btnShowAll");
+  const btnShowUnvisited = document.getElementById("btnShowUnvisited");
+  const btnReset = document.getElementById("btnReset");
+
+  const btnRoute = document.getElementById("btnRoute");
+  const btnOpenOSM = document.getElementById("btnOpenOSM");
+  const btnOpenGoogle = document.getElementById("btnOpenGoogle");
+  const btnWaze = document.getElementById("btnWaze");
+
+  /**************************************************************
+   *  MAP INIT (Leaflet)
+   **************************************************************/
+  const map = L.map("map", { zoomControl: true });
+  const defaultCenter = [2.95, 101.75]; // MY-ish
+  map.setView(defaultCenter, 9);
+
+  // OSM tiles (no iframe, no Google X-Frame errors)
+  const tile = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap"
+  });
+  tile.addTo(map);
+
+  function setStatus(msg, level="ok"){
+    elStatus.textContent = msg;
+    netDot.className = "dot";
+    if (level==="ok") netDot.classList.add("good");
+    if (level==="warn") netDot.classList.add("warn");
+    if (level==="err") netDot.classList.add("err");
+  }
+
+  function saveVisited(){
     localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
     updateProgress();
   }
 
-  function updateProgress() {
-    const total = plants.length;
+  function updateProgress(){
+    elTotal.textContent = plants.length;
     const done = Object.values(visited).filter(Boolean).length;
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    document.getElementById("progressBar").style.width = pct + "%";
+    elProgress.innerHTML = `✅ Visited: <b>${done}</b>/${plants.length}`;
   }
 
-  function setStatus(msg) { statusText.innerText = msg; }
+  function updateGpsPill(){
+    if (!user){
+      elGPSPill.innerHTML = `📍 GPS: <b>Not set</b>`;
+      return;
+    }
+    elGPSPill.innerHTML = `📍 GPS: <b>${user.lat.toFixed(5)}, ${user.lng.toFixed(5)}</b>`;
+  }
 
-  function clearRoadDistances() {
-    plants.forEach(p => {
-      delete p._roadMeters;
-      delete p._roadKm;
-      delete p._roadErr;
+  function clearDistances(){
+    plants.forEach(p => { delete p._roadMeters; delete p._roadKm; delete p._roadErr; delete p._pending; });
+  }
+
+  function km1(m){ return (m/1000).toFixed(1); }
+
+  /**************************************************************
+   *  FILTER + SORT
+   **************************************************************/
+  function filteredPlants(){
+    const q = elQ.value.trim().toLowerCase();
+    return plants.filter(p => {
+      if (q){
+        const hay = (p.name + " " + p.area).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+
+      const isV = !!visited[p.id];
+
+      if (filterMode === "visited" && !isV) return false;
+      if (filterMode === "unvisited" && isV) return false;
+
+      const hasDist = typeof p._roadMeters === "number";
+      if (filterDist === "has" && !hasDist) return false;
+      if (filterDist === "no" && hasDist) return false;
+
+      if (unvisitedOnlyQuick && isV) return false;
+
+      return true;
     });
   }
 
-  // --- OSRM TABLE (1 origin -> many destinations) ---
-  async function fetchOsrmTableDistances(origin, dests) {
-    // coords format: lon,lat;lon,lat;...
-    const coords = [
-      `${origin.lng},${origin.lat}`,
-      ...dests.map(d => `${d.lng},${d.lat}`)
-    ].join(";");
-
-    const destinationsIdx = dests.map((_, i) => (i + 1)).join(";"); // 1..N
-    const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&destinations=${destinationsIdx}&annotations=distance`;
-
-    const res = await fetch(url);
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`OSRM error ${res.status}: ${txt.slice(0, 120)}`);
-    }
-    const data = await res.json();
-    // distances: [ [d1, d2, ...] ]
-    const row = (data && data.distances && data.distances[0]) ? data.distances[0] : null;
-    if (!row || !Array.isArray(row)) throw new Error("OSRM: invalid table response");
-    return row; // meters or null
-  }
-
-  async function calculateAllDrivingDistances() {
-    if (!userCoords) {
-      alert("Click 'Update GPS' first!");
-      return;
-    }
-    if (isCalculating) return;
-
-    isCalculating = true;
-    calcAbort = false;
-
-    btnCalc.disabled = true;
-    btnGPS.disabled = true;
-
-    setStatus("Preparing destinations...");
-
-    // Work on ALL plants, but sort later with Unvisited-first logic
-    const all = plants.slice();
-
-    // Batch destinations to avoid OSRM demo limits
-    const DEST_BATCH = 70; // safe; origin + 70 = 71 coords per request
-
-    let processed = 0;
-    const total = all.length;
-
-    for (let i = 0; i < total; i += DEST_BATCH) {
-      if (calcAbort) break;
-
-      const chunk = all.slice(i, i + DEST_BATCH);
-
-      // Mark pending for UI
-      chunk.forEach(p => { if (p._roadMeters == null && !p._roadErr) p._roadPending = true; });
-      renderList();
-
-      try {
-        setStatus(`Fetching driving routes: ${Math.min(i + chunk.length, total)} / ${total}...`);
-        const distances = await fetchOsrmTableDistances(userCoords, chunk);
-
-        distances.forEach((m, idx) => {
-          const p = chunk[idx];
-          delete p._roadPending;
-
-          if (typeof m === "number" && isFinite(m)) {
-            p._roadMeters = m;
-            p._roadKm = km1(m);
-            delete p._roadErr;
-          } else {
-            // unreachable / null
-            p._roadErr = true;
-            delete p._roadMeters;
-            delete p._roadKm;
-          }
-        });
-
-      } catch (e) {
-        console.error(e);
-        // Mark this chunk as error so user can see something happened
-        chunk.forEach(p => {
-          delete p._roadPending;
-          p._roadErr = true;
-          delete p._roadMeters;
-          delete p._roadKm;
-        });
-
-        // Backoff a bit (helps with rate limits)
-        setStatus("Route service busy. Retrying next batch...");
-        await new Promise(r => setTimeout(r, 1200));
-      }
-
-      processed += chunk.length;
-
-      sortPlants();
-      renderList();
-
-      // small delay to be polite
-      await new Promise(r => setTimeout(r, 200));
-    }
-
-    sortPlants();
-    renderList();
-
-    if (calcAbort) setStatus("Calculation cancelled.");
-    else setStatus("Calculation complete (driving distance).");
-
-    isCalculating = false;
-    btnCalc.disabled = false;
-    btnGPS.disabled = false;
-  }
-
-  function sortPlants() {
-    // Unvisited first, then by driving distance (known), then unknown at bottom
-    plants.sort((a, b) => {
+  function sortForDisplay(list){
+    // Unvisited first, then by driving distance (known), then unknown, then name.
+    return list.slice().sort((a,b)=>{
       const av = !!visited[a.id];
       const bv = !!visited[b.id];
-      if (av !== bv) return av - bv; // false first
+      if (av !== bv) return av - bv;
 
       const da = (typeof a._roadMeters === "number") ? a._roadMeters : Number.POSITIVE_INFINITY;
       const db = (typeof b._roadMeters === "number") ? b._roadMeters : Number.POSITIVE_INFINITY;
       if (da !== db) return da - db;
 
-      // stable tie-breaker
       return a.name.localeCompare(b.name);
     });
   }
 
-  // --- RENDER ---
-  function renderList() {
-    listEl.innerHTML = "";
+  /**************************************************************
+   *  OSRM (driving distance + route)
+   **************************************************************/
+  async function osrmTable(origin, dests){
+    // coords = lon,lat;lon,lat;...
+    const coords = [
+      `${origin.lng},${origin.lat}`,
+      ...dests.map(d => `${d.lng},${d.lat}`)
+    ].join(";");
 
-    const term = document.getElementById("searchInput").value.trim().toLowerCase();
-    const filtered = plants.filter(p => {
-      if (!term) return true;
-      return p.name.toLowerCase().includes(term) || p.area.toLowerCase().includes(term);
-    });
+    const destinations = dests.map((_,i)=> i+1).join(";");
+    const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&destinations=${destinations}&annotations=distance`;
 
-    filtered.forEach((p, idx) => {
-      const isVisited = !!visited[p.id];
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("OSRM table failed: " + res.status);
+    const data = await res.json();
+    const row = data?.distances?.[0];
+    if (!Array.isArray(row)) throw new Error("OSRM table invalid");
+    return row; // meters or null
+  }
 
-      const card = document.createElement("div");
-      card.className = `plant-card ${isVisited ? "visited" : ""} ${selectedId === p.id ? "selected" : ""}`;
+  async function osrmRoute(origin, dest){
+    const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("OSRM route failed: " + res.status);
+    const data = await res.json();
+    const r = data?.routes?.[0];
+    if (!r || !r.geometry) throw new Error("OSRM route invalid");
+    return r; // contains geometry, distance, duration
+  }
 
-      // Rank (current list order), NOT the original p.order
-      const ord = document.createElement("div");
-      ord.className = "plant-order";
-      ord.innerText = (idx + 1);
+  async function sortUnvisitedByDrivingDistance(){
+    if (!user){
+      alert("Update GPS first.");
+      return;
+    }
+    if (isBusy) return;
 
-      // Info
-      const info = document.createElement("div");
-      info.className = "plant-info";
+    isBusy = true;
+    btnSortDrive.disabled = true;
+    btnGPS.disabled = true;
 
-      const name = document.createElement("div");
-      name.className = "plant-name";
-      name.innerText = p.name;
+    setStatus("Calculating driving distances for unvisited…", "warn");
 
-      const det = document.createElement("div");
-      det.className = "plant-details";
+    const targets = plants.filter(p => !visited[p.id]);
+    if (!targets.length){
+      setStatus("All plants are visited. Nothing to sort.", "ok");
+      isBusy = false;
+      btnSortDrive.disabled = false;
+      btnGPS.disabled = false;
+      return;
+    }
 
-      let badge = "";
-      if (typeof p._roadMeters === "number") {
-        badge = `<span class="dist-badge">🚗 ${p._roadKm} km</span>`;
-      } else if (p._roadPending) {
-        badge = `<span class="dist-badge pending">⏳ calculating…</span>`;
-      } else if (p._roadErr) {
-        badge = `<span class="dist-badge err">⚠ route?</span>`;
-      } else if (userCoords) {
-        badge = `<span class="dist-badge pending">—</span>`;
+    // batch to avoid OSRM demo limits
+    const BATCH = 70;
+    for (let i=0; i<targets.length; i+=BATCH){
+      const chunk = targets.slice(i, i+BATCH);
+      chunk.forEach(p => p._pending = true);
+      render();
+
+      try{
+        const metersList = await osrmTable(user, chunk);
+        metersList.forEach((m, idx)=>{
+          const p = chunk[idx];
+          delete p._pending;
+          if (typeof m === "number" && isFinite(m)){
+            p._roadMeters = m;
+            p._roadKm = km1(m);
+            delete p._roadErr;
+          } else {
+            p._roadErr = true;
+            delete p._roadMeters;
+            delete p._roadKm;
+          }
+        });
+      } catch(e){
+        console.error(e);
+        chunk.forEach(p=>{
+          delete p._pending;
+          p._roadErr = true;
+          delete p._roadMeters;
+          delete p._roadKm;
+        });
+        setStatus("OSRM busy/blocked. Some distances may show error.", "warn");
+        // polite pause
+        await new Promise(r=>setTimeout(r, 900));
       }
 
-      const areaShort = p.area.split(",")[0];
-      det.innerHTML = `${badge}${areaShort}`;
+      render();
+      await new Promise(r=>setTimeout(r, 250));
+    }
 
-      info.appendChild(name);
-      info.appendChild(det);
+    setStatus("Done. Unvisited sorted by driving distance.", "ok");
+    isBusy = false;
+    btnSortDrive.disabled = false;
+    btnGPS.disabled = false;
+  }
 
-      // Map Button
-      const btn = document.createElement("button");
-      btn.className = "action-btn";
-      btn.innerText = "Map";
-      btn.onclick = (e) => { e.stopPropagation(); openMapApp(p); };
+  /**************************************************************
+   *  RENDER
+   **************************************************************/
+  function render(){
+    updateProgress();
+    updateGpsPill();
 
-      // Check
-      const check = document.createElement("div");
-      check.className = `check-circle ${isVisited ? "checked" : ""}`;
-      check.onclick = (e) => {
+    const list = sortForDisplay(filteredPlants());
+
+    elList.innerHTML = "";
+    list.forEach((p, idx)=>{
+      const isV = !!visited[p.id];
+      const sel = p.id === selectedId;
+
+      const card = document.createElement("div");
+      card.className = "card" + (isV ? " visited" : "") + (sel ? " selected" : "");
+
+      const n = document.createElement("div");
+      n.className = "n";
+      n.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const nm = document.createElement("div");
+      nm.className = "name";
+      nm.textContent = p.name;
+
+      const addr = document.createElement("div");
+      addr.className = "addr";
+      addr.textContent = p.area;
+
+      meta.appendChild(nm);
+      meta.appendChild(addr);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+
+      if (p._pending){
+        badge.classList.add("wait");
+        badge.textContent = "⏳ calc…";
+      } else if (typeof p._roadMeters === "number"){
+        badge.classList.add("good");
+        badge.textContent = `🚗 ${p._roadKm} km`;
+      } else if (p._roadErr){
+        badge.classList.add("err");
+        badge.textContent = "⚠ route?";
+      } else if (user){
+        badge.classList.add("warn");
+        badge.textContent = "— no dist";
+      } else {
+        badge.textContent = "GPS first";
+      }
+
+      const tick = document.createElement("div");
+      tick.className = "tick" + (isV ? " on" : "");
+      tick.textContent = isV ? "✓" : "";
+      tick.title = "Toggle visited";
+      tick.onclick = (e)=>{
         e.stopPropagation();
         visited[p.id] = !visited[p.id];
         saveVisited();
-        sortPlants();
-        renderList();
+        // keep sorted feel
+        render();
       };
 
-      card.appendChild(ord);
-      card.appendChild(info);
-      card.appendChild(btn);
-      card.appendChild(check);
+      card.appendChild(n);
+      card.appendChild(meta);
+      card.appendChild(badge);
+      card.appendChild(tick);
 
-      card.onclick = () => selectPlant(p);
+      card.onclick = ()=> selectPlant(p.id);
 
-      listEl.appendChild(card);
+      elList.appendChild(card);
     });
 
-    // Enable calc button only if we have GPS
-    btnCalc.disabled = !userCoords || isCalculating;
-    btnCalc.style.opacity = btnCalc.disabled ? "0.5" : "1";
+    // enable/disable map action buttons
+    const hasSel = !!selectedId;
+    btnRoute.disabled = !hasSel || !user;
+    btnOpenOSM.disabled = !hasSel;
+    btnOpenGoogle.disabled = !hasSel;
+    btnWaze.disabled = !hasSel;
   }
 
-  function selectPlant(p) {
-    selectedId = p.id;
-    labelEl.innerText = p.name;
+  /**************************************************************
+   *  SELECT PLANT + MAP UPDATE
+   **************************************************************/
+  function selectPlant(id){
+    selectedId = id;
+    const p = plants.find(x=>x.id===id);
+    if (!p) return;
 
-    // FIXED: removed accidental "3" prefix
-    const q = `${p.lat},${p.lng}`;
-    mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(q)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    elSelTitle.textContent = p.name;
+    elSelSub.textContent = p.area;
 
-    renderList();
+    // markers
+    if (plantMarker) plantMarker.remove();
+    plantMarker = L.marker([p.lat, p.lng]).addTo(map).bindPopup(p.name);
+
+    if (user){
+      if (userMarker) userMarker.remove();
+      userMarker = L.circleMarker([user.lat, user.lng], {
+        radius: 8,
+        color: "#22C55E",
+        weight: 3,
+        fillColor: "#22C55E",
+        fillOpacity: 0.35
+      }).addTo(map).bindPopup("You are here");
+      map.fitBounds(L.latLngBounds([[user.lat,user.lng],[p.lat,p.lng]]).pad(0.35));
+    } else {
+      map.setView([p.lat, p.lng], 13);
+    }
+
+    // clear any old route line when selecting new plant
+    if (routeLine) { routeLine.remove(); routeLine = null; }
+
+    render();
   }
 
-  function openMapApp(p) {
-    // FIXED: removed accidental "$" symbols in URL
-    if (userCoords) {
+  async function drawRoute(){
+    if (!user){
+      alert("Update GPS first.");
+      return;
+    }
+    if (!selectedId){
+      alert("Select a plant first.");
+      return;
+    }
+    if (isBusy) return;
+
+    const p = plants.find(x=>x.id===selectedId);
+    if (!p) return;
+
+    isBusy = true;
+    btnRoute.disabled = true;
+    setStatus("Fetching route polyline…", "warn");
+
+    try{
+      const r = await osrmRoute(user, p);
+
+      if (routeLine) routeLine.remove();
+      routeLine = L.geoJSON(r.geometry, {
+        style: { weight: 5, opacity: 0.85 } // default Leaflet color
+      }).addTo(map);
+
+      const km = km1(r.distance);
+      const min = Math.round(r.duration / 60);
+      setStatus(`Route drawn: ${km} km • ~${min} min`, "ok");
+      map.fitBounds(routeLine.getBounds().pad(0.25));
+
+    } catch(e){
+      console.error(e);
+      setStatus("Route failed (OSRM blocked or rate-limited). Try again.", "err");
+      alert("Could not fetch route. Your network may block OSRM or is rate-limited.");
+    }
+
+    isBusy = false;
+    btnRoute.disabled = !selectedId || !user;
+  }
+
+  function openOSM(){
+    const p = plants.find(x=>x.id===selectedId);
+    if (!p) return;
+    const url = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}`;
+    window.open(url, "_blank");
+  }
+
+  function openGoogle(){
+    const p = plants.find(x=>x.id===selectedId);
+    if (!p) return;
+
+    if (user){
       window.open(
-        `https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${p.lat},${p.lng}&travelmode=driving`,
+        `https://www.google.com/maps/dir/?api=1&origin=${user.lat},${user.lng}&destination=${p.lat},${p.lng}&travelmode=driving`,
         "_blank"
       );
     } else {
       window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`,
+        `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`,
         "_blank"
       );
     }
   }
 
-  function updateGPS() {
-    if (!navigator.geolocation) return alert("GPS not available");
+  function openWaze(){
+    const p = plants.find(x=>x.id===selectedId);
+    if (!p) return;
+    window.location.href = `https://waze.com/ul?ll=${p.lat},${p.lng}&navigate=yes`;
+  }
 
-    setStatus("Locating...");
+  /**************************************************************
+   *  GPS
+   **************************************************************/
+  function updateGPS(){
+    if (!navigator.geolocation){
+      alert("Geolocation not supported in this browser.");
+      return;
+    }
+    if (isBusy) return;
+
+    setStatus("Getting GPS…", "warn");
+    btnGPS.disabled = true;
+
     navigator.geolocation.getCurrentPosition(
-      pos => {
-        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        localStorage.setItem(GPS_KEY, JSON.stringify(userCoords));
+      pos=>{
+        user = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        localStorage.setItem(GPS_KEY, JSON.stringify(user));
 
-        // Important: origin changed → clear cached driving distances
-        clearRoadDistances();
-        sortPlants();
-        renderList();
+        // origin changed => clear distances + route
+        clearDistances();
+        if (routeLine) { routeLine.remove(); routeLine = null; }
 
-        setStatus("GPS updated. Click 'Driving Distance' to sort by route.");
+        // show marker
+        if (userMarker) userMarker.remove();
+        userMarker = L.circleMarker([user.lat, user.lng], {
+          radius: 8,
+          color: "#22C55E",
+          weight: 3,
+          fillColor: "#22C55E",
+          fillOpacity: 0.35
+        }).addTo(map).bindPopup("You are here");
+
+        map.setView([user.lat, user.lng], 12);
+
+        setStatus("GPS updated. Now click 'Sort Unvisited by Driving Distance'.", "ok");
+        btnGPS.disabled = false;
+        render();
       },
-      err => {
-        setStatus("GPS error.");
-        alert("Error: " + err.message);
+      err=>{
+        console.error(err);
+        setStatus("GPS error: " + err.message, "err");
+        btnGPS.disabled = false;
       },
-      { enableHighAccuracy: true, maximumAge: 15000, timeout: 15000 }
+      { enableHighAccuracy:true, maximumAge: 15000, timeout: 15000 }
     );
   }
 
-  // --- EVENTS ---
+  /**************************************************************
+   *  CHIP FILTERS
+   **************************************************************/
+  function setChipActive(idActive){
+    const all = ["chipAll","chipUnvisited","chipVisited","chipHasDistance","chipNoDistance"];
+    all.forEach(id=>document.getElementById(id).classList.remove("active"));
+    document.getElementById(idActive).classList.add("active");
+  }
+
+  document.getElementById("chipAll").onclick = ()=>{
+    filterMode="all"; filterDist="any"; unvisitedOnlyQuick=false;
+    setChipActive("chipAll");
+    render();
+  };
+  document.getElementById("chipUnvisited").onclick = ()=>{
+    filterMode="unvisited"; filterDist="any"; unvisitedOnlyQuick=false;
+    setChipActive("chipUnvisited");
+    render();
+  };
+  document.getElementById("chipVisited").onclick = ()=>{
+    filterMode="visited"; filterDist="any"; unvisitedOnlyQuick=false;
+    setChipActive("chipVisited");
+    render();
+  };
+  document.getElementById("chipHasDistance").onclick = ()=>{
+    filterMode="all"; filterDist="has"; unvisitedOnlyQuick=false;
+    setChipActive("chipHasDistance");
+    render();
+  };
+  document.getElementById("chipNoDistance").onclick = ()=>{
+    filterMode="all"; filterDist="no"; unvisitedOnlyQuick=false;
+    setChipActive("chipNoDistance");
+    render();
+  };
+
+  /**************************************************************
+   *  TOP BUTTONS
+   **************************************************************/
   btnGPS.onclick = updateGPS;
-  btnCalc.onclick = calculateAllDrivingDistances;
+  btnSortDrive.onclick = sortUnvisitedByDrivingDistance;
 
-  document.getElementById("searchInput").oninput = renderList;
-
-  document.getElementById("btnClear").onclick = () => {
-    if (confirm("Reset visited marks?")) {
-      visited = {};
-      saveVisited();
-      sortPlants();
-      renderList();
-      setStatus("Visited reset.");
-    }
+  btnShowAll.onclick = ()=>{
+    filterMode="all"; filterDist="any"; unvisitedOnlyQuick=false;
+    setChipActive("chipAll");
+    setStatus("Showing all plants.", "ok");
+    render();
   };
 
-  document.getElementById("btnWaze").onclick = () => {
-    if (!selectedId) return alert("Select a plant");
-    const p = plants.find(x => x.id === selectedId);
-    // Waze deep link
-    window.location.href = `https://waze.com/ul?ll=${p.lat},${p.lng}&navigate=yes`;
+  btnShowUnvisited.onclick = ()=>{
+    filterMode="unvisited"; filterDist="any"; unvisitedOnlyQuick=true;
+    setChipActive("chipUnvisited");
+    setStatus("Showing unvisited only.", "ok");
+    render();
   };
 
-  // init
+  btnReset.onclick = ()=>{
+    if (!confirm("Reset all visited marks?")) return;
+    visited = {};
+    saveVisited();
+    setStatus("Visited reset.", "ok");
+    render();
+  };
+
+  btnRoute.onclick = drawRoute;
+  btnOpenOSM.onclick = openOSM;
+  btnOpenGoogle.onclick = openGoogle;
+  btnWaze.onclick = openWaze;
+
+  elQ.oninput = ()=> render();
+
+  /**************************************************************
+   *  STARTUP
+   **************************************************************/
   updateProgress();
-  sortPlants();
-  renderList();
+  updateGpsPill();
+  elTotal.textContent = plants.length;
 
-  // If GPS was loaded from storage, tell user
-  if (userCoords) setStatus("GPS loaded. Click 'Driving Distance' to calculate.");
+  // If GPS exists, show it on map
+  if (user){
+    userMarker = L.circleMarker([user.lat, user.lng], {
+      radius: 8,
+      color: "#22C55E",
+      weight: 3,
+      fillColor: "#22C55E",
+      fillOpacity: 0.35
+    }).addTo(map).bindPopup("You are here");
+    map.setView([user.lat, user.lng], 12);
+    setStatus("GPS loaded. You can sort by driving distance now.", "ok");
+  } else {
+    setStatus("Click 'Update GPS' to start.", "warn");
+  }
+
+  render();
 </script>
 </body>
 </html>
