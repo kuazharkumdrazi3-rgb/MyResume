@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +17,6 @@
       --text-muted: #9aa4c0;
     }
 
-    /* Base */
     * {
       box-sizing: border-box;
     }
@@ -44,7 +42,6 @@
       color: var(--text-muted);
     }
 
-    /* MAIN CARD */
     .main-card {
       background: var(--bg-card);
       border-radius: 16px;
@@ -53,14 +50,12 @@
       padding: 0.75rem;
     }
 
-    /* Row inside main card */
     .card-row {
       display: flex;
       gap: 0.75rem;
-      flex-wrap: nowrap;           /* keep side-by-side on tablet */
+      flex-wrap: nowrap;
     }
 
-    /* Two panels (col-6) */
     .card-panel {
       flex: 0 0 50%;
       max-width: 50%;
@@ -76,10 +71,9 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 120px); /* nice fit for landscape tablet */
+      height: calc(100vh - 120px);
     }
 
-    /* Text bits */
     .card-title {
       font-size: 0.9rem;
       text-transform: uppercase;
@@ -103,7 +97,6 @@
       color: var(--accent);
     }
 
-    /* Controls */
     .controls {
       display: flex;
       justify-content: space-between;
@@ -144,6 +137,8 @@
     .map-buttons {
       display: flex;
       gap: 0.35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .btn-sm {
@@ -151,7 +146,6 @@
       padding: 0.18rem 0.6rem;
     }
 
-    /* LEFT LIST */
     .list {
       flex: 1 1 auto;
       overflow-y: auto;
@@ -230,7 +224,6 @@
       accent-color: var(--accent);
     }
 
-    /* RIGHT MAP */
     .map-caption {
       font-size: 0.8rem;
       color: var(--text-muted);
@@ -255,7 +248,6 @@
       border: 0;
     }
 
-    /* Scrollbar for Android/Chrome */
     .list::-webkit-scrollbar {
       width: 6px;
     }
@@ -267,7 +259,6 @@
       border-radius: 3px;
     }
 
-    /* Stack panels on narrow screens if needed */
     @media (max-width: 960px) {
       .card-row {
         flex-wrap: wrap;
@@ -312,6 +303,7 @@
             <div class="card-header-row">
               <div class="card-title">Map Preview</div>
               <div class="map-buttons">
+                <button id="refreshLocation" class="btn btn-sm">Refresh my location</button>
                 <button id="showMyLocation" class="btn btn-sm">Show my location</button>
                 <button id="openDirections" class="btn btn-sm">Directions</button>
               </div>
@@ -336,189 +328,852 @@
   </div>
 
 <script>
-  // --- DATA: add more entries following the same pattern ---
+  // --- DATA: now with lat/lng for many plants (you can keep extending) ---
   const plants = [
-         { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Kawasan Perindustrian Nilai, Nilai, Negeri Sembilan" },
-    { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Nilai / Arab-Malaysian Industrial Park – Area Not Confirmed (Negeri Sembilan)" },
-    { id: "ouji_sekken", order: 3, name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", area: "Nilai Industrial Estate, Nilai, Negeri Sembilan" },
-    { id: "alps_electric", order: 4, name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", area: "Nilai Industrial Estate, Nilai, Negeri Sembilan" },
-    { id: "k_plastics", order: 5, name: "K-Plastics Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "pca_group", order: 6, name: "PCA Group Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "johnson_matthey", order: 7, name: "Johnson Matthey Sdn. Bhd.", area: "Arab-Malaysian Industrial Park, Nilai, Negeri Sembilan" },
-    { id: "meditech_gloves", order: 8, name: "Meditech Gloves Sdn. Bhd.", area: "Nilai / Enstek – Area Not Confirmed (NS)" },
-    { id: "future_plastic", order: 9, name: "Future Plastic Industries Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "jujutsu_industries", order: 10, name: "Jujutsu Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "polyplus_packages", order: 11, name: "Polyplus Packages Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "jebsen_jessen_packaging", order: 12, name: "Jebsen & Jessen Packaging Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "lti_industries", order: 13, name: "LTI Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "harta_packaging", order: 14, name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", area: "Southern Selangor / near Nilai – Area Not Confirmed" },
-    { id: "skf_bearing", order: 15, name: "SKF Bearing Industries (M) Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
-    { id: "akzo_nobel_paints", order: 16, name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
-    { id: "mapei_nilai", order: 17, name: "Mapei Malaysia Nilai Plant", area: "Nilai Industrial Area, Nilai, Negeri Sembilan" },
-    { id: "poly_ab_ssp", order: 18, name: "Poly AB SSP", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "gf_one_chemicals", order: 19, name: "GF One Chemicals Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "dansoon_chemicals", order: 20, name: "Dansoon Chemicals Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "chuanplus_industries", order: 21, name: "Chuanplus Industries Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "av_manufacturing", order: 22, name: "AV Manufacturing Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "yec_chemical", order: 23, name: "YEC Chemical Compounds Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "vivasil_paints", order: 24, name: "Vivasil Paints ( M ) Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "dongnam", order: 25, name: "Dongnam Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
-    { id: "see_sen_chemical", order: 26, name: "See Sen Chemical Berhad", area: "Seremban / Nilai Corridor – Area Not Confirmed (NS)" },
 
-    // === SENDAYAN / SEREMBAN CLUSTER ===
-    { id: "cenviro", order: 27, name: "Cenviro Sdn Bhd", area: "Sendayan Integrated Waste Management Centre, Seremban, Negeri Sembilan" },
-    { id: "schmidt_clemens", order: 28, name: "Schmidt + Clemens (Asia) Sdn. Bhd.", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
-    { id: "jaewon_frontier", order: 29, name: "Jaewon Frontier (M) Sdn Bhd", area: "Sendayan, Seremban – Tech Valley Area" },
-    { id: "tecford_precision", order: 30, name: "Tecford Precision Sdn Bhd", area: "Sendayan – Area Not Confirmed (NS)" },
-    { id: "fibertex_personal_care", order: 31, name: "Fibertex Personal Care Sdn. Bhd.", area: "Nilai / Enstek – Area Not Confirmed (NS)" },
-    { id: "sugihara_grand", order: 32, name: "Sugihara Grand Industries (Sendayan Plant) Sdn Bhd", area: "Tech Valley, Sendayan, Seremban, Negeri Sembilan" },
-    { id: "bluetech_environmental", order: 33, name: "Bluetech Environmental Technology Sdn Bhd", area: "Enstek / Nilai – Area Not Confirmed (NS)" },
-    { id: "cbt_petroleum", order: 34, name: "CBT Petroleum Sdn Bhd", area: "Enstek / Nilai – Area Not Confirmed (NS)" },
-    { id: "goodmaid_chemicals", order: 35, name: "Goodmaid Chemicals Corporation Sdn Bhd", area: "Negeri Sembilan – Area Not Confirmed" },
-    { id: "ansell_seremban", order: 36, name: "Ansell Seremban Sdn Bhd", area: "Seremban Industrial Area, Negeri Sembilan" },
-    { id: "toyochem_specialty_seremban", order: 37, name: "Toyochem Specialty Chemicals Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
-    { id: "careplus", order: 38, name: "Careplus (M) Sdn Bhd", area: "Negeri Sembilan (Rembau/Seremban area) – Area Not Confirmed" },
-    { id: "maytech_cleanroom", order: 39, name: "Maytech Cleanroom Manufacturing Sdn Bhd", area: "Negeri Sembilan (likely Nilai / Seremban) – Area Not Confirmed" },
-    { id: "intco_malaysia", order: 40, name: "Intco Malaysia Sdn Bhd", area: "NS / Selangor border – Area Not Confirmed" },
+    { id: "aureumaex", order: 1, 
+      name: "Aureumaex Precision Plastics (M) Sdn Bhd", 
+      area: "Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8258, lng: 101.8105 
+    },
+    { id: "ichikoh", order: 2, 
+      name: "Ichikoh (M) Sdn. Bhd.", 
+      area: "Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8214, lng: 101.8083 
+    },
+    { id: "ouji_sekken", order: 3, 
+      name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", 
+      area: "Lot 759(B3), Nilai Industrial Estate, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8350, lng: 101.8150 
+    },
+    { id: "alps_electric", order: 4, 
+      name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", 
+      area: "Lot 109, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8228, lng: 101.8075 
+    },
+    { id: "k_plastics", order: 5, 
+      name: "K-Plastics Industries Sdn Bhd", 
+      area: "Lot 24, Jalan Permata 1/2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8200, lng: 101.8100 
+    },
+    { id: "pca_group", order: 6, 
+      name: "PCA Group Sdn Bhd", 
+      area: "Lot 50, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8310, lng: 101.8185 
+    },
+    { id: "johnson_matthey", order: 7, 
+      name: "Johnson Matthey Sdn. Bhd.", 
+      area: "Lot 12, Jalan 2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8125, lng: 101.7925 
+    },
+    { id: "meditech_gloves", order: 8, 
+      name: "Meditech Gloves Sdn. Bhd.", 
+      area: "Lot 23, Jalan Seriemas 1, Kota Seriemas, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.7680, lng: 101.7650 
+    },
+    { id: "future_plastic", order: 9, 
+      name: "Future Plastic Industries Sdn. Bhd.", 
+      area: "Lot 1608, Jalan Nilai 3/10, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8550, lng: 101.7950 
+    },
+    { id: "jujutsu_industries", order: 10, 
+      name: "Jujutsu Industries Sdn Bhd", 
+      area: "Lot 83, Jalan Permata 2/3, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8330, lng: 101.8160 
+    },
+    { id: "polyplus_packages", order: 11, 
+      name: "Polyplus Packages Sdn. Bhd.", 
+      area: "Lot 18, Jalan Permata 1/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8250, lng: 101.8120 
+    },
+    { id: "jebsen_jessen", order: 12, 
+      name: "Jebsen & Jessen Packaging Sdn Bhd", 
+      area: "Lot 3297, Jalan Permata 2/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8340, lng: 101.8170 
+    },
+    { id: "lti_industries", order: 13, 
+      name: "LTI Industries Sdn Bhd", 
+      area: "Lot 16, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8240, lng: 101.8110 
+    },
+    { id: "harta_packaging", order: 14, 
+      name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", 
+      area: "Lot 6, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8400, lng: 101.8200 
+    },
+    { id: "skf_bearing", order: 15, 
+      name: "SKF Bearing Industries (M) Sdn Bhd", 
+      area: "Lot 79, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8265, lng: 101.8135 
+    },
+    { id: "akzo_nobel", order: 16, 
+      name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", 
+      area: "Lot 5827, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8300, lng: 101.8150 
+    },
+    { id: "mapei_nilai", order: 17, 
+      name: "Mapei Malaysia Nilai Plant", 
+      area: "D3A, Lot 28, Jalan Industri 3/4, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8520, lng: 101.7980 
+    },
+    { id: "gf_one", order: 18, 
+      name: "GF One Chemicals Sdn. Bhd.", 
+      area: "Lot 12A, Jalan Nilai 3/7, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8500, lng: 101.7950 
+    },
+    { id: "dansoon", order: 19, 
+      name: "Dansoon Chemicals Sdn. Bhd.", 
+      area: "No. 5, Jalan Nilai 3/8, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8480, lng: 101.7960 
+    },
+    { id: "chuanplus", order: 20, 
+      name: "Chuanplus Industries Sdn. Bhd.", 
+      area: "Lot 27, Jalan Nilai 3/1, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8530, lng: 101.7970 
+    },
+    { id: "av_manufacturing", order: 21, 
+      name: "AV Manufacturing Sdn. Bhd.", 
+      area: "Lot 19, Jalan Nilai 3/5, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8510, lng: 101.7990 
+    },
+    { id: "yec_chemical", order: 22, 
+      name: "YEC Chemical Compounds Sdn Bhd", 
+      area: "No. 16, Jalan Nilai 3/2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8500, lng: 101.7980 
+    },
+    { id: "vivasil_paints", order: 23, 
+      name: "Vivasil Paints ( M ) Sdn Bhd", 
+      area: "No. 38, Jalan KIP 2, Taman Perindustrian KIP, 52200 Kuala Lumpur / Nilai 3 Ops", 
+      lat: 2.6800, lng: 101.9500 
+    },
+    { id: "dongnam", order: 24, 
+      name: "Dongnam Sdn. Bhd.", 
+      area: "Lot 106, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8230, lng: 101.8080 
+    },
+    { id: "see_sen", order: 25, 
+      name: "See Sen Chemical Berhad", 
+      area: "Lot 82, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8280, lng: 101.8140 
+    },
+    { id: "cenviro", order: 26, 
+      name: "Cenviro Sdn Bhd", 
+      area: "Ladang Tanah Merah A3 Division, Bukit Pelanduk, 71900 Port Dickson, Negeri Sembilan", 
+      lat: 2.7500, lng: 101.8500 
+    },
+    { id: "schmidt_clemens", order: 27, 
+      name: "Schmidt + Clemens (Asia) Sdn. Bhd.", 
+      area: "Lot 1928, Jalan Sendayan, Kawasan Perindustrian Sendayan, 71950 Seremban, Negeri Sembilan", 
+      lat: 2.7650, lng: 101.8900 
+    },
+    { id: "jaewon_frontier", order: 28, 
+      name: "Jaewon Frontier (M) Sdn Bhd", 
+      area: "Lot 55, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8320, lng: 101.8165 
+    },
+    { id: "tecford_precision", order: 29, 
+      name: "Tecford Precision Sdn Bhd", 
+      area: "Lot 138, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8250, lng: 101.8125 
+    },
+    { id: "fibertex", order: 30, 
+      name: "Fibertex Personal Care Sdn. Bhd.", 
+      area: "Lot 72, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8350, lng: 101.8180 
+    },
+    { id: "sugihara_grand", order: 31, 
+      name: "Sugihara Grand Industries (Sendayan Plant) Sdn Bhd", 
+      area: "Lot 11, Jalan Tech Valley 1, Sendayan Tech Valley, 71950 Seremban, Negeri Sembilan", 
+      lat: 2.6680, lng: 101.8850 
+    },
+    { id: "bluetech_env", order: 32, 
+      name: "Bluetech Environmental Technology Sdn Bhd", 
+      area: "No. 12, Jalan Toman 2, Kemayan Square, 70200 Seremban, Negeri Sembilan", 
+      lat: 2.6950, lng: 101.9250 
+    },
+    { id: "cbt_petroleum", order: 33, 
+      name: "CBT Petroleum Sdn Bhd", 
+      area: "Lot 3835, Jalan Labu, Batu 3 1/2, 70200 Seremban, Negeri Sembilan", 
+      lat: 2.7200, lng: 101.9400 
+    },
+    { id: "goodmaid", order: 34, 
+      name: "Goodmaid Chemicals Corporation Sdn Bhd", 
+      area: "Lot 27B, Lorong Bunga Tanjung 3/1, Senawang Industrial Park, 70400 Seremban, Negeri Sembilan", 
+      lat: 2.6850, lng: 101.9800 
+    },
+    { id: "ansell_seremban", order: 35, 
+      name: "Ansell Seremban Sdn Bhd", 
+      area: "Lot 80, Air Hitam Industrial Estate, 72120 Jempol, Negeri Sembilan", 
+      lat: 2.6800, lng: 101.9850 
+    },
+    { id: "toyochem_seremban", order: 36, 
+      name: "Toyochem Specialty Chemicals Sdn Bhd", 
+      area: "Lot 29, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6900, lng: 101.9750 
+    },
+    { id: "aica_malaysia", order: 37, 
+      name: "Aica Malaysia Sdn. Bhd.", 
+      area: "Lot 38, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6880, lng: 101.9780 
+    },
+    { id: "sumitomo_env", order: 38, 
+      name: "Sumitomo Chemical Enviro-Agro Asia Pacific Sdn. Bhd.", 
+      area: "Lot 60, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6850, lng: 101.9800 
+    },
+    { id: "careplus", order: 39, 
+      name: "Careplus (M) Sdn Bhd", 
+      area: "Lot 17479, Lorong Senawang 3/2, Kawasan Perindustrian Senawang, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6820, lng: 101.9820 
+    },
+    { id: "bostik", order: 40, 
+      name: "Bostik Malaysia Sdn Bhd", 
+      area: "Lot 22, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6880, lng: 101.9760 
+    },
+    { id: "aegis_materials", order: 41, 
+      name: "Aegis Materials (M) Sdn. Bhd.", 
+      area: "Lot 45, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6860, lng: 101.9780 
+    },
+    { id: "sun_rubber", order: 42, 
+      name: "Sun Rubber Industry Sdn. Bhd.", 
+      area: "Lot 68, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6840, lng: 101.9800 
+    },
+    { id: "conquest_chem", order: 43, 
+      name: "Conquest Chemical Supply Sdn. Bhd.", 
+      area: "No. 49, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6900, lng: 101.9750 
+    },
+    { id: "ogosin_chem", order: 44, 
+      name: "Ogosin Chemical Industries Sdn. Bhd.", 
+      area: "No. 11, Jalan Lombong Emas 4, Seremban Light Industrial Park, 70200 Seremban, Negeri Sembilan", 
+      lat: 2.7300, lng: 101.9350 
+    },
+    { id: "allied_specialty", order: 45, 
+      name: "Allied Specialty Compounds", 
+      area: "Lot 26, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6850, lng: 101.9800 
+    },
+    { id: "ecogreen_monomer", order: 46, 
+      name: "Ecogreen Monomer Sdn Bhd", 
+      area: "Lot 23, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6880, lng: 101.9760 
+    },
+    { id: "sanyu_jushi", order: 47, 
+      name: "Sanyu Jushi Sdn. Bhd.", 
+      area: "Lot 18, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6860, lng: 101.9780 
+    },
+    { id: "gb_industries", order: 48, 
+      name: "G.B. Industries Sdn Bhd", 
+      area: "Lot 72, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6840, lng: 101.9800 
+    },
+    { id: "maytech", order: 49, 
+      name: "Maytech Cleanroom Manufacturing Sdn Bhd", 
+      area: "Lot 25, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6850, lng: 101.9800 
+    },
+    { id: "growchem_senawang", order: 50, 
+      name: "Growchem Sdn Bhd", 
+      area: "Lot 15, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6880, lng: 101.9760 
+    },
+    { id: "cp_chemie", order: 51, 
+      name: "Cp Chemie Resources (M) Sdn Bhd", 
+      area: "Lot 33, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6900, lng: 101.9750 
+    },
+    { id: "ccp_century", order: 52, 
+      name: "Ccp Century Chemical Paints & Hardware Trading S.B", 
+      area: "No. 12, Jalan SS 13/3E, Subang Jaya Industrial Estate, 47500 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5500 
+    },
+    { id: "m_xell", order: 53, 
+      name: "M-Xell Chemicals Sdn Bhd", 
+      area: "No. 58, Jalan Senawang 3, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6850, lng: 101.9800 
+    },
+    { id: "goldstab", order: 54, 
+      name: "Goldstab Additives Sdn Bhd", 
+      area: "Lot 21, Jalan Senawang 4, Senawang Industrial Estate, 70450 Seremban, Negeri Sembilan", 
+      lat: 2.6880, lng: 101.9760 
+    },
+    { id: "zhe_ma", order: 55, 
+      name: "Zhe Ma Advance Material Technology Sdn. Bhd.", 
+      area: "Lot 108, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8220, lng: 101.8080 
+    },
+    { id: "dia_chemical", order: 56, 
+      name: "Dia-Chemical Sdn. Bhd.", 
+      area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 2.9900, lng: 101.5600 
+    },
+    { id: "asachem_sa", order: 57, 
+      name: "Asachem (M) Sdn. Bhd.", 
+      area: "Lot 10, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0300, lng: 101.4800 
+    },
+    { id: "inventec", order: 58, 
+      name: "Inventec Performance Chemicals South East Asia Sdn Bhd", 
+      area: "Lot 10, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", 
+      lat: 2.8400, lng: 101.8200 
+    },
+    { id: "bt_chemicals", order: 59, 
+      name: "BT Chemicals Sdn Bhd", 
+      area: "No. 8, Jalan TP 5A, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "pro_chem", order: 60, 
+      name: "Pro-Chem Industrial Sdn Bhd", 
+      area: "No. 6, Jalan TPP 6/6, Taman Perindustrian Puchong, 47100 Puchong, Selangor", 
+      lat: 3.0500, lng: 101.5000 
+    },
+    { id: "helios_chem", order: 61, 
+      name: "Helios Chemicals Sdn Bhd", 
+      area: "No. 9, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "cyto_tech", order: 62, 
+      name: "Cyto Tech Sdn Bhd", 
+      area: "No. 15, Jalan TPP 1/1, Taman Perindustrian Puchong, 47100 Puchong, Selangor", 
+      lat: 2.9800, lng: 101.5800 
+    },
+    { id: "hexachem", order: 63, 
+      name: "Hexachem (M) Sdn. Bhd.", 
+      area: "No. 22, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 2.9900, lng: 101.5600 
+    },
+    { id: "tech_lab", order: 64, 
+      name: "Tech-Lab Manufacturing Sdn Bhd", 
+      area: "No. 48, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", 
+      lat: 3.0150, lng: 101.5850 
+    },
+    { id: "qemrich", order: 65, 
+      name: "Qemrich Sdn Bhd", 
+      area: "No. 2, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0000, lng: 101.5500 
+    },
+    { id: "kraiburg_tpe", order: 66, 
+      name: "KRAIBURG TPE Technology (M) Sdn Bhd", 
+      area: "Lot 1839, Jalan KPB 6, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", 
+      lat: 3.0350, lng: 101.7650 
+    },
+    { id: "leivy", order: 67, 
+      name: "Leivy Laboratories Sdn. Bhd", 
+      area: "No. 9, Jalan KPB 5, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", 
+      lat: 3.0300, lng: 101.7700 
+    },
+    { id: "guppy_plastic", order: 68, 
+      name: "Guppy Plastic Industries Sdn Bhd", 
+      area: "Lot 19, Jalan KPB 3, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", 
+      lat: 3.0280, lng: 101.7680 
+    },
+    { id: "miracon", order: 69, 
+      name: "Miracon (M) Sdn Bhd", 
+      area: "No. 20, Jalan KPB 11, Kawasan Perindustrian Balakong, 43300 Seri Kembangan, Selangor", 
+      lat: 3.0320, lng: 101.7720 
+    },
+    { id: "imec_hygiene", order: 70, 
+      name: "iMEC Hygiene Sdn. Bhd.", 
+      area: "No. 36, Jalan Kajang Jaya 7, Taman Kajang Jaya, 43000 Kajang, Selangor", 
+      lat: 2.9850, lng: 101.7200 
+    },
+    { id: "ysp_industries", order: 71, 
+      name: "Y.S.P Industries (M) Sdn Bhd", 
+      area: "Lot 3, 5 & 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9450, lng: 101.7850 
+    },
+    { id: "duopharma", order: 72, 
+      name: "Duopharma Manufacturing (Bangi) Sdn Bhd", 
+      area: "Lot 2, 4, 6, 8 & 10, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9400, lng: 101.7800 
+    },
+    { id: "etika_beverages", order: 73, 
+      name: "Etika Beverages Sdn Bhd", 
+      area: "Lot 5, Jalan P/13, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9420, lng: 101.7820 
+    },
+    { id: "texchem_life", order: 74, 
+      name: "Texchem Life Science Sdn Bhd", 
+      area: "No. 5, Jalan P/1, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9380, lng: 101.7780 
+    },
+    { id: "denso", order: 75, 
+      name: "Denso (M) Sdn Bhd", 
+      area: "Lot 2, Jalan P/1, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9410, lng: 101.7790 
+    },
+    { id: "ccm_polymers", order: 76, 
+      name: "Ccm Polymers Sdn Bhd", 
+      area: "Lot 3, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9350, lng: 101.7750 
+    },
+    { id: "compounding_colouring", order: 77, 
+      name: "Compounding & Colouring Sdn Bhd", 
+      area: "Lot 1, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9360, lng: 101.7760 
+    },
+    { id: "stenta_films", order: 78, 
+      name: "Stenta Films (M) Sdn Bhd", 
+      area: "Lot 8, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9390, lng: 101.7770 
+    },
+    { id: "tesa_tapes", order: 79, 
+      name: "Tesa Tapes (M) Sdn Bhd", 
+      area: "Lot 7, Jalan P/5, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9400, lng: 101.7800 
+    },
+    { id: "sapura_industrial", order: 80, 
+      name: "Sapura Industrial Berhad", 
+      area: "Lot 2 & 4, Jalan P/11, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9420, lng: 101.7810 
+    },
+    { id: "pharmaniaga", order: 81, 
+      name: "Pharmaniaga Manufacturing Bhd", 
+      area: "Lot 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9450, lng: 101.7830 
+    },
+    { id: "mlm_packaging", order: 82, 
+      name: "Mlm Packaging Sdn Bhd", 
+      area: "No. 5, Jalan TP 2, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 2.9800, lng: 101.5500 
+    },
+    { id: "alsey_kimia", order: 83, 
+      name: "Alsey Kimia (M) Sdn Bhd", 
+      area: "No. 12, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5300 
+    },
+    { id: "ichem_solution", order: 84, 
+      name: "i-Chem Solution Sdn Bhd", 
+      area: "No. 2, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", 
+      lat: 2.9850, lng: 101.5650 
+    },
+    { id: "chembond", order: 85, 
+      name: "Chembond Chemicals(Malaysia) Sdn Bhd", 
+      area: "No. 15, Jalan Utarid U5/15, Seksyen U5, 40150 Shah Alam, Selangor", 
+      lat: 3.0500, lng: 101.4800 
+    },
+    { id: "hb_laboratories", order: 86, 
+      name: "HB Laboratories Sdn Bhd", 
+      area: "No. 8, Jalan Utarid U5/26, Seksyen U5, 40150 Shah Alam, Selangor", 
+      lat: 3.0400, lng: 101.5000 
+    },
+    { id: "ferrovic", order: 87, 
+      name: "Ferrovic Corporation (M) Sdn. Bhd.", 
+      area: "No. 18, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5200 
+    },
+    { id: "pavilion_coating", order: 88, 
+      name: "Pavilion Coating (M) Sdn Bhd", 
+      area: "No. 6, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "edenor_oleo", order: 89, 
+      name: "Edenor Oleochemicals (M) Sdn Bhd", 
+      area: "Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", 
+      lat: 2.9150, lng: 101.4550 
+    },
+    { id: "primechem", order: 90, 
+      name: "Primechem Malaysia Sdn Bhd", 
+      area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "unigreen", order: 91, 
+      name: "Unigreen Chemicals Sdn. Bhd.", 
+      area: "Lot 12, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", 
+      lat: 3.0000, lng: 101.4200 
+    },
+    { id: "synerchem", order: 92, 
+      name: "Synerchem Group", 
+      area: "No. 2, Jalan Anggerik Mokara 31/48, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 3.0500, lng: 101.5500 
+    },
+    { id: "bio_enviro", order: 93, 
+      name: "Bio Enviro Industries Sdn Bhd", 
+      area: "No. 8, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5300 
+    },
+    { id: "cb_palm", order: 94, 
+      name: "Cb Palm Industrial Sdn. Bhd.", 
+      area: "Lot 15, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9500, lng: 101.4000 
+    },
+    { id: "plantic_lab", order: 95, 
+      name: "Plantic Lab Sdn Bhd", 
+      area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5200 
+    },
+    { id: "mildef", order: 96, 
+      name: "Mildef International Technologies Sdn Bhd", 
+      area: "Lot 26, Jalan 6, Kawasan Perindustrian Cheras Jaya, 43200 Balakong, Selangor", 
+      lat: 2.9600, lng: 101.7500 
+    },
+    { id: "techbond", order: 97, 
+      name: "Techbond Manufacturing Sdn Bhd", 
+      area: "No. 10, Jalan U1/20, Hicom Glenmarie Industrial Park, 40150 Shah Alam, Selangor", 
+      lat: 3.0300, lng: 101.5300 
+    },
+    { id: "wasco_thermal", order: 98, 
+      name: "Wasco Thermal Sdn. Bhd", 
+      area: "Lot 9, Jalan Kemajuan, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0600, lng: 101.5000 
+    },
+    { id: "hicom_diecastings", order: 99, 
+      name: "Hicom Diecastings Sdn Bhd", 
+      area: "Lot 16, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0200, lng: 101.5400 
+    },
+    { id: "mettube", order: 100, 
+      name: "Mettube Sdn Bhd", 
+      area: "Lot 5, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "afcona", order: 101, 
+      name: "Afcona Chemicals Sdn Bhd", 
+      area: "Lot 3, Jalan Anggerik Mokara 31/64, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 2.9800, lng: 101.4000 
+    },
+    { id: "apex_packaging", order: 102, 
+      name: "Apex Packaging Sdn Bhd", 
+      area: "Lot 888, Jalan Subang 9, Taman Perindustrian Subang, 47620 Subang Jaya, Selangor", 
+      lat: 2.9150, lng: 101.4550 
+    },
+    { id: "shintako", order: 103, 
+      name: "Shintako (M) Sdn Bhd", 
+      area: "Lot 18, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0300, lng: 101.4800 
+    },
+    { id: "kaizen_packaging", order: 104, 
+      name: "Kaizen Packaging Sdn Bhd", 
+      area: "No. 2, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "nichia_malaysia", order: 105, 
+      name: "Nichia (Malaysia) Sdn Bhd", 
+      area: "Lot 10, Jalan P/10, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", 
+      lat: 2.9450, lng: 101.7850 
+    },
+    { id: "igl_coatings", order: 106, 
+      name: "Igl Coatings Headquarters", 
+      area: "No. 10, Jalan Astaka U8/82, Bukit Jelutong, 40150 Shah Alam, Selangor", 
+      lat: 3.0800, lng: 101.5800 
+    },
+    { id: "jj_asia", order: 107, 
+      name: "Jj Asia Manufacturing (M) Sdn Bhd", 
+      area: "Lot 5, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 2.9800, lng: 101.4000 
+    },
+    { id: "mre_group", order: 108, 
+      name: "Mre Group Of Companies", 
+      area: "No. 15, Jalan Anggerik Mokara 31/48, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 3.0500, lng: 101.5500 
+    },
+    { id: "suka_chemicals", order: 109, 
+      name: "Suka Chemicals (M) Sdn Bhd", 
+      area: "Lot 1115, Jalan Subang 10, Taman Perindustrian Subang, 47620 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "fnholdings", order: 110, 
+      name: "Fraser & Neave Holdings Bhd", 
+      area: "1, Jalan Bukit Belimbing 26/38, Persiaran Kuala Selangor, Seksyen 26, 40400 Shah Alam, Selangor", 
+      lat: 3.0600, lng: 101.5800 
+    },
+    { id: "malaysian_diecast", order: 111, 
+      name: "Malaysian Die-Casting Industries Sdn. Bhd.", 
+      area: "Lot 6, Jalan Pahat 16/8A, Seksyen 16, 40200 Shah Alam, Selangor", 
+      lat: 3.0300, lng: 101.5300 
+    },
+    { id: "globechem", order: 112, 
+      name: "Globechem Sdn Bhd", 
+      area: "No. 9, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5400 
+    },
+    { id: "finn_chem", order: 113, 
+      name: "Finn Chemicals Sdn. Bhd.", 
+      area: "No. 3, Jalan TPP 1, Taman Perindustrian Putra, 47130 Puchong, Selangor", 
+      lat: 3.0000, lng: 101.5500 
+    },
+    { id: "japan_chemical", order: 114, 
+      name: "Japan Chemical (M) Sdn Bhd", 
+      area: "Lot 7, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", 
+      lat: 2.9150, lng: 101.4550 
+    },
+    { id: "gme_chemicals", order: 115, 
+      name: "Gme Chemicals (M) Sdn Bhd", 
+      area: "No. 8, Jalan TP 2, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "malayan_adhesives", order: 116, 
+      name: "Malayan Adhesives And Chemicals Sdn Bhd", 
+      area: "No. 9, Jalan Utas 15/7, Seksyen 15, 40200 Shah Alam, Selangor", 
+      lat: 3.0600, lng: 101.5400 
+    },
+    { id: "krischem", order: 117, 
+      name: "Krischem Sdn. Bhd.", 
+      area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "arobenz", order: 118, 
+      name: "Arobenz Chemicals Sdn Bhd", 
+      area: "No. 6, Jalan TPP 5, Taman Perindustrian Putra, 47130 Puchong, Selangor", 
+      lat: 2.9900, lng: 101.5600 
+    },
+    { id: "ken_rich", order: 119, 
+      name: "Ken-Rich Chemical Sdn Bhd.", 
+      area: "No. 2, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "dpi_chemicals", order: 120, 
+      name: "Dpi Chemicals Sdn Bhd", 
+      area: "No. 15, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "archem", order: 121, 
+      name: "Archem Malaysia Sdn Bhd", 
+      area: "Lot 22, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9600, lng: 101.4000 
+    },
+    { id: "gladron", order: 122, 
+      name: "Gladron Chemicals Sdn. Bhd.", 
+      area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0300, lng: 101.5300 
+    },
+    { id: "clariant", order: 123, 
+      name: "Clariant (Malaysia) Sdn Bhd", 
+      area: "Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", 
+      lat: 2.9150, lng: 101.4550 
+    },
+    { id: "zextron", order: 124, 
+      name: "Zextron Chemical Industries (M) Sdn Bhd", 
+      area: "No. 18, Jalan TPP 1, Taman Perindustrian Putra, 47130 Puchong, Selangor", 
+      lat: 3.0000, lng: 101.5500 
+    },
+    { id: "fujikura", order: 125, 
+      name: "Fujikura Chemicals Sdn Bhd", 
+      area: "Lot 9, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 2.9800, lng: 101.4000 
+    },
+    { id: "jintai", order: 126, 
+      name: "Jintai (M) Sdn Bhd", 
+      area: "Lot 5, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9600, lng: 101.4000 
+    },
+    { id: "tmk_chemical", order: 127, 
+      name: "Tmk Chemical Banting Sdn Bhd", 
+      area: "Lot 36, Jalan Cempaka 2, Kawasan Perindustrian Telok Panglima Garang, 42500 Telok Panglima Garang, Selangor", 
+      lat: 2.8000, lng: 101.5000 
+    },
+    { id: "kc_chemicals", order: 128, 
+      name: "KC Chemicals (M) Sdn Bhd", 
+      area: "No. 2, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "sunenergy", order: 129, 
+      name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", 
+      area: "No. 8, Jalan TP 3, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "ccm_berhad", order: 130, 
+      name: "Chemical Company Of Malaysia Berhad", 
+      area: "No. 1, Jalan Utas 15/7, Seksyen 15, 40200 Shah Alam, Selangor", 
+      lat: 3.0600, lng: 101.5400 
+    },
+    { id: "olen_port", order: 131, 
+      name: "Olen Port Klang Sdn Bhd", 
+      area: "Lot 12, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", 
+      lat: 2.9150, lng: 101.4550 
+    },
+    { id: "mey_chern", order: 132, 
+      name: "Mey Chern Chemical Sdn Bhd", 
+      area: "Lot 5, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", 
+      lat: 3.0000, lng: 101.4200 
+    },
+    { id: "acme_chemicals", order: 133, 
+      name: "Acme Chemicals (M) Sdn Bhd", 
+      area: "Lot 18, Jalan Solok Sultan Hishamuddin 6, Kawasan Perusahaan Selat Klang Utara, 42000 Port Klang, Selangor", 
+      lat: 2.9200, lng: 101.4600 
+    },
+    { id: "nylex_specialty", order: 134, 
+      name: "Nylex Specialty Chemicals Sdn. Bhd.", 
+      area: "Lot 593, Persiaran Raja Lumu, Kawasan Perusahaan Pandamaran, 42000 Port Klang, Selangor", 
+      lat: 2.9200, lng: 101.4600 
+    },
+    { id: "nexuschem", order: 135, 
+      name: "Nexuschem Engineering Sdn Bhd", 
+      area: "No. 12, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "govi_chemicals", order: 136, 
+      name: "GOVI Chemicals Sdn. Bhd", 
+      area: "Lot 18, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9500, lng: 101.4000 
+    },
+    { id: "mitsui_poly", order: 137, 
+      name: "Mitsui Chemicals Polyurethanes Malaysia Sdn. Bhd.", 
+      area: "Lot 20, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 2.9800, lng: 101.4000 
+    },
+    { id: "lyondellbasell", order: 138, 
+      name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", 
+      area: "No. 15, Jalan TP 5, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "zagro_chem", order: 139, 
+      name: "Zagro Chemicals Sdn. Bhd.", 
+      area: "No. 18, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0300, lng: 101.5300 
+    },
+    { id: "southern_acids", order: 140, 
+      name: "Southern Acids Industries Sdn. Bhd.", 
+      area: "Golconda Estate, Persiaran Hamzah Alang, 42200 Kapar, Selangor", 
+      lat: 2.9900, lng: 101.4300 
+    },
+    { id: "klh_telok", order: 141, 
+      name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", 
+      area: "Lot 23, Jalan Ikan Mata Duyung, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9600, lng: 101.4000 
+    },
+    { id: "pkg_gemilang", order: 142, 
+      name: "Perusahaan Kimia Gemilang Sdn. Bhd.", 
+      area: "Lot 9, Jalan TUDM, Kampung Baru Subang, 40150 Shah Alam, Selangor", 
+      lat: 2.9900, lng: 101.4300 
+    },
+    { id: "formosa_prosonic", order: 143, 
+      name: "Formosa Prosonic Chemicals Sdn Bhd", 
+      area: "Lot 12, Jalan Sultan Mohamed 6, Kawasan Perindustrian Bandar Sultan Suleiman, 42000 Port Klang, Selangor", 
+      lat: 2.9200, lng: 101.4600 
+    },
+    { id: "w_clay", order: 144, 
+      name: "The W Clay Industries Sdn. Bhd.", 
+      area: "Lot 38, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9500, lng: 101.4000 
+    },
+    { id: "synergy_chem", order: 145, 
+      name: "Synergy Chemicals Sdn Bhd", 
+      area: "No. 5, Jalan TP 6, Taman Perindustrian Sime UEP, 47600 Subang Jaya, Selangor", 
+      lat: 3.0200, lng: 101.5300 
+    },
+    { id: "ksc_chem", order: 146, 
+      name: "Ksc Chemical (Malaysia) Sdn. Bhd.", 
+      area: "Lot 9, Jalan Anggerik Mokara 31/54, Kota Kemuning, 40460 Shah Alam, Selangor", 
+      lat: 2.9800, lng: 101.4000 
+    },
+    { id: "tg_chem", order: 147, 
+      name: "Tg Chemical (M) Sdn Bhd", 
+      area: "Lot 18, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9600, lng: 101.4000 
+    },
+    { id: "mah_sing", order: 148, 
+      name: "Mah Sing Plastics Industries Sdn Bhd", 
+      area: "Lot 8, Jalan Pandan, Pandan Indah, 55100 Kuala Lumpur", 
+      lat: 3.0100, lng: 101.5200 
+    },
+    { id: "growchem_pi", order: 149, 
+      name: "Growchem Sdn Bhd (Pulau Indah Plant)", 
+      area: "Lot 22, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "yara_industrial", order: 150, 
+      name: "Yara International (M)Sdn Bhd - Industrial", 
+      area: "Lot 1, Jalan Perigi Nanas 7/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "mewah_oils", order: 151, 
+      name: "Mewah Oils Sdn Bhd", 
+      area: "Lot 40, Section 4, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "mitsui_scientex", order: 152, 
+      name: "Mitsui Chemicals Scientex Sdn. Bhd.", 
+      area: "Lot 12, Jalan Ikan Bawal 2, Telok Gong, 42000 Port Klang, Selangor", 
+      lat: 2.9600, lng: 101.4000 
+    },
+    { id: "hextar", order: 153, 
+      name: "Hextar Chemicals Sdn Bhd", 
+      area: "Lot 5, Jalan Perigi Nanas 7/3, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "ascendchem", order: 154, 
+      name: "Ascendchem Sdn Bhd Pulau Indah", 
+      area: "Lot 3, Jalan Perigi Nanas 7/2, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "topmark", order: 155, 
+      name: "Topmark Petroleum Products Sdn. Bhd.", 
+      area: "Lot 16, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "cargill", order: 156, 
+      name: "Cargill Palm Products Sdn Bhd", 
+      area: "Lot 220, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Pulau Indah Plant)", 
+      lat: 2.9800, lng: 101.3300 
+    },
+    { id: "chevron_pi", order: 157, 
+      name: "Chevron Pulau Indah Terminal", 
+      area: "Lot 15, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "concord_chem", order: 158, 
+      name: "Concord Chemicals Corporation Sdn. Bhd.", 
+      area: "Lot 19, Jalan Perigi Nanas 7/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "adhes_packaging", order: 159, 
+      name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", 
+      area: "Lot 5, Jalan Perigi Nanas 7/3, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "klk_oleomas", order: 160, 
+      name: "Kl-Kepong Oleomas Sdn. Bhd.", 
+      area: "Lot 1, Jalan Perigi Nanas 8/1, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "gamalux", order: 161, 
+      name: "Gamalux Sdn Bhd (Factory)", 
+      area: "Lot 6, Jalan Perigi Nanas 7/2, Kawasan Perindustrian Pulau Indah, 42920 Pulau Indah, Selangor", 
+      lat: 2.9400, lng: 101.3500 
+    },
+    { id: "ancom_nylex", order: 162, 
+      name: "Ancom Nylex Terminals Sdn Bhd", 
+      area: "Lot 22, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Port Klang Terminals)", 
+      lat: 2.9800, lng: 101.3300 
+    },
+    { id: "intco_malaysia", order: 163, 
+      name: "Intco Malaysia Sdn Bhd", 
+      area: "Lot 1, Jalan Timah 2, Kawasan Perindustrian Pasir Gudang (Ref Klang Plant)", 
+      lat: 2.9800, lng: 101.3300 
+    },
+    { id: "dh_hygiene", order: 164, 
+      name: "Dh Hygience (Melaka) Sdn Bhd", 
+      area: "Lot 12, Jalan Paya Rumput Indah 1, Taman Paya Rumput Indah, 76450 Melaka", 
+      lat: 2.2700, lng: 102.1500 
+    },
+    { id: "tech_latex", order: 165, 
+      name: "Tech-Latex Scientific Sdn. Bhd.", 
+      area: "Lot 8, Jalan IKS M1, Taman IKS Merdeka, 75350 Batu Berendam, Melaka", 
+      lat: 2.2900, lng: 102.1800 
+    },
+    { id: "yakuhin", order: 166, 
+      name: "Yakuhin Industries (M) Sdn Bhd", 
+      area: "Lot 38, Jalan Usaha 10, Kawasan Perindustrian Ayer Keroh, 75450 Ayer Keroh, Melaka", 
+      lat: 2.2800, lng: 102.2000 
+    },
+    { id: "air_liquide", order: 167, 
+      name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", 
+      area: "Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka", 
+      lat: 2.2500, lng: 102.1500 
+    }
 
-    // === BANGI / KAJANG / HULU LANGAT CLUSTER ===
-    { id: "aica_malaysia", order: 41, name: "Aica Malaysia Sdn. Bhd.", area: "Klang Valley – Area Not Confirmed (Selangor)" },
-    { id: "sumitomo_enviro_agro", order: 42, name: "Sumitomo Chemical Enviro-Agro Asia Pacific Sdn. Bhd.", area: "Klang Valley – Area Not Confirmed (Selangor)" },
-    { id: "bostik_malaysia", order: 43, name: "Bostik Malaysia Sdn Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
-    { id: "aegis_materials", order: 44, name: "Aegis Materials (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "sun_rubber", order: 45, name: "Sun Rubber Industry Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "conquest_chemical", order: 46, name: "Conquest Chemical Supply Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "ogosin_chemical", order: 47, name: "Ogosin Chemical Industries Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "allied_specialty", order: 48, name: "Allied Specialty Compounds", area: "Selangor – Area Not Confirmed" },
-    { id: "sanyu_jushi", order: 49, name: "Sanyu Jushi Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "gb_industries", order: 50, name: "G.B. Industries Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "growchem_selangor", order: 51, name: "Growchem Sdn Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
-    { id: "cp_chemie", order: 52, name: "Cp Chemie Resources (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "ccp_century", order: 53, name: "Ccp Century Chemical Paints & Hardware Trading S.B", area: "Selangor – Area Not Confirmed" },
-    { id: "m_xell", order: 54, name: "M-Xell Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "goldstab_additives", order: 55, name: "Goldstab Additives Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "zhe_ma_advance", order: 56, name: "Zhe Ma Advance Material Technology Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "dia_chemical", order: 57, name: "Dia-Chemical Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "asachem", order: 58, name: "Asachem (M) Sdn. Bhd.", area: "Kajang / Hulu Langat, Selangor" },
-    { id: "inventec_performance", order: 59, name: "Inventec Performance Chemicals South East Asia Sdn Bhd", area: "Selangor – Area Not Confirmed (Hulu Langat / Bangi)" },
-    { id: "bt_chemicals", order: 60, name: "BT Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "pro_chem_industrial", order: 61, name: "Pro-Chem Industrial Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "helios_chemicals", order: 62, name: "Helios Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "cyto_tech", order: 63, name: "Cyto Tech Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "hexachem", order: 64, name: "Hexachem (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "tech_lab", order: 65, name: "Tech-Lab Manufacturing Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "qemrich", order: 66, name: "Qemrich Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "kraiburg_tpe", order: 67, name: "KRAIBURG TPE Technology (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "leivy_laboratories", order: 68, name: "Leivy Laboratories Sdn. Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "guppy_plastic", order: 69, name: "Guppy Plastic Industries Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "miracon", order: 70, name: "Miracon (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "imec_hygiene", order: 71, name: "iMEC Hygiene Sdn. Bhd.", area: "Bangi / Kajang, Selangor – Area Not Confirmed" },
-    { id: "ysp_industries", order: 72, name: "Y.S.P Industries (M) Sdn Bhd", area: "Bandar Baru Bangi, Hulu Langat, Selangor" },
-    { id: "duopharma_bangi", order: 73, name: "Duopharma Manufacturing (Bangi) Sdn Bhd", area: "Bangi Industrial Area, Selangor" },
-    { id: "etika_beverages", order: 74, name: "Etika Beverages Sdn Bhd", area: "Bangi / Nilai Corridor – Area Not Confirmed" },
-    { id: "texchem_life_science_bangi", order: 75, name: "Texchem Life Science Sdn Bhd", area: "Bangi, Selangor" },
-    { id: "alsey_kimia", order: 76, name: "Alsey Kimia (M) Sdn Bhd", area: "Hulu Langat / Bangi – Area Not Confirmed" },
-    { id: "tech_latex_scientific", order: 77, name: "Tech-Latex Scientific Sdn. Bhd.", area: "Selangor (Bangi / Hulu Langat) – Area Not Confirmed" },
-    { id: "yakuhin_industries", order: 78, name: "Yakuhin Industries (M) Sdn Bhd", area: "Selangor (Bangi / Kajang) – Area Not Confirmed" },
-    { id: "texchem_life_sciences", order: 79, name: "Texchem Life Sciences Sdn. Bhd.", area: "Bangi, Selangor" },
-
-    // === SHAH ALAM / KLANG VALLEY CORE CLUSTER ===
-    { id: "denso_malaysia", order: 80, name: "Denso (M) Sdn Bhd", area: "Selangor (Shah Alam) – Area Not Confirmed" },
-    { id: "ccm_polymers", order: 81, name: "Ccm Polymers Sdn Bhd", area: "Shah Alam, Selangor – Area Not Confirmed" },
-    { id: "compounding_colouring", order: 82, name: "Compounding & Colouring Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "stenta_films", order: 83, name: "Stenta Films (M) Sdn Bhd", area: "Shah Alam, Selangor" },
-    { id: "tesa_tapes", order: 84, name: "Tesa Tapes (M) Sdn Bhd", area: "Shah Alam, Selangor" },
-    { id: "sapura_industrial", order: 85, name: "Sapura Industrial Berhad", area: "Shah Alam, Selangor" },
-    { id: "pharmaniaga_manufacturing", order: 86, name: "Pharmaniaga Manufacturing Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
-    { id: "mlm_packaging", order: 87, name: "Mlm Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "i_chem_solution", order: 88, name: "i-Chem Solution Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
-    { id: "chembond_chemicals", order: 89, name: "Chembond Chemicals(Malaysia) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "hb_laboratories", order: 90, name: "HB Laboratories Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "ferrovic_corporation", order: 91, name: "Ferrovic Corporation (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "wisma_albe_advance", order: 92, name: "Wisma Albe Advance", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "pavilion_coating", order: 93, name: "Pavilion Coating (M) Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "techbond_manufacturing", order: 94, name: "Techbond Manufacturing Sdn Bhd", area: "Shah Alam, Selangor – Area Not Confirmed" },
-    { id: "wasco_thermal", order: 95, name: "Wasco Thermal Sdn. Bhd", area: "Klang / Shah Alam, Selangor" },
-    { id: "hicom_diecastings", order: 96, name: "Hicom Diecastings Sdn Bhd", area: "Pekan Hicom, Shah Alam, Selangor" },
-    { id: "mettube", order: 97, name: "Mettube Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "afcona_chemicals", order: 98, name: "Afcona Chemicals Sdn Bhd", area: "Shah Alam, Selangor" },
-    { id: "apex_packaging", order: 99, name: "Apex Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "shintako", order: 100, name: "Shintako (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "kaizen_packaging", order: 101, name: "Kaizen Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "nichia_malaysia", order: 102, name: "Nichia (Malaysia) Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
-    { id: "igle_coatings", order: 103, name: "Igl Coatings Headquarters", area: "Shah Alam / Subang – Area Not Confirmed" },
-    { id: "jj_asia_manufacturing", order: 104, name: "Jj Asia Manufacturing (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "mre_group", order: 105, name: "Mre Group Of Companies", area: "Selangor – Area Not Confirmed" },
-    { id: "suka_chemicals", order: 106, name: "Suka Chemicals (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "fraser_neave", order: 107, name: "Fraser & Neave Holdings Bhd", area: "Shah Alam, Selangor" },
-    { id: "malaysian_die_casting", order: 108, name: "Malaysian Die-Casting Industries Sdn. Bhd.", area: "Shah Alam, Selangor" },
-    { id: "toyochem_specialty_selangor", order: 109, name: "Toyochem Specialty Chemical Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "globechem", order: 110, name: "Globechem Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "finn_chemicals", order: 111, name: "Finn Chemicals Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
-    { id: "japan_chemical", order: 112, name: "Japan Chemical (M) Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
-    { id: "gme_chemicals", order: 113, name: "Gme Chemicals (M) Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "malayan_adhesives", order: 114, name: "Malayan Adhesives And Chemicals Sdn Bhd", area: "Shah Alam, Selangor" },
-    { id: "krischem", order: 115, name: "Krischem Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
-    { id: "arobenz_chemicals", order: 116, name: "Arobenz Chemicals Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
-    { id: "ken_rich_chemical", order: 117, name: "Ken-Rich Chemical Sdn Bhd.", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "dpi_chemicals", order: 118, name: "Dpi Chemicals Sdn Bhd", area: "Shah Alam" },
-    { id: "archem_malaysia", order: 119, name: "Archem Malaysia Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
-    { id: "gladron_chemicals", order: 120, name: "Gladron Chemicals Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
-    { id: "clariant_malaysia", order: 121, name: "Clariant (Malaysia) Sdn Bhd", area: "Shah Alam, Selangor" },
-    { id: "zextron_chemical", order: 122, name: "Zextron Chemical Industries (M) Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
-    { id: "fujikura_chemicals", order: 123, name: "Fujikura Chemicals Sdn Bhd", area: "Shah Alam / Subang – Area Not Confirmed" },
-    { id: "jintai", order: 124, name: "Jintai (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "tmk_chemical_banting", order: 125, name: "Tmk Chemical Banting Sdn Bhd", area: "Banting, Kuala Langat, Selangor" },
-    { id: "kc_chemicals", order: 126, name: "KC Chemicals (M) Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "sunenergy_chemical", order: 127, name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", area: "Kuala Langat, Selangor – Area Not Confirmed" },
-    { id: "chemical_company_malaysia", order: 128, name: "Chemical Company Of Malaysia Berhad", area: "Shah Alam / Klang, Selangor" },
-
-    // === KLANG / PORT KLANG / PULAU INDAH / TELOK GONG COASTAL BELT ===
-    { id: "olen_port_klang", order: 129, name: "Olen Port Klang Sdn Bhd", area: "Port Klang, Selangor" },
-    { id: "mey_chern_chemical", order: 130, name: "Mey Chern Chemical Sdn Bhd", area: "Port Klang / Klang – Area Not Confirmed" },
-    { id: "acme_chemicals", order: 131, name: "Acme Chemicals (M) Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "nylex_specialty", order: 132, name: "Nylex Specialty Chemicals Sdn. Bhd.", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "nexuschem_engineering", order: 133, name: "Nexuschem Engineering Sdn Bhd", area: "Port Klang / Klang – Area Not Confirmed" },
-    { id: "govi_chemicals", order: 134, name: "GOVI Chemicals Sdn. Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "mitsui_polyurethanes", order: 135, name: "Mitsui Chemicals Polyurethanes Malaysia Sdn. Bhd.", area: "Shah Alam / Klang – Area Not Confirmed" },
-    { id: "lyondellbasell_polymers", order: 136, name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "zagro_chemicals", order: 137, name: "Zagro Chemicals Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
-    { id: "southern_acids", order: 138, name: "Southern Acids Industries Sdn. Bhd.", area: "Klang / Shah Alam, Selangor" },
-    { id: "kong_long_huat_telokgong", order: 139, name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", area: "Telok Gong, Klang, Selangor" },
-    { id: "perusahaan_kimia_gemilang", order: 140, name: "Perusahaan Kimia Gemilang Sdn. Bhd.", area: "Telok Gong, Klang, Selangor" },
-    { id: "formosa_prosonic", order: 141, name: "Formosa Prosonic Chemicals Sdn Bhd", area: "Klang coastal belt, Selangor" },
-    { id: "w_clay_industries", order: 142, name: "The W Clay Industries Sdn. Bhd.", area: "Klang coastal belt, Selangor" },
-    { id: "synergy_chemicals", order: 143, name: "Synergy Chemicals Sdn Bhd", area: "Port Klang / Telok Gong, Selangor – Area Not Confirmed" },
-    { id: "ksc_chemical", order: 144, name: "Ksc Chemical (Malaysia) Sdn. Bhd.", area: "Telok Gong / Port Klang, Selangor – Area Not Confirmed" },
-    { id: "tg_chemical", order: 145, name: "Tg Chemical (M) Sdn Bhd", area: "Telok Gong / Port Klang, Selangor – Area Not Confirmed" },
-    { id: "mah_sing_plastics", order: 146, name: "Mah Sing Plastics Industries Sdn Bhd", area: "Selangor (Klang Valley) – Area Not Confirmed" },
-    { id: "growchem_pulau_indah", order: 147, name: "Growchem Sdn Bhd (Pulau Indah Plant)", area: "Pulau Indah, Port Klang, Selangor" },
-    { id: "yara_international", order: 148, name: "Yara International (M)Sdn Bhd - Industrial", area: "Pulau Indah, Port Klang, Selangor" },
-    { id: "mewah_oils", order: 149, name: "Mewah Oils Sdn Bhd", area: "Port Klang, Selangor" },
-    { id: "mcs_scientex_pulau_indah", order: 150, name: "Mitsui Chemicals Scientex Sdn. Bhd.", area: "Taman Perindustrian Pulau Indah, Pelabuhan Klang, Selangor" },
-    { id: "hextar_chemicals", order: 151, name: "Hextar Chemicals Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
-    { id: "ascendchem_pulau_indah", order: 152, name: "Ascendchem Sdn Bhd Pulau Indah", area: "Pulau Indah, Klang, Selangor" },
-    { id: "topmark_petroleum", order: 153, name: "Topmark Petroleum Products Sdn. Bhd.", area: "Pulau Indah, Klang, Selangor – Area Not Confirmed" },
-    { id: "cargill_palm_products", order: 154, name: "Cargill Palm Products Sdn Bhd", area: "Port Klang, Selangor – Area Not Confirmed" },
-    { id: "chevron_pulau_indah", order: 155, name: "Chevron Pulau Indah Terminal", area: "Pulau Indah, Klang, Selangor" },
-    { id: "concord_chemicals_pelabuhan", order: 156, name: "Concord Chemicals Corporation Sdn. Bhd., Pelabuhan Klang", area: "Pelabuhan Klang, Selangor" },
-    { id: "adhes_packaging", order: 157, name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
-    { id: "kl_kepong_oleomas", order: 158, name: "Kl-Kepong Oleomas Sdn. Bhd.", area: "Pulau Indah, Klang, Selangor" },
-    { id: "gamalux_factory", order: 159, name: "Gamalux Sdn Bhd (Factory)", area: "Pulau Indah, Klang, Selangor" },
-    { id: "ancom_nylex_terminals", order: 160, name: "Ancom Nylex Terminals Sdn Bhd", area: "Pulau Indah / Port Klang, Selangor" },
-    { id: "ecogreen_monomer", order: 161, name: "Ecogreen Monomer Sdn Bhd", area: "Klang / Port Area – Area Not Confirmed (Selangor)" },
-    { id: "plantic_lab", order: 162, name: "Plantic Lab Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-    { id: "mildef_international", order: 163, name: "Mildef International Technologies Sdn Bhd", area: "Selangor – Area Not Confirmed" },
-
-    // === LAST FEW + MELAKA CLUSTER ===
-    { id: "yara_note2", order: 164, name: "Yara International (M)Sdn Bhd - Industrial (duplicate ref)", area: "Pulau Indah, Port Klang, Selangor" },
-    { id: "air_liquide_melaka", order: 165, name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area: "Melaka" },
-    { id: "dh_hygience_melaka", order: 166, name: "Dh Hygience (Melaka) Sdn Bhd", area: "Melaka" }
   ];
 
+  // Keep original sort by order as base
   plants.sort((a, b) => a.order - b.order);
 
-  const VISITED_KEY = "plant_visit_dark_v1";
+  const VISITED_KEY  = "plant_visit_dark_v1";
+  const LOCATION_KEY = "plant_visit_dark_v1_location";
 
   function loadVisited() {
     try {
@@ -535,6 +1190,21 @@
     } catch {}
   }
 
+  function loadLocation() {
+    try {
+      const s = localStorage.getItem(LOCATION_KEY);
+      return s ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveLocation(coords) {
+    try {
+      localStorage.setItem(LOCATION_KEY, JSON.stringify(coords));
+    } catch {}
+  }
+
   const visited  = loadVisited();
   const listEl   = document.getElementById("plantList");
   const statsEl  = document.getElementById("stats");
@@ -542,18 +1212,17 @@
   const labelEl  = document.getElementById("currentCompanyLabel");
 
   let selectedId = null;
-  let userCoords = null; // will hold GPS when available
+  let userCoords = loadLocation(); // last saved GPS if any
 
-  // --- APPROX COORDS BY AREA CLUSTER ---
+  // --- Area-based approximate coords (fallback if no lat/lng) ---
   function getApproxCoordsForPlant(plant) {
     const area = (plant.area || "").toLowerCase();
 
-    // Order matters: more specific first
     if (area.includes("melaka")) {
       return { lat: 2.1896, lng: 102.2501 };
     }
     if (area.includes("pulau indah") || area.includes("pelabuhan klang") || area.includes("port klang") || area.includes("telok gong")) {
-      return { lat: 2.9440, lng: 101.3190 }; // Port Klang / Pulau Indah region
+      return { lat: 2.9440, lng: 101.3190 };
     }
     if (area.includes("klang")) {
       return { lat: 3.0436, lng: 101.4460 };
@@ -570,6 +1239,9 @@
     if (area.includes("nilai") || area.includes("enstek")) {
       return { lat: 2.8033, lng: 101.7972 };
     }
+    if (area.includes("selangor")) {
+      return { lat: 3.0738, lng: 101.5183 };
+    }
     return null;
   }
 
@@ -578,7 +1250,7 @@
   }
 
   function haversineKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
@@ -589,43 +1261,41 @@
     return R * c;
   }
 
-  function computeDistancesFrom(origin) {
+  // Compute straight-line distances (for quick rough display)
+  function computeStraightDistancesFrom(origin) {
     plants.forEach(p => {
       if (visited[p.id]) {
         p._distanceKm = null;
         return;
       }
-      const c = getApproxCoordsForPlant(p);
-      if (!c) {
+      let dest = null;
+      if (typeof p.lat === "number" && typeof p.lng === "number") {
+        dest = { lat: p.lat, lng: p.lng };
+      } else {
+        dest = getApproxCoordsForPlant(p);
+      }
+      if (!dest) {
         p._distanceKm = null;
         return;
       }
-      p._distanceKm = haversineKm(origin.lat, origin.lng, c.lat, c.lng);
+      p._distanceKm = haversineKm(origin.lat, origin.lng, dest.lat, dest.lng);
     });
   }
 
-  function sortPlantsByDistance() {
-    plants.sort((a, b) => {
-      const aVisited = !!visited[a.id];
-      const bVisited = !!visited[b.id];
-      if (aVisited !== bVisited) {
-        // unchecked (false) first, then visited (true)
-        return aVisited - bVisited;
-      }
+  // Real driving distance using OSRM (no API key)
+  async function getDrivingDistanceKm(origin, dest) {
+    const url =
+      `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=false`;
 
-      const da = typeof a._distanceKm === "number" ? a._distanceKm : null;
-      const db = typeof b._distanceKm === "number" ? b._distanceKm : null;
-
-      const aHas = da !== null;
-      const bHas = db !== null;
-
-      if (aHas && bHas) return da - db;
-      if (aHas) return -1;
-      if (bHas) return 1;
-
-      // fallback: original order
-      return a.order - b.order;
-    });
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.routes || !data.routes.length) return null;
+      return data.routes[0].distance / 1000; // m → km
+    } catch (e) {
+      console.error("OSRM error", e);
+      return null;
+    }
   }
 
   function buildList() {
@@ -650,10 +1320,16 @@
       main.textContent = plant.name;
       name.appendChild(main);
 
-      if (typeof plant._distanceKm === "number") {
+      // Prefer real driving distance; fall back to straight-line
+      if (typeof plant._driveKm === "number") {
         const distEl = document.createElement("span");
         distEl.className = "company-distance";
-        distEl.textContent = plant._distanceKm.toFixed(1) + " km from you";
+        distEl.textContent = plant._driveKm.toFixed(1) + " km (driving)";
+        name.appendChild(distEl);
+      } else if (typeof plant._distanceKm === "number") {
+        const distEl = document.createElement("span");
+        distEl.className = "company-distance";
+        distEl.textContent = plant._distanceKm.toFixed(1) + " km (approx)";
         name.appendChild(distEl);
       }
 
@@ -668,6 +1344,9 @@
         visited[plant.id] = cb.checked;
         saveVisited(visited);
         updateStats();
+        if (userCoords) {
+          computeStraightDistancesFrom(userCoords);
+        }
         buildList();
       });
 
@@ -699,9 +1378,9 @@
     statsEl.innerHTML = `<b>${done}</b> of <b>${total}</b> stops visited`;
   }
 
-  // --- Geolocation & Directions ---
+  // --- Location & controls ---
 
-  function showMyLocationOnMap() {
+  function refreshMyLocation() {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported on this device.");
       return;
@@ -713,9 +1392,14 @@
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
         };
+        saveLocation(userCoords);
+        computeStraightDistancesFrom(userCoords);
+        buildList();
+        updateStats();
+
         const q = encodeURIComponent(userCoords.lat + "," + userCoords.lng);
         mapFrame.src = "https://www.google.com/maps?q=" + q + "&output=embed";
-        labelEl.textContent = "Your current location";
+        labelEl.textContent = "Your current location (saved)";
       },
       (err) => {
         alert("Could not get location: " + err.message);
@@ -725,6 +1409,16 @@
         timeout: 10000,
       }
     );
+  }
+
+  function showMyLocationOnMap() {
+    if (!userCoords) {
+      alert("No saved location yet. Tap 'Refresh my location' first.");
+      return;
+    }
+    const q = encodeURIComponent(userCoords.lat + "," + userCoords.lng);
+    mapFrame.src = "https://www.google.com/maps?q=" + q + "&output=embed";
+    labelEl.textContent = "Your saved location";
   }
 
   function openDirectionsFromHere() {
@@ -738,19 +1432,27 @@
 
     const destination = encodeURIComponent(plant.name + " " + plant.area);
 
-    // If we can get GPS, use it as origin; otherwise use "Current Location"
+    if (userCoords) {
+      const url =
+        "https://www.google.com/maps/dir/?api=1" +
+        "&origin=" + encodeURIComponent(userCoords.lat + "," + userCoords.lng) +
+        "&destination=" + destination +
+        "&travelmode=driving";
+      window.open(url, "_blank");
+      return;
+    }
+
+    // fallback: live GPS or Google "Current Location"
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-
           const url =
             "https://www.google.com/maps/dir/?api=1" +
             "&origin=" + encodeURIComponent(lat + "," + lng) +
             "&destination=" + destination +
             "&travelmode=driving";
-
           window.open(url, "_blank");
         },
         () => {
@@ -759,7 +1461,6 @@
             "&origin=Current+Location" +
             "&destination=" + destination +
             "&travelmode=driving";
-
           window.open(url, "_blank");
         }
       );
@@ -769,43 +1470,80 @@
         "&origin=Current+Location" +
         "&destination=" + destination +
         "&travelmode=driving";
-
       window.open(url, "_blank");
     }
   }
 
-  function sortUncheckedByDistance() {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported on this device.");
+  // Sort unchecked plants by real driving distance
+  async function sortUncheckedByDistance() {
+    if (!userCoords) {
+      alert("Please tap 'Refresh my location' first so I can use your latest GPS.");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        computeDistancesFrom(origin);
-        sortPlantsByDistance();
-        buildList();
-        updateStats();
-      },
-      (err) => {
-        alert("Could not get location: " + err.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
+    const origin = userCoords;
+
+    const tasks = plants.map(async p => {
+      if (visited[p.id]) {
+        p._driveKm = null;
+        return;
       }
-    );
+
+      let dest = null;
+      if (typeof p.lat === "number" && typeof p.lng === "number") {
+        dest = { lat: p.lat, lng: p.lng };
+      } else {
+        dest = getApproxCoordsForPlant(p);
+      }
+      if (!dest) {
+        p._driveKm = null;
+        return;
+      }
+
+      const d = await getDrivingDistanceKm(origin, dest);
+      p._driveKm = d; // may be null if routing fails
+    });
+
+    await Promise.all(tasks);
+
+    plants.sort((a, b) => {
+      const av = !!visited[a.id];
+      const bv = !!visited[b.id];
+      if (av !== bv) return av - bv; // unchecked first
+
+      const da = a._driveKm;
+      const db = b._driveKm;
+
+      if (da != null && db != null) return da - db;
+      if (da != null) return -1;
+      if (db != null) return 1;
+
+      // fallback to straight-line if available
+      const sa = a._distanceKm;
+      const sb = b._distanceKm;
+      if (sa != null && sb != null) return sa - sb;
+      if (sa != null) return -1;
+      if (sb != null) return 1;
+
+      return a.order - b.order;
+    });
+
+    buildList();
+    updateStats();
   }
 
-  // Button hooks
+  // Buttons
   document.getElementById("clearVisited").addEventListener("click", () => {
     if (!confirm("Clear all visited ticks?")) return;
     for (const key in visited) visited[key] = false;
     saveVisited(visited);
+    if (userCoords) computeStraightDistancesFrom(userCoords);
     updateStats();
     buildList();
   });
+
+  document.getElementById("refreshLocation")
+    .addEventListener("click", refreshMyLocation);
 
   document.getElementById("showMyLocation")
     .addEventListener("click", showMyLocationOnMap);
@@ -814,10 +1552,13 @@
     .addEventListener("click", openDirectionsFromHere);
 
   document.getElementById("sortByDistance")
-    .addEventListener("click", sortUncheckedByDistance);
+    .addEventListener("click", () => { sortUncheckedByDistance(); });
 
   // Initial render
   updateStats();
+  if (userCoords) {
+    computeStraightDistancesFrom(userCoords);
+  }
   buildList();
   if (plants[0]) selectPlant(plants[0]);
 </script>
