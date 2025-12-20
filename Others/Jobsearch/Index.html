@@ -198,7 +198,6 @@
 <body>
   <div class="page">
 
-
     <div class="az-wrap">
       <div class="az-grid" id="azGrid"></div>
     </div>
@@ -400,7 +399,7 @@
   const selectedLetterEl = document.getElementById("selectedLetter");
   const shownCountEl = document.getElementById("shownCount");
   const totalCountEl = document.getElementById("totalCount");
-  const statsEl = document.getElementById("stats");
+  const statsEl = document.getElementById("stats"); // (kept, even if not in HTML)
   const showAllBtn = document.getElementById("showAllBtn");
 
   // --- STATE ---
@@ -415,13 +414,11 @@
   function firstLetter(name) {
     const s = (name || "").trim();
     if (!s) return "#";
-    // Find first A-Z letter in the string (skip symbols like "(" or quotes)
     const m = s.toUpperCase().match(/[A-Z]/);
     return m ? m[0] : "#";
   }
 
   function sortedPlants(arr) {
-    // stable sort: order then name
     return [...arr].sort((a, b) => {
       const ao = (a.order ?? 999999);
       const bo = (b.order ?? 999999);
@@ -453,6 +450,14 @@
       return;
     }
     window.open(webUrl, "_blank");
+  }
+
+  // ✅ NEW: Open in Waze
+  function openWaze(p) {
+    const q = encodeURIComponent(buildQuery(p));
+    // Waze universal link (opens app if installed, otherwise browser)
+    const wazeUrl = `https://waze.com/ul?q=${q}&navigate=yes`;
+    window.open(wazeUrl, "_blank");
   }
 
   function attemptOpen(appUrl, webUrl) {
@@ -491,7 +496,6 @@
       azGrid.appendChild(btn);
     });
 
-    // default active (none)
     setActiveButton();
   }
 
@@ -510,7 +514,10 @@
     selectedLetterEl.textContent = activeLetter || "All";
     shownCountEl.textContent = String(sorted.length);
 
-    statsEl.innerHTML = `Tap A–Z • Total <b>${plants.length}</b> • Showing <b>${sorted.length}</b>`;
+    // (statsEl is not in your HTML now; keep this safe)
+    if (statsEl) {
+      statsEl.innerHTML = `Tap A–Z • Total <b>${plants.length}</b> • Showing <b>${sorted.length}</b>`;
+    }
 
     cardsEl.innerHTML = "";
     emptyEl.style.display = sorted.length ? "none" : "block";
@@ -530,13 +537,20 @@
       const actions = document.createElement("div");
       actions.className = "row-actions";
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "btn btn-primary";
-      btn.textContent = "Open in Google Maps";
-      btn.onclick = () => openDirections(p);
+      const btnG = document.createElement("button");
+      btnG.type = "button";
+      btnG.className = "btn btn-primary";
+      btnG.textContent = "Open in Google Maps";
+      btnG.onclick = () => openDirections(p);
 
-      actions.appendChild(btn);
+      const btnW = document.createElement("button");
+      btnW.type = "button";
+      btnW.className = "btn";
+      btnW.textContent = "Open in Waze";
+      btnW.onclick = () => openWaze(p);
+
+      actions.appendChild(btnG);
+      actions.appendChild(btnW);
 
       card.appendChild(name);
       card.appendChild(addr);
