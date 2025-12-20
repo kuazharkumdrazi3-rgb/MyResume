@@ -1,1 +1,825 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plant Visit Planner – Dark</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root {
+      --bg: #05070d;
+      --bg-card: #151a24;
+      --bg-card-soft: #1b2230;
+      --border-soft: #252b3a;
+      --accent: #59b5ff;
+      --accent-soft: rgba(89,181,255,0.15);
+      --text-main: #f5f7ff;
+      --text-muted: #9aa4c0;
+    }
+
+    /* Base */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151a24 0, #05070d 45%, #020308 100%);
+      color: var(--text-main);
+    }
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0.75rem;
+    }
+
+    h1 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* MAIN CARD */
+    .main-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      padding: 0.75rem;
+    }
+
+    /* Row inside main card */
+    .card-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: nowrap;           /* keep side-by-side on tablet */
+    }
+
+    /* Two panels (col-6) */
+    .card-panel {
+      flex: 0 0 50%;
+      max-width: 50%;
+      min-width: 0;
+      display: flex;
+    }
+
+    .card-inner {
+      background: var(--bg-card-soft);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      padding: 0.75rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 120px); /* nice fit for landscape tablet */
+    }
+
+    /* Text bits */
+    .card-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .subline {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .stats {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stats b {
+      color: var(--accent);
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .controls-left {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #0f131d;
+      padding: 0.25rem 0.7rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .map-buttons {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .btn-sm {
+      font-size: 0.75rem;
+      padding: 0.18rem 0.6rem;
+    }
+
+    /* LEFT LIST */
+    .list {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .stop-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.4rem;
+      margin-bottom: 0.15rem;
+      border-radius: 10px;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+
+    .stop-row:hover {
+      background: #202738;
+    }
+
+    .stop-row.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .stop-row.visited {
+      background: rgba(20, 80, 40, 0.7);
+    }
+
+    .stop-row.visited .company-name-main {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .stop-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #0d111c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .company-name {
+      font-size: 0.86rem;
+      line-height: 1.25;
+      flex: 1 1 auto;
+    }
+
+    .company-name-main {
+      display: block;
+    }
+
+    .company-distance {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .checkbox-wrap {
+      flex-shrink: 0;
+    }
+
+    .checkbox-wrap input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+    }
+
+    /* RIGHT MAP */
+    .map-caption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .map-caption b {
+      color: var(--accent);
+    }
+
+    .map-wrapper {
+      flex: 1 1 auto;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border-soft);
+    }
+
+    .map-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Scrollbar for Android/Chrome */
+    .list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .list::-webkit-scrollbar-thumb {
+      background: #343c4f;
+      border-radius: 3px;
+    }
+
+    /* Stack panels on narrow screens if needed */
+    @media (max-width: 960px) {
+      .card-row {
+        flex-wrap: wrap;
+      }
+      .card-panel {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+      .card-inner {
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Plant Visit Planner</h1>
+
+    <div class="main-card">
+      <div class="card-row">
+        <!-- LEFT: LIST -->
+        <div class="card-panel">
+          <div class="card-inner">
+            <div class="card-title">Route List</div>
+            <div class="subline">Tap a row to focus its location on the map. Tick when visited.</div>
+
+            <div class="controls">
+              <div class="controls-left">
+                <button id="clearVisited" class="btn">Clear visited</button>
+                <button id="sortByDistance" class="btn">Sort by distance</button>
+              </div>
+              <div class="stats" id="stats"></div>
+            </div>
+
+            <div class="list" id="plantList"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: MAP -->
+        <div class="card-panel">
+          <div class="card-inner">
+            <div class="card-header-row">
+              <div class="card-title">Map Preview</div>
+              <div class="map-buttons">
+                <button id="showMyLocation" class="btn btn-sm">Show my location</button>
+                <button id="openDirections" class="btn btn-sm">Directions</button>
+              </div>
+            </div>
+
+            <div class="map-caption">
+              Showing: <b id="currentCompanyLabel">Select a company on the left</b>
+            </div>
+
+            <div class="map-wrapper">
+              <iframe
+                id="mapFrame"
+                src="https://www.google.com/maps?q=Nilai%20Malaysia&output=embed"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- DATA: add more entries following the same pattern ---
+  const plants = [
+         { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Kawasan Perindustrian Nilai, Nilai, Negeri Sembilan" },
+    { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Nilai / Arab-Malaysian Industrial Park – Area Not Confirmed (Negeri Sembilan)" },
+    { id: "ouji_sekken", order: 3, name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", area: "Nilai Industrial Estate, Nilai, Negeri Sembilan" },
+    { id: "alps_electric", order: 4, name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", area: "Nilai Industrial Estate, Nilai, Negeri Sembilan" },
+    { id: "k_plastics", order: 5, name: "K-Plastics Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "pca_group", order: 6, name: "PCA Group Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "johnson_matthey", order: 7, name: "Johnson Matthey Sdn. Bhd.", area: "Arab-Malaysian Industrial Park, Nilai, Negeri Sembilan" },
+    { id: "meditech_gloves", order: 8, name: "Meditech Gloves Sdn. Bhd.", area: "Nilai / Enstek – Area Not Confirmed (NS)" },
+    { id: "future_plastic", order: 9, name: "Future Plastic Industries Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "jujutsu_industries", order: 10, name: "Jujutsu Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "polyplus_packages", order: 11, name: "Polyplus Packages Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "jebsen_jessen_packaging", order: 12, name: "Jebsen & Jessen Packaging Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "lti_industries", order: 13, name: "LTI Industries Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "harta_packaging", order: 14, name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", area: "Southern Selangor / near Nilai – Area Not Confirmed" },
+    { id: "skf_bearing", order: 15, name: "SKF Bearing Industries (M) Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
+    { id: "akzo_nobel_paints", order: 16, name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
+    { id: "mapei_nilai", order: 17, name: "Mapei Malaysia Nilai Plant", area: "Nilai Industrial Area, Nilai, Negeri Sembilan" },
+    { id: "poly_ab_ssp", order: 18, name: "Poly AB SSP", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "gf_one_chemicals", order: 19, name: "GF One Chemicals Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "dansoon_chemicals", order: 20, name: "Dansoon Chemicals Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "chuanplus_industries", order: 21, name: "Chuanplus Industries Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "av_manufacturing", order: 22, name: "AV Manufacturing Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "yec_chemical", order: 23, name: "YEC Chemical Compounds Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "vivasil_paints", order: 24, name: "Vivasil Paints ( M ) Sdn Bhd", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "dongnam", order: 25, name: "Dongnam Sdn. Bhd.", area: "Nilai – Area Not Confirmed (NS)" },
+    { id: "see_sen_chemical", order: 26, name: "See Sen Chemical Berhad", area: "Seremban / Nilai Corridor – Area Not Confirmed (NS)" },
+
+    // === SENDAYAN / SEREMBAN CLUSTER ===
+    { id: "cenviro", order: 27, name: "Cenviro Sdn Bhd", area: "Sendayan Integrated Waste Management Centre, Seremban, Negeri Sembilan" },
+    { id: "schmidt_clemens", order: 28, name: "Schmidt + Clemens (Asia) Sdn. Bhd.", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
+    { id: "jaewon_frontier", order: 29, name: "Jaewon Frontier (M) Sdn Bhd", area: "Sendayan, Seremban – Tech Valley Area" },
+    { id: "tecford_precision", order: 30, name: "Tecford Precision Sdn Bhd", area: "Sendayan – Area Not Confirmed (NS)" },
+    { id: "fibertex_personal_care", order: 31, name: "Fibertex Personal Care Sdn. Bhd.", area: "Nilai / Enstek – Area Not Confirmed (NS)" },
+    { id: "sugihara_grand", order: 32, name: "Sugihara Grand Industries (Sendayan Plant) Sdn Bhd", area: "Tech Valley, Sendayan, Seremban, Negeri Sembilan" },
+    { id: "bluetech_environmental", order: 33, name: "Bluetech Environmental Technology Sdn Bhd", area: "Enstek / Nilai – Area Not Confirmed (NS)" },
+    { id: "cbt_petroleum", order: 34, name: "CBT Petroleum Sdn Bhd", area: "Enstek / Nilai – Area Not Confirmed (NS)" },
+    { id: "goodmaid_chemicals", order: 35, name: "Goodmaid Chemicals Corporation Sdn Bhd", area: "Negeri Sembilan – Area Not Confirmed" },
+    { id: "ansell_seremban", order: 36, name: "Ansell Seremban Sdn Bhd", area: "Seremban Industrial Area, Negeri Sembilan" },
+    { id: "toyochem_specialty_seremban", order: 37, name: "Toyochem Specialty Chemicals Sdn Bhd", area: "Nilai / Seremban – Area Not Confirmed (NS)" },
+    { id: "careplus", order: 38, name: "Careplus (M) Sdn Bhd", area: "Negeri Sembilan (Rembau/Seremban area) – Area Not Confirmed" },
+    { id: "maytech_cleanroom", order: 39, name: "Maytech Cleanroom Manufacturing Sdn Bhd", area: "Negeri Sembilan (likely Nilai / Seremban) – Area Not Confirmed" },
+    { id: "intco_malaysia", order: 40, name: "Intco Malaysia Sdn Bhd", area: "NS / Selangor border – Area Not Confirmed" },
+
+    // === BANGI / KAJANG / HULU LANGAT CLUSTER ===
+    { id: "aica_malaysia", order: 41, name: "Aica Malaysia Sdn. Bhd.", area: "Klang Valley – Area Not Confirmed (Selangor)" },
+    { id: "sumitomo_enviro_agro", order: 42, name: "Sumitomo Chemical Enviro-Agro Asia Pacific Sdn. Bhd.", area: "Klang Valley – Area Not Confirmed (Selangor)" },
+    { id: "bostik_malaysia", order: 43, name: "Bostik Malaysia Sdn Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
+    { id: "aegis_materials", order: 44, name: "Aegis Materials (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "sun_rubber", order: 45, name: "Sun Rubber Industry Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "conquest_chemical", order: 46, name: "Conquest Chemical Supply Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "ogosin_chemical", order: 47, name: "Ogosin Chemical Industries Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "allied_specialty", order: 48, name: "Allied Specialty Compounds", area: "Selangor – Area Not Confirmed" },
+    { id: "sanyu_jushi", order: 49, name: "Sanyu Jushi Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "gb_industries", order: 50, name: "G.B. Industries Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "growchem_selangor", order: 51, name: "Growchem Sdn Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
+    { id: "cp_chemie", order: 52, name: "Cp Chemie Resources (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "ccp_century", order: 53, name: "Ccp Century Chemical Paints & Hardware Trading S.B", area: "Selangor – Area Not Confirmed" },
+    { id: "m_xell", order: 54, name: "M-Xell Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "goldstab_additives", order: 55, name: "Goldstab Additives Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "zhe_ma_advance", order: 56, name: "Zhe Ma Advance Material Technology Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "dia_chemical", order: 57, name: "Dia-Chemical Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "asachem", order: 58, name: "Asachem (M) Sdn. Bhd.", area: "Kajang / Hulu Langat, Selangor" },
+    { id: "inventec_performance", order: 59, name: "Inventec Performance Chemicals South East Asia Sdn Bhd", area: "Selangor – Area Not Confirmed (Hulu Langat / Bangi)" },
+    { id: "bt_chemicals", order: 60, name: "BT Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "pro_chem_industrial", order: 61, name: "Pro-Chem Industrial Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "helios_chemicals", order: 62, name: "Helios Chemicals Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "cyto_tech", order: 63, name: "Cyto Tech Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "hexachem", order: 64, name: "Hexachem (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "tech_lab", order: 65, name: "Tech-Lab Manufacturing Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "qemrich", order: 66, name: "Qemrich Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "kraiburg_tpe", order: 67, name: "KRAIBURG TPE Technology (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "leivy_laboratories", order: 68, name: "Leivy Laboratories Sdn. Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "guppy_plastic", order: 69, name: "Guppy Plastic Industries Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "miracon", order: 70, name: "Miracon (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "imec_hygiene", order: 71, name: "iMEC Hygiene Sdn. Bhd.", area: "Bangi / Kajang, Selangor – Area Not Confirmed" },
+    { id: "ysp_industries", order: 72, name: "Y.S.P Industries (M) Sdn Bhd", area: "Bandar Baru Bangi, Hulu Langat, Selangor" },
+    { id: "duopharma_bangi", order: 73, name: "Duopharma Manufacturing (Bangi) Sdn Bhd", area: "Bangi Industrial Area, Selangor" },
+    { id: "etika_beverages", order: 74, name: "Etika Beverages Sdn Bhd", area: "Bangi / Nilai Corridor – Area Not Confirmed" },
+    { id: "texchem_life_science_bangi", order: 75, name: "Texchem Life Science Sdn Bhd", area: "Bangi, Selangor" },
+    { id: "alsey_kimia", order: 76, name: "Alsey Kimia (M) Sdn Bhd", area: "Hulu Langat / Bangi – Area Not Confirmed" },
+    { id: "tech_latex_scientific", order: 77, name: "Tech-Latex Scientific Sdn. Bhd.", area: "Selangor (Bangi / Hulu Langat) – Area Not Confirmed" },
+    { id: "yakuhin_industries", order: 78, name: "Yakuhin Industries (M) Sdn Bhd", area: "Selangor (Bangi / Kajang) – Area Not Confirmed" },
+    { id: "texchem_life_sciences", order: 79, name: "Texchem Life Sciences Sdn. Bhd.", area: "Bangi, Selangor" },
+
+    // === SHAH ALAM / KLANG VALLEY CORE CLUSTER ===
+    { id: "denso_malaysia", order: 80, name: "Denso (M) Sdn Bhd", area: "Selangor (Shah Alam) – Area Not Confirmed" },
+    { id: "ccm_polymers", order: 81, name: "Ccm Polymers Sdn Bhd", area: "Shah Alam, Selangor – Area Not Confirmed" },
+    { id: "compounding_colouring", order: 82, name: "Compounding & Colouring Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "stenta_films", order: 83, name: "Stenta Films (M) Sdn Bhd", area: "Shah Alam, Selangor" },
+    { id: "tesa_tapes", order: 84, name: "Tesa Tapes (M) Sdn Bhd", area: "Shah Alam, Selangor" },
+    { id: "sapura_industrial", order: 85, name: "Sapura Industrial Berhad", area: "Shah Alam, Selangor" },
+    { id: "pharmaniaga_manufacturing", order: 86, name: "Pharmaniaga Manufacturing Bhd", area: "Klang Valley – Area Not Confirmed (Selangor)" },
+    { id: "mlm_packaging", order: 87, name: "Mlm Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "i_chem_solution", order: 88, name: "i-Chem Solution Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
+    { id: "chembond_chemicals", order: 89, name: "Chembond Chemicals(Malaysia) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "hb_laboratories", order: 90, name: "HB Laboratories Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "ferrovic_corporation", order: 91, name: "Ferrovic Corporation (M) Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "wisma_albe_advance", order: 92, name: "Wisma Albe Advance", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "pavilion_coating", order: 93, name: "Pavilion Coating (M) Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "techbond_manufacturing", order: 94, name: "Techbond Manufacturing Sdn Bhd", area: "Shah Alam, Selangor – Area Not Confirmed" },
+    { id: "wasco_thermal", order: 95, name: "Wasco Thermal Sdn. Bhd", area: "Klang / Shah Alam, Selangor" },
+    { id: "hicom_diecastings", order: 96, name: "Hicom Diecastings Sdn Bhd", area: "Pekan Hicom, Shah Alam, Selangor" },
+    { id: "mettube", order: 97, name: "Mettube Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "afcona_chemicals", order: 98, name: "Afcona Chemicals Sdn Bhd", area: "Shah Alam, Selangor" },
+    { id: "apex_packaging", order: 99, name: "Apex Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "shintako", order: 100, name: "Shintako (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "kaizen_packaging", order: 101, name: "Kaizen Packaging Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "nichia_malaysia", order: 102, name: "Nichia (Malaysia) Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
+    { id: "igle_coatings", order: 103, name: "Igl Coatings Headquarters", area: "Shah Alam / Subang – Area Not Confirmed" },
+    { id: "jj_asia_manufacturing", order: 104, name: "Jj Asia Manufacturing (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "mre_group", order: 105, name: "Mre Group Of Companies", area: "Selangor – Area Not Confirmed" },
+    { id: "suka_chemicals", order: 106, name: "Suka Chemicals (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "fraser_neave", order: 107, name: "Fraser & Neave Holdings Bhd", area: "Shah Alam, Selangor" },
+    { id: "malaysian_die_casting", order: 108, name: "Malaysian Die-Casting Industries Sdn. Bhd.", area: "Shah Alam, Selangor" },
+    { id: "toyochem_specialty_selangor", order: 109, name: "Toyochem Specialty Chemical Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "globechem", order: 110, name: "Globechem Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "finn_chemicals", order: 111, name: "Finn Chemicals Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
+    { id: "japan_chemical", order: 112, name: "Japan Chemical (M) Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
+    { id: "gme_chemicals", order: 113, name: "Gme Chemicals (M) Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "malayan_adhesives", order: 114, name: "Malayan Adhesives And Chemicals Sdn Bhd", area: "Shah Alam, Selangor" },
+    { id: "krischem", order: 115, name: "Krischem Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
+    { id: "arobenz_chemicals", order: 116, name: "Arobenz Chemicals Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
+    { id: "ken_rich_chemical", order: 117, name: "Ken-Rich Chemical Sdn Bhd.", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "dpi_chemicals", order: 118, name: "Dpi Chemicals Sdn Bhd", area: "Shah Alam" },
+    { id: "archem_malaysia", order: 119, name: "Archem Malaysia Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
+    { id: "gladron_chemicals", order: 120, name: "Gladron Chemicals Sdn. Bhd.", area: "Shah Alam – Area Not Confirmed" },
+    { id: "clariant_malaysia", order: 121, name: "Clariant (Malaysia) Sdn Bhd", area: "Shah Alam, Selangor" },
+    { id: "zextron_chemical", order: 122, name: "Zextron Chemical Industries (M) Sdn Bhd", area: "Shah Alam – Area Not Confirmed" },
+    { id: "fujikura_chemicals", order: 123, name: "Fujikura Chemicals Sdn Bhd", area: "Shah Alam / Subang – Area Not Confirmed" },
+    { id: "jintai", order: 124, name: "Jintai (M) Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "tmk_chemical_banting", order: 125, name: "Tmk Chemical Banting Sdn Bhd", area: "Banting, Kuala Langat, Selangor" },
+    { id: "kc_chemicals", order: 126, name: "KC Chemicals (M) Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "sunenergy_chemical", order: 127, name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", area: "Kuala Langat, Selangor – Area Not Confirmed" },
+    { id: "chemical_company_malaysia", order: 128, name: "Chemical Company Of Malaysia Berhad", area: "Shah Alam / Klang, Selangor" },
+
+    // === KLANG / PORT KLANG / PULAU INDAH / TELOK GONG COASTAL BELT ===
+    { id: "olen_port_klang", order: 129, name: "Olen Port Klang Sdn Bhd", area: "Port Klang, Selangor" },
+    { id: "mey_chern_chemical", order: 130, name: "Mey Chern Chemical Sdn Bhd", area: "Port Klang / Klang – Area Not Confirmed" },
+    { id: "acme_chemicals", order: 131, name: "Acme Chemicals (M) Sdn Bhd", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "nylex_specialty", order: 132, name: "Nylex Specialty Chemicals Sdn. Bhd.", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "nexuschem_engineering", order: 133, name: "Nexuschem Engineering Sdn Bhd", area: "Port Klang / Klang – Area Not Confirmed" },
+    { id: "govi_chemicals", order: 134, name: "GOVI Chemicals Sdn. Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "mitsui_polyurethanes", order: 135, name: "Mitsui Chemicals Polyurethanes Malaysia Sdn. Bhd.", area: "Shah Alam / Klang – Area Not Confirmed" },
+    { id: "lyondellbasell_polymers", order: 136, name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "zagro_chemicals", order: 137, name: "Zagro Chemicals Sdn. Bhd.", area: "Selangor – Area Not Confirmed" },
+    { id: "southern_acids", order: 138, name: "Southern Acids Industries Sdn. Bhd.", area: "Klang / Shah Alam, Selangor" },
+    { id: "kong_long_huat_telokgong", order: 139, name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", area: "Telok Gong, Klang, Selangor" },
+    { id: "perusahaan_kimia_gemilang", order: 140, name: "Perusahaan Kimia Gemilang Sdn. Bhd.", area: "Telok Gong, Klang, Selangor" },
+    { id: "formosa_prosonic", order: 141, name: "Formosa Prosonic Chemicals Sdn Bhd", area: "Klang coastal belt, Selangor" },
+    { id: "w_clay_industries", order: 142, name: "The W Clay Industries Sdn. Bhd.", area: "Klang coastal belt, Selangor" },
+    { id: "synergy_chemicals", order: 143, name: "Synergy Chemicals Sdn Bhd", area: "Port Klang / Telok Gong, Selangor – Area Not Confirmed" },
+    { id: "ksc_chemical", order: 144, name: "Ksc Chemical (Malaysia) Sdn. Bhd.", area: "Telok Gong / Port Klang, Selangor – Area Not Confirmed" },
+    { id: "tg_chemical", order: 145, name: "Tg Chemical (M) Sdn Bhd", area: "Telok Gong / Port Klang, Selangor – Area Not Confirmed" },
+    { id: "mah_sing_plastics", order: 146, name: "Mah Sing Plastics Industries Sdn Bhd", area: "Selangor (Klang Valley) – Area Not Confirmed" },
+    { id: "growchem_pulau_indah", order: 147, name: "Growchem Sdn Bhd (Pulau Indah Plant)", area: "Pulau Indah, Port Klang, Selangor" },
+    { id: "yara_international", order: 148, name: "Yara International (M)Sdn Bhd - Industrial", area: "Pulau Indah, Port Klang, Selangor" },
+    { id: "mewah_oils", order: 149, name: "Mewah Oils Sdn Bhd", area: "Port Klang, Selangor" },
+    { id: "mcs_scientex_pulau_indah", order: 150, name: "Mitsui Chemicals Scientex Sdn. Bhd.", area: "Taman Perindustrian Pulau Indah, Pelabuhan Klang, Selangor" },
+    { id: "hextar_chemicals", order: 151, name: "Hextar Chemicals Sdn Bhd", area: "Klang / Shah Alam – Area Not Confirmed" },
+    { id: "ascendchem_pulau_indah", order: 152, name: "Ascendchem Sdn Bhd Pulau Indah", area: "Pulau Indah, Klang, Selangor" },
+    { id: "topmark_petroleum", order: 153, name: "Topmark Petroleum Products Sdn. Bhd.", area: "Pulau Indah, Klang, Selangor – Area Not Confirmed" },
+    { id: "cargill_palm_products", order: 154, name: "Cargill Palm Products Sdn Bhd", area: "Port Klang, Selangor – Area Not Confirmed" },
+    { id: "chevron_pulau_indah", order: 155, name: "Chevron Pulau Indah Terminal", area: "Pulau Indah, Klang, Selangor" },
+    { id: "concord_chemicals_pelabuhan", order: 156, name: "Concord Chemicals Corporation Sdn. Bhd., Pelabuhan Klang", area: "Pelabuhan Klang, Selangor" },
+    { id: "adhes_packaging", order: 157, name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", area: "Klang Valley – Area Not Confirmed" },
+    { id: "kl_kepong_oleomas", order: 158, name: "Kl-Kepong Oleomas Sdn. Bhd.", area: "Pulau Indah, Klang, Selangor" },
+    { id: "gamalux_factory", order: 159, name: "Gamalux Sdn Bhd (Factory)", area: "Pulau Indah, Klang, Selangor" },
+    { id: "ancom_nylex_terminals", order: 160, name: "Ancom Nylex Terminals Sdn Bhd", area: "Pulau Indah / Port Klang, Selangor" },
+    { id: "ecogreen_monomer", order: 161, name: "Ecogreen Monomer Sdn Bhd", area: "Klang / Port Area – Area Not Confirmed (Selangor)" },
+    { id: "plantic_lab", order: 162, name: "Plantic Lab Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+    { id: "mildef_international", order: 163, name: "Mildef International Technologies Sdn Bhd", area: "Selangor – Area Not Confirmed" },
+
+    // === LAST FEW + MELAKA CLUSTER ===
+    { id: "yara_note2", order: 164, name: "Yara International (M)Sdn Bhd - Industrial (duplicate ref)", area: "Pulau Indah, Port Klang, Selangor" },
+    { id: "air_liquide_melaka", order: 165, name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area: "Melaka" },
+    { id: "dh_hygience_melaka", order: 166, name: "Dh Hygience (Melaka) Sdn Bhd", area: "Melaka" }
+  ];
+
+  plants.sort((a, b) => a.order - b.order);
+
+  const VISITED_KEY = "plant_visit_dark_v1";
+
+  function loadVisited() {
+    try {
+      const s = localStorage.getItem(VISITED_KEY);
+      return s ? JSON.parse(s) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveVisited(v) {
+    try {
+      localStorage.setItem(VISITED_KEY, JSON.stringify(v));
+    } catch {}
+  }
+
+  const visited  = loadVisited();
+  const listEl   = document.getElementById("plantList");
+  const statsEl  = document.getElementById("stats");
+  const mapFrame = document.getElementById("mapFrame");
+  const labelEl  = document.getElementById("currentCompanyLabel");
+
+  let selectedId = null;
+  let userCoords = null; // will hold GPS when available
+
+  // --- APPROX COORDS BY AREA CLUSTER ---
+  function getApproxCoordsForPlant(plant) {
+    const area = (plant.area || "").toLowerCase();
+
+    // Order matters: more specific first
+    if (area.includes("melaka")) {
+      return { lat: 2.1896, lng: 102.2501 };
+    }
+    if (area.includes("pulau indah") || area.includes("pelabuhan klang") || area.includes("port klang") || area.includes("telok gong")) {
+      return { lat: 2.9440, lng: 101.3190 }; // Port Klang / Pulau Indah region
+    }
+    if (area.includes("klang")) {
+      return { lat: 3.0436, lng: 101.4460 };
+    }
+    if (area.includes("shah alam") || area.includes("subang")) {
+      return { lat: 3.0738, lng: 101.5183 };
+    }
+    if (area.includes("bangi") || area.includes("kajang") || area.includes("hulu langat")) {
+      return { lat: 2.9550, lng: 101.7600 };
+    }
+    if (area.includes("sendayan") || area.includes("seremban") || area.includes("rembau")) {
+      return { lat: 2.7189, lng: 101.9183 };
+    }
+    if (area.includes("nilai") || area.includes("enstek")) {
+      return { lat: 2.8033, lng: 101.7972 };
+    }
+    return null;
+  }
+
+  function toRad(deg) {
+    return deg * Math.PI / 180;
+  }
+
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function computeDistancesFrom(origin) {
+    plants.forEach(p => {
+      if (visited[p.id]) {
+        p._distanceKm = null;
+        return;
+      }
+      const c = getApproxCoordsForPlant(p);
+      if (!c) {
+        p._distanceKm = null;
+        return;
+      }
+      p._distanceKm = haversineKm(origin.lat, origin.lng, c.lat, c.lng);
+    });
+  }
+
+  function sortPlantsByDistance() {
+    plants.sort((a, b) => {
+      const aVisited = !!visited[a.id];
+      const bVisited = !!visited[b.id];
+      if (aVisited !== bVisited) {
+        // unchecked (false) first, then visited (true)
+        return aVisited - bVisited;
+      }
+
+      const da = typeof a._distanceKm === "number" ? a._distanceKm : null;
+      const db = typeof b._distanceKm === "number" ? b._distanceKm : null;
+
+      const aHas = da !== null;
+      const bHas = db !== null;
+
+      if (aHas && bHas) return da - db;
+      if (aHas) return -1;
+      if (bHas) return 1;
+
+      // fallback: original order
+      return a.order - b.order;
+    });
+  }
+
+  function buildList() {
+    listEl.innerHTML = "";
+    plants.forEach(plant => {
+      const row = document.createElement("div");
+      row.className = "stop-row";
+      row.dataset.id = plant.id;
+
+      if (visited[plant.id]) row.classList.add("visited");
+      if (plant.id === selectedId) row.classList.add("selected");
+
+      const num = document.createElement("div");
+      num.className = "stop-number";
+      num.textContent = plant.order;
+
+      const name = document.createElement("div");
+      name.className = "company-name";
+
+      const main = document.createElement("span");
+      main.className = "company-name-main";
+      main.textContent = plant.name;
+      name.appendChild(main);
+
+      if (typeof plant._distanceKm === "number") {
+        const distEl = document.createElement("span");
+        distEl.className = "company-distance";
+        distEl.textContent = plant._distanceKm.toFixed(1) + " km from you";
+        name.appendChild(distEl);
+      }
+
+      const cbWrap = document.createElement("div");
+      cbWrap.className = "checkbox-wrap";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!visited[plant.id];
+
+      cb.addEventListener("click", e => {
+        e.stopPropagation();
+        visited[plant.id] = cb.checked;
+        saveVisited(visited);
+        updateStats();
+        buildList();
+      });
+
+      cbWrap.appendChild(cb);
+
+      row.appendChild(num);
+      row.appendChild(name);
+      row.appendChild(cbWrap);
+
+      row.addEventListener("click", () => {
+        selectPlant(plant);
+      });
+
+      listEl.appendChild(row);
+    });
+  }
+
+  function selectPlant(plant) {
+    selectedId = plant.id;
+    const q = encodeURIComponent(plant.name + " " + plant.area + " Malaysia");
+    mapFrame.src = "https://www.google.com/maps?q=" + q + "&output=embed";
+    labelEl.textContent = plant.order + ". " + plant.name;
+    buildList();
+  }
+
+  function updateStats() {
+    const total = plants.length;
+    const done  = plants.filter(p => visited[p.id]).length;
+    statsEl.innerHTML = `<b>${done}</b> of <b>${total}</b> stops visited`;
+  }
+
+  // --- Geolocation & Directions ---
+
+  function showMyLocationOnMap() {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported on this device.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userCoords = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+        const q = encodeURIComponent(userCoords.lat + "," + userCoords.lng);
+        mapFrame.src = "https://www.google.com/maps?q=" + q + "&output=embed";
+        labelEl.textContent = "Your current location";
+      },
+      (err) => {
+        alert("Could not get location: " + err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
+  }
+
+  function openDirectionsFromHere() {
+    if (!selectedId) {
+      alert("Please select a company on the left first.");
+      return;
+    }
+
+    const plant = plants.find(p => p.id === selectedId);
+    if (!plant) return;
+
+    const destination = encodeURIComponent(plant.name + " " + plant.area);
+
+    // If we can get GPS, use it as origin; otherwise use "Current Location"
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          const url =
+            "https://www.google.com/maps/dir/?api=1" +
+            "&origin=" + encodeURIComponent(lat + "," + lng) +
+            "&destination=" + destination +
+            "&travelmode=driving";
+
+          window.open(url, "_blank");
+        },
+        () => {
+          const url =
+            "https://www.google.com/maps/dir/?api=1" +
+            "&origin=Current+Location" +
+            "&destination=" + destination +
+            "&travelmode=driving";
+
+          window.open(url, "_blank");
+        }
+      );
+    } else {
+      const url =
+        "https://www.google.com/maps/dir/?api=1" +
+        "&origin=Current+Location" +
+        "&destination=" + destination +
+        "&travelmode=driving";
+
+      window.open(url, "_blank");
+    }
+  }
+
+  function sortUncheckedByDistance() {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported on this device.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        computeDistancesFrom(origin);
+        sortPlantsByDistance();
+        buildList();
+        updateStats();
+      },
+      (err) => {
+        alert("Could not get location: " + err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      }
+    );
+  }
+
+  // Button hooks
+  document.getElementById("clearVisited").addEventListener("click", () => {
+    if (!confirm("Clear all visited ticks?")) return;
+    for (const key in visited) visited[key] = false;
+    saveVisited(visited);
+    updateStats();
+    buildList();
+  });
+
+  document.getElementById("showMyLocation")
+    .addEventListener("click", showMyLocationOnMap);
+
+  document.getElementById("openDirections")
+    .addEventListener("click", openDirectionsFromHere);
+
+  document.getElementById("sortByDistance")
+    .addEventListener("click", sortUncheckedByDistance);
+
+  // Initial render
+  updateStats();
+  buildList();
+  if (plants[0]) selectPlant(plants[0]);
+</script>
+</body>
+</html>
