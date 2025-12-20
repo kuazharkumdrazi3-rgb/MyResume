@@ -6,131 +6,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <style>
-    :root {
-      --bg: #05070d;
-      --bg-card: #151a24;
-      --bg-card-soft: #1b2230;
-      --border-soft: #252b3a;
-      --accent: #59b5ff;
-      --accent-soft: rgba(89,181,255,0.15);
-      --text-main: #f5f7ff;
-      --text-muted: #9aa4c0;
-      --success: #2ecc71;
+    :root{
+      --bg:#05070d; --bg-card:#151a24; --bg-card-soft:#1b2230;
+      --border-soft:#252b3a; --accent:#59b5ff; --accent-soft:rgba(89,181,255,0.15);
+      --text-main:#f5f7ff; --text-muted:#9aa4c0; --success:#2ecc71;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top,#151a24 0,#05070d 45%,#020308 100%);
+      color:var(--text-main);
+    }
+    .page{max-width:1400px;margin:0 auto;padding:.75rem}
+    h1{
+      margin:0 0 .75rem;
+      font-size:1.1rem; letter-spacing:.04em; text-transform:uppercase;
+      color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;
+      gap:.75rem; flex-wrap:wrap;
     }
 
-    * { box-sizing: border-box; }
+    .main-card{
+      background:var(--bg-card);
+      border-radius:16px;
+      border:1px solid var(--border-soft);
+      box-shadow:0 16px 40px rgba(0,0,0,.5);
+      padding:.75rem;
+    }
+    .card-inner{
+      background:var(--bg-card-soft);
+      border-radius:12px;
+      border:1px solid var(--border-soft);
+      padding:.75rem;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      height:calc(100vh - 120px);
+    }
+    .card-title{
+      font-size:.9rem; text-transform:uppercase; letter-spacing:.08em;
+      color:var(--text-muted); margin-bottom:.35rem;
+    }
+    .subline{font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem}
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #151a24 0, #05070d 45%, #020308 100%);
-      color: var(--text-main);
+    .controls{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:.5rem; margin-bottom:.55rem; flex-wrap:wrap;
+    }
+    .controls-left{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+
+    .btn{
+      border-radius:999px;
+      border:1px solid var(--border-soft);
+      background:#0f131d;
+      padding:.25rem .7rem;
+      color:var(--text-muted);
+      font-size:.78rem;
+      cursor:pointer;
+      transition:all .2s;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      white-space:nowrap;
+    }
+    .btn:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-primary{border-color:var(--accent);color:var(--accent);background:rgba(89,181,255,.05)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+
+    .stats{font-size:.8rem;color:var(--text-muted)}
+    .stats b{color:var(--accent)}
+
+    .list{flex:1 1 auto;overflow-y:auto;padding-right:.25rem}
+
+    .stop-row{
+      display:flex; align-items:flex-start; gap:.55rem;
+      padding:.55rem .45rem; margin-bottom:.2rem;
+      border-radius:12px; cursor:pointer;
+      border:1px solid transparent; transition:all .15s;
+    }
+    .stop-row:hover{background:#202738}
+    .stop-row.selected{background:var(--accent-soft);border-color:var(--accent);transform:translateY(-1px)}
+    .stop-row.visited{background:rgba(20,80,40,.35);opacity:.8}
+    .stop-row.visited .company-name-main{ text-decoration:line-through; color:var(--text-muted); }
+
+    .stop-number{
+      width:30px;height:30px;border-radius:50%;background:#0d111c;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;color:var(--accent);flex-shrink:0;margin-top:.1rem;
     }
 
-    .page { max-width: 1400px; margin: 0 auto; padding: 0.75rem; }
+    .company-block{flex:1 1 auto; min-width: 240px;}
+    .company-name{font-size:.88rem;line-height:1.25;}
+    .company-name-main{display:block;font-weight:650}
+    .company-area{display:block;margin-top:.2rem;font-size:.75rem;color:var(--text-muted);line-height:1.35}
+    .row-actions{margin-top:.45rem;display:flex;gap:.35rem;flex-wrap:wrap}
 
-    h1 {
-      margin: 0 0 0.75rem;
-      font-size: 1.1rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .checkbox-wrap{flex-shrink:0;margin-top:.15rem}
+    .checkbox-wrap input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
 
-    /* MAIN CARD */
-    .main-card {
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-      padding: 0.75rem;
-    }
+    .list::-webkit-scrollbar{width:6px}
+    .list::-webkit-scrollbar-track{background:transparent}
+    .list::-webkit-scrollbar-thumb{background:#343c4f;border-radius:3px}
 
-    .card-row { display: flex; gap: 0.75rem; flex-wrap: nowrap; }
-    .card-panel { flex: 0 0 50%; max-width: 50%; display: flex; }
-    .card-inner {
-      background: var(--bg-card-soft);
-      border-radius: 12px;
-      border: 1px solid var(--border-soft);
-      padding: 0.75rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 120px);
-    }
-
-    .card-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.35rem; }
-    .subline { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .stats { font-size: 0.8rem; color: var(--text-muted); }
-    .stats b { color: var(--accent); }
-
-    /* CONTROLS */
-    .controls { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
-    .controls-left { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
-
-    .btn {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: #0f131d;
-      padding: 0.25rem 0.7rem;
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-primary { border-color: var(--accent); color: var(--accent); background: rgba(89,181,255,0.05); }
-
-    .gps-status { font-size: 0.7rem; margin-left: 5px; color: var(--text-muted); }
-    .gps-active { color: var(--success); }
-
-    .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
-    .map-buttons { display: flex; gap: 0.35rem; }
-    .btn-sm { font-size: 0.75rem; padding: 0.18rem 0.6rem; }
-
-    /* LIST */
-    .list { flex: 1 1 auto; overflow-y: auto; padding-right: 0.25rem; }
-    .stop-row {
-      display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.4rem; margin-bottom: 0.15rem;
-      border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
-    }
-    .stop-row:hover { background: #202738; }
-    .stop-row.selected { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
-    .stop-row.visited { background: rgba(20, 80, 40, 0.4); opacity: 0.7; }
-    .stop-row.visited .company-name-main { text-decoration: line-through; color: var(--text-muted); }
-
-    .stop-number {
-      width: 30px; height: 30px; border-radius: 50%; background: #0d111c;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; color: var(--accent); flex-shrink: 0;
-    }
-
-    .company-name { font-size: 0.86rem; line-height: 1.25; flex: 1 1 auto; }
-    .company-name-main { display: block; }
-    .company-distance { display: block; font-size: 0.72rem; color: #59b5ff; margin-top: 2px; font-weight: 600; }
-    .company-coords { font-size: 0.65rem; color: #555; font-family: monospace; }
-
-    .checkbox-wrap { flex-shrink: 0; }
-    .checkbox-wrap input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-
-    /* MAP */
-    .map-caption { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem; }
-    .map-caption b { color: var(--accent); }
-    .map-wrapper { flex: 1 1 auto; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid var(--border-soft); position: relative; }
-    .map-wrapper iframe { width: 100%; height: 100%; border: 0; }
-
-    /* SCROLLBAR */
-    .list::-webkit-scrollbar { width: 6px; }
-    .list::-webkit-scrollbar-track { background: transparent; }
-    .list::-webkit-scrollbar-thumb { background: #343c4f; border-radius: 3px; }
-
-    @media (max-width: 960px) {
-      .card-row { flex-wrap: wrap; }
-      .card-panel { flex: 0 0 100%; max-width: 100%; }
-      .card-inner { height: 60vh; }
+    @media (max-width: 960px){
+      .card-inner{height:75vh}
     }
   </style>
 </head>
@@ -138,394 +119,178 @@
   <div class="page">
     <h1>
       Plant Visit Planner
-      <span id="gpsIndicator" class="gps-status">GPS: Not Saved</span>
+      <span class="stats" id="stats"></span>
     </h1>
 
     <div class="main-card">
-      <div class="card-row">
-        <div class="card-panel">
-          <div class="card-inner">
-            <div class="card-title">Route List</div>
-            <div class="subline">1. Click <b>Refresh GPS</b>. 2. Click <b>Sort by Distance</b>.</div>
+      <div class="card-inner">
+        <div class="card-title">Company List</div>
+        <div class="subline">Tap a company to highlight it. Use the button under it to open Google Maps for directions (Google Maps will use your current location).</div>
 
-            <div class="controls">
-              <div class="controls-left">
-                <button id="btnRefreshGPS" class="btn btn-primary">Refresh GPS</button>
-                <button id="sortByDistance" class="btn">Sort by Distance</button>
-                <button id="clearVisited" class="btn">Reset</button>
-              </div>
-              <div class="stats" id="stats"></div>
-            </div>
-
-            <div class="list" id="plantList"></div>
+        <div class="controls">
+          <div class="controls-left">
+            <button id="clearVisited" class="btn">Reset Visited</button>
           </div>
+          <div class="stats" id="hint"></div>
         </div>
 
-        <div class="card-panel">
-          <div class="card-inner">
-            <div class="card-header-row">
-              <div class="card-title">Map Preview</div>
-              <div class="map-buttons">
-                <button id="openDirections" class="btn btn-sm">Google Maps App</button>
-              </div>
-            </div>
-
-            <div class="map-caption">
-              Target: <b id="currentCompanyLabel">Select a company</b>
-            </div>
-
-            <div class="map-wrapper">
-              <iframe
-                id="mapFrame"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
-              </iframe>
-            </div>
-          </div>
-        </div>
+        <div class="list" id="plantList"></div>
       </div>
     </div>
   </div>
 
 <script>
-  // --- DATA POPULATED FROM PREVIOUS REQUEST ---
+  // --- DATA (NO LAT/LNG USED) ---
   const plants = [
-    { id: "aureumaex", name: "Aureumaex Precision Plastics (M) Sdn Bhd", lat: 2.8258, lng: 101.8105 },
-    { id: "ichikoh", name: "Ichikoh (M) Sdn. Bhd.", lat: 2.8214, lng: 101.8083 },
-    { id: "ouji_sekken", name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", lat: 2.8350, lng: 101.8150 },
-    { id: "alps_electric", name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", lat: 2.8228, lng: 101.8075 },
-    { id: "k_plastics", name: "K-Plastics Industries Sdn Bhd", lat: 2.8200, lng: 101.8100 },
-    { id: "pca_group", name: "PCA Group Sdn Bhd", lat: 2.8310, lng: 101.8185 },
-    { id: "johnson_matthey", name: "Johnson Matthey Sdn. Bhd.", lat: 2.8125, lng: 101.7925 },
-    { id: "meditech_gloves", name: "Meditech Gloves Sdn. Bhd.", lat: 2.7680, lng: 101.7650 },
-    { id: "future_plastic", name: "Future Plastic Industries Sdn. Bhd.", lat: 2.8550, lng: 101.7950 },
-    { id: "jujutsu_industries", name: "Jujutsu Industries Sdn Bhd", lat: 2.8330, lng: 101.8160 },
-    { id: "polyplus_packages", name: "Polyplus Packages Sdn. Bhd.", lat: 2.8250, lng: 101.8120 },
-    { id: "jebsen_jessen", name: "Jebsen & Jessen Packaging Sdn Bhd", lat: 2.8340, lng: 101.8170 },
-    { id: "lti_industries", name: "LTI Industries Sdn Bhd", lat: 2.8240, lng: 101.8110 },
-    { id: "harta_packaging", name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", lat: 2.8400, lng: 101.8200 },
-    { id: "skf_bearing", name: "SKF Bearing Industries (M) Sdn Bhd", lat: 2.8265, lng: 101.8135 },
-    { id: "akzo_nobel", name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", lat: 2.8300, lng: 101.8150 },
-    { id: "mapei_nilai", name: "Mapei Malaysia Nilai Plant", lat: 2.8520, lng: 101.7980 },
-    { id: "gf_one", name: "GF One Chemicals Sdn. Bhd.", lat: 2.8500, lng: 101.7950 },
-    { id: "dansoon", name: "Dansoon Chemicals Sdn. Bhd.", lat: 2.8480, lng: 101.7960 },
-    { id: "chuanplus", name: "Chuanplus Industries Sdn. Bhd.", lat: 2.8530, lng: 101.7970 },
-    { id: "av_manufacturing", name: "AV Manufacturing Sdn. Bhd.", lat: 2.8510, lng: 101.7990 },
-    { id: "yec_chemical", name: "YEC Chemical Compounds Sdn Bhd", lat: 2.8500, lng: 101.7980 },
-    { id: "vivasil_paints", name: "Vivasil Paints ( M ) Sdn Bhd", lat: 2.6800, lng: 101.9500 },
-    { id: "dongnam", name: "Dongnam Sdn. Bhd.", lat: 2.8230, lng: 101.8080 },
-    { id: "see_sen", name: "See Sen Chemical Berhad", lat: 2.8280, lng: 101.8140 },
-    { id: "cenviro", name: "Cenviro Sdn Bhd", lat: 2.7500, lng: 101.8500 },
-    { id: "schmidt_clemens", name: "Schmidt + Clemens (Asia) Sdn. Bhd.", lat: 2.7650, lng: 101.8900 },
-    { id: "jaewon_frontier", name: "Jaewon Frontier (M) Sdn Bhd", lat: 2.8320, lng: 101.8165 },
-    { id: "tecford_precision", name: "Tecford Precision Sdn Bhd", lat: 2.8250, lng: 101.8125 },
-    { id: "fibertex", name: "Fibertex Personal Care Sdn. Bhd.", lat: 2.8350, lng: 101.8180 },
-    { id: "sugihara_grand", name: "Sugihara Grand Industries (Sendayan Plant)", lat: 2.6680, lng: 101.8850 },
-    { id: "bluetech_env", name: "Bluetech Environmental Technology Sdn Bhd", lat: 2.6950, lng: 101.9250 },
-    { id: "cbt_petroleum", name: "CBT Petroleum Sdn Bhd", lat: 2.7200, lng: 101.9400 },
-    { id: "goodmaid", name: "Goodmaid Chemicals Corporation Sdn Bhd", lat: 2.6850, lng: 101.9800 },
-    { id: "ansell_seremban", name: "Ansell Seremban Sdn Bhd", lat: 2.6800, lng: 101.9850 },
-    { id: "toyochem_seremban", name: "Toyochem Specialty Chemicals Sdn Bhd", lat: 2.6900, lng: 101.9750 },
-    { id: "aica_malaysia", name: "Aica Malaysia Sdn. Bhd.", lat: 2.6880, lng: 101.9780 },
-    { id: "sumitomo_env", name: "Sumitomo Chemical Enviro-Agro Asia Pacific", lat: 2.6850, lng: 101.9800 },
-    { id: "careplus", name: "Careplus (M) Sdn Bhd", lat: 2.6820, lng: 101.9820 },
-    { id: "bostik", name: "Bostik Malaysia Sdn Bhd", lat: 2.6880, lng: 101.9760 },
-    { id: "aegis_materials", name: "Aegis Materials (M) Sdn. Bhd.", lat: 2.6860, lng: 101.9780 },
-    { id: "sun_rubber", name: "Sun Rubber Industry Sdn. Bhd.", lat: 2.6840, lng: 101.9800 },
-    { id: "conquest_chem", name: "Conquest Chemical Supply Sdn. Bhd.", lat: 2.6900, lng: 101.9750 },
-    { id: "ogosin_chem", name: "Ogosin Chemical Industries Sdn. Bhd.", lat: 2.7300, lng: 101.9350 },
-    { id: "allied_specialty", name: "Allied Specialty Compounds", lat: 2.6850, lng: 101.9800 },
-    { id: "ecogreen_monomer", name: "Ecogreen Monomer Sdn Bhd", lat: 2.6880, lng: 101.9760 },
-    { id: "sanyu_jushi", name: "Sanyu Jushi Sdn. Bhd.", lat: 2.6860, lng: 101.9780 },
-    { id: "gb_industries", name: "G.B. Industries Sdn Bhd", lat: 2.6840, lng: 101.9800 },
-    { id: "maytech", name: "Maytech Cleanroom Manufacturing Sdn Bhd", lat: 2.6850, lng: 101.9800 },
-    { id: "growchem_senawang", name: "Growchem Sdn Bhd", lat: 2.6880, lng: 101.9760 },
-    { id: "cp_chemie", name: "Cp Chemie Resources (M) Sdn Bhd", lat: 2.6900, lng: 101.9750 },
-    { id: "ccp_century", name: "Ccp Century Chemical Paints", lat: 3.0100, lng: 101.5500 },
-    { id: "m_xell", name: "M-Xell Chemicals Sdn Bhd", lat: 2.6850, lng: 101.9800 },
-    { id: "goldstab", name: "Goldstab Additives Sdn Bhd", lat: 2.6880, lng: 101.9760 },
-    { id: "zhe_ma", name: "Zhe Ma Advance Material Technology Sdn. Bhd.", lat: 2.8220, lng: 101.8080 },
-    { id: "dia_chemical", name: "Dia-Chemical Sdn. Bhd.", lat: 2.9900, lng: 101.5600 },
-    { id: "asachem_sa", name: "Asachem (M) Sdn. Bhd.", lat: 3.0300, lng: 101.4800 },
-    { id: "inventec", name: "Inventec Performance Chemicals South East Asia", lat: 2.8400, lng: 101.8200 },
-    { id: "bt_chemicals", name: "BT Chemicals Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "pro_chem", name: "Pro-Chem Industrial Sdn Bhd", lat: 3.0500, lng: 101.5000 },
-    { id: "helios_chem", name: "Helios Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "cyto_tech", name: "Cyto Tech Sdn Bhd", lat: 2.9800, lng: 101.5800 },
-    { id: "hexachem", name: "Hexachem (M) Sdn. Bhd.", lat: 2.9900, lng: 101.5600 },
-    { id: "tech_lab", name: "Tech-Lab Manufacturing Sdn Bhd", lat: 3.0150, lng: 101.5850 },
-    { id: "qemrich", name: "Qemrich Sdn Bhd", lat: 3.0000, lng: 101.5500 },
-    { id: "kraiburg_tpe", name: "KRAIBURG TPE Technology (M) Sdn Bhd", lat: 3.0350, lng: 101.7650 },
-    { id: "leivy", name: "Leivy Laboratories Sdn. Bhd", lat: 3.0300, lng: 101.7700 },
-    { id: "guppy_plastic", name: "Guppy Plastic Industries Sdn Bhd", lat: 3.0280, lng: 101.7680 },
-    { id: "miracon", name: "Miracon (M) Sdn Bhd", lat: 3.0320, lng: 101.7720 },
-    { id: "imec_hygiene", name: "iMEC Hygiene Sdn. Bhd.", lat: 2.9850, lng: 101.7200 },
-    { id: "ysp_industries", name: "Y.S.P Industries (M) Sdn Bhd", lat: 2.9450, lng: 101.7850 },
-    { id: "duopharma", name: "Duopharma Manufacturing (Bangi) Sdn Bhd", lat: 2.9400, lng: 101.7800 },
-    { id: "etika_beverages", name: "Etika Beverages Sdn Bhd", lat: 2.9420, lng: 101.7820 },
-    { id: "texchem_life", name: "Texchem Life Science Sdn Bhd", lat: 2.9380, lng: 101.7780 },
-    { id: "denso", name: "Denso (M) Sdn Bhd", lat: 2.9410, lng: 101.7790 },
-    { id: "ccm_polymers", name: "Ccm Polymers Sdn Bhd", lat: 2.9350, lng: 101.7750 },
-    { id: "compounding_colouring", name: "Compounding & Colouring Sdn Bhd", lat: 2.9360, lng: 101.7760 },
-    { id: "stenta_films", name: "Stenta Films (M) Sdn Bhd", lat: 2.9390, lng: 101.7770 },
-    { id: "tesa_tapes", name: "Tesa Tapes (M) Sdn Bhd", lat: 2.9400, lng: 101.7800 },
-    { id: "sapura_industrial", name: "Sapura Industrial Berhad", lat: 2.9420, lng: 101.7810 },
-    { id: "pharmaniaga", name: "Pharmaniaga Manufacturing Bhd", lat: 2.9450, lng: 101.7830 },
-    { id: "mlm_packaging", name: "Mlm Packaging Sdn Bhd", lat: 2.9800, lng: 101.5500 },
-    { id: "alsey_kimia", name: "Alsey Kimia (M) Sdn Bhd", lat: 3.0100, lng: 101.5300 },
-    { id: "ichem_solution", name: "i-Chem Solution Sdn Bhd", lat: 2.9850, lng: 101.5650 },
-    { id: "chembond", name: "Chembond Chemicals(Malaysia) Sdn Bhd", lat: 3.0500, lng: 101.4800 },
-    { id: "hb_laboratories", name: "HB Laboratories Sdn Bhd", lat: 3.0400, lng: 101.5000 },
-    { id: "ferrovic", name: "Ferrovic Corporation (M) Sdn. Bhd.", lat: 3.0200, lng: 101.5200 },
-    { id: "pavilion_coating", name: "Pavilion Coating (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "edenor_oleo", name: "Edenor Oleochemicals (M) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
-    { id: "primechem", name: "Primechem Malaysia Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "unigreen", name: "Unigreen Chemicals Sdn. Bhd.", lat: 3.0000, lng: 101.4200 },
-    { id: "synerchem", name: "Synerchem Group", lat: 3.0500, lng: 101.5500 },
-    { id: "bio_enviro", name: "Bio Enviro Industries Sdn Bhd", lat: 3.0100, lng: 101.5300 },
-    { id: "cb_palm", name: "Cb Palm Industrial Sdn. Bhd.", lat: 2.9500, lng: 101.4000 },
-    { id: "plantic_lab", name: "Plantic Lab Sdn Bhd", lat: 3.0200, lng: 101.5200 },
-    { id: "mildef", name: "Mildef International Technologies Sdn Bhd", lat: 2.9600, lng: 101.7500 },
-    { id: "techbond", name: "Techbond Manufacturing Sdn Bhd", lat: 3.0300, lng: 101.5300 },
-    { id: "wasco_thermal", name: "Wasco Thermal Sdn. Bhd", lat: 3.0600, lng: 101.5000 },
-    { id: "hicom_diecastings", name: "Hicom Diecastings Sdn Bhd", lat: 3.0200, lng: 101.5400 },
-    { id: "mettube", name: "Mettube Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "afcona", name: "Afcona Chemicals Sdn Bhd", lat: 2.9800, lng: 101.4000 },
-    { id: "apex_packaging", name: "Apex Packaging Sdn Bhd", lat: 2.9150, lng: 101.4550 },
-    { id: "shintako", name: "Shintako (M) Sdn Bhd", lat: 3.0300, lng: 101.4800 },
-    { id: "kaizen_packaging", name: "Kaizen Packaging Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "nichia_malaysia", name: "Nichia (Malaysia) Sdn Bhd", lat: 2.9450, lng: 101.7850 },
-    { id: "igl_coatings", name: "Igl Coatings Headquarters", lat: 3.0800, lng: 101.5800 },
-    { id: "jj_asia", name: "Jj Asia Manufacturing (M) Sdn Bhd", lat: 2.9800, lng: 101.4000 },
-    { id: "mre_group", name: "Mre Group Of Companies", lat: 3.0500, lng: 101.5500 },
-    { id: "suka_chemicals", name: "Suka Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "fnholdings", name: "Fraser & Neave Holdings Bhd", lat: 3.0600, lng: 101.5800 },
-    { id: "malaysian_diecast", name: "Malaysian Die-Casting Industries Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
-    { id: "globechem", name: "Globechem Sdn Bhd", lat: 3.0200, lng: 101.5400 },
-    { id: "finn_chem", name: "Finn Chemicals Sdn. Bhd.", lat: 3.0000, lng: 101.5500 },
-    { id: "japan_chemical", name: "Japan Chemical (M) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
-    { id: "gme_chemicals", name: "Gme Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "malayan_adhesives", name: "Malayan Adhesives And Chemicals Sdn Bhd", lat: 3.0600, lng: 101.5400 },
-    { id: "krischem", name: "Krischem Sdn. Bhd.", lat: 3.0200, lng: 101.5300 },
-    { id: "arobenz", name: "Arobenz Chemicals Sdn Bhd", lat: 2.9900, lng: 101.5600 },
-    { id: "ken_rich", name: "Ken-Rich Chemical Sdn Bhd.", lat: 3.0100, lng: 101.5200 },
-    { id: "dpi_chemicals", name: "Dpi Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "archem", name: "Archem Malaysia Sdn Bhd", lat: 2.9600, lng: 101.4000 },
-    { id: "gladron", name: "Gladron Chemicals Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
-    { id: "clariant", name: "Clariant (Malaysia) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
-    { id: "zextron", name: "Zextron Chemical Industries (M) Sdn Bhd", lat: 3.0000, lng: 101.5500 },
-    { id: "fujikura", name: "Fujikura Chemicals Sdn Bhd", lat: 2.9800, lng: 101.4000 },
-    { id: "jintai", name: "Jintai (M) Sdn Bhd", lat: 2.9600, lng: 101.4000 },
-    { id: "tmk_chemical", name: "Tmk Chemical Banting Sdn Bhd", lat: 2.8000, lng: 101.5000 },
-    { id: "kc_chemicals", name: "KC Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "sunenergy", name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "ccm_berhad", name: "Chemical Company Of Malaysia Berhad", lat: 3.0600, lng: 101.5400 },
-    { id: "olen_port", name: "Olen Port Klang Sdn Bhd", lat: 2.9150, lng: 101.4550 },
-    { id: "mey_chern", name: "Mey Chern Chemical Sdn Bhd", lat: 3.0000, lng: 101.4200 },
-    { id: "acme_chemicals", name: "Acme Chemicals (M) Sdn Bhd", lat: 2.9200, lng: 101.4600 },
-    { id: "nylex_specialty", name: "Nylex Specialty Chemicals Sdn. Bhd.", lat: 2.9200, lng: 101.4600 },
-    { id: "nexuschem", name: "Nexuschem Engineering Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "govi_chemicals", name: "GOVI Chemicals Sdn. Bhd", lat: 2.9500, lng: 101.4000 },
-    { id: "mitsui_poly", name: "Mitsui Chemicals Polyurethanes Malaysia", lat: 2.9800, lng: 101.4000 },
-    { id: "lyondellbasell", name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", lat: 3.0100, lng: 101.5200 },
-    { id: "zagro_chem", name: "Zagro Chemicals Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
-    { id: "southern_acids", name: "Southern Acids Industries Sdn. Bhd.", lat: 2.9900, lng: 101.4300 },
-    { id: "klh_telok", name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", lat: 2.9600, lng: 101.4000 },
-    { id: "pkg_gemilang", name: "Perusahaan Kimia Gemilang Sdn. Bhd.", lat: 2.9900, lng: 101.4300 },
-    { id: "formosa_prosonic", name: "Formosa Prosonic Chemicals Sdn Bhd", lat: 2.9200, lng: 101.4600 },
-    { id: "w_clay", name: "The W Clay Industries Sdn. Bhd.", lat: 2.9500, lng: 101.4000 },
-    { id: "synergy_chem", name: "Synergy Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
-    { id: "ksc_chem", name: "Ksc Chemical (Malaysia) Sdn. Bhd.", lat: 2.9800, lng: 101.4000 },
-    { id: "tg_chem", name: "Tg Chemical (M) Sdn Bhd", lat: 2.9600, lng: 101.4000 },
-    { id: "mah_sing", name: "Mah Sing Plastics Industries Sdn Bhd", lat: 3.0100, lng: 101.5200 },
-    { id: "growchem_pi", name: "Growchem Sdn Bhd (Pulau Indah Plant)", lat: 2.9400, lng: 101.3500 },
-    { id: "yara_industrial", name: "Yara International (M)Sdn Bhd - Industrial", lat: 2.9400, lng: 101.3500 },
-    { id: "mewah_oils", name: "Mewah Oils Sdn Bhd", lat: 2.9400, lng: 101.3500 },
-    { id: "mitsui_scientex", name: "Mitsui Chemicals Scientex Sdn. Bhd.", lat: 2.9600, lng: 101.4000 },
-    { id: "hextar", name: "Hextar Chemicals Sdn Bhd", lat: 2.9400, lng: 101.3500 },
-    { id: "ascendchem", name: "Ascendchem Sdn Bhd Pulau Indah", lat: 2.9400, lng: 101.3500 },
-    { id: "topmark", name: "Topmark Petroleum Products Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
-    { id: "cargill", name: "Cargill Palm Products Sdn Bhd", lat: 2.9800, lng: 101.3300 },
-    { id: "chevron_pi", name: "Chevron Pulau Indah Terminal", lat: 2.9400, lng: 101.3500 },
-    { id: "concord_chem", name: "Concord Chemicals Corporation Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
-    { id: "adhes_packaging", name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", lat: 2.9400, lng: 101.3500 },
-    { id: "klk_oleomas", name: "Kl-Kepong Oleomas Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
-    { id: "gamalux", name: "Gamalux Sdn Bhd (Factory)", lat: 2.9400, lng: 101.3500 },
-    { id: "ancom_nylex", name: "Ancom Nylex Terminals Sdn Bhd", lat: 2.9800, lng: 101.3300 },
-    { id: "intco_malaysia", name: "Intco Malaysia Sdn Bhd", lat: 2.9800, lng: 101.3300 },
-    { id: "dh_hygiene", name: "Dh Hygience (Melaka) Sdn Bhd", lat: 2.2700, lng: 102.1500 },
-    { id: "tech_latex", name: "Tech-Latex Scientific Sdn. Bhd.", lat: 2.2900, lng: 102.1800 },
-    { id: "yakuhin", name: "Yakuhin Industries (M) Sdn Bhd", lat: 2.2800, lng: 102.2000 },
-    { id: "air_liquide", name: "Air Liquide Malaysia Sdn. Bhd. (Melaka)", lat: 2.2500, lng: 102.1500 }
+    { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "ouji_sekken", order: 3, name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", area: "Lot 759(B3), Nilai Industrial Estate, 71800 Nilai, Negeri Sembilan" },
+    { id: "alps_electric", order: 4, name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", area: "Lot 109, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "k_plastics", order: 5, name: "K-Plastics Industries Sdn Bhd", area: "Lot 24, Jalan Permata 1/2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "pca_group", order: 6, name: "PCA Group Sdn Bhd", area: "Lot 50, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "johnson_matthey", order: 7, name: "Johnson Matthey Sdn. Bhd.", area: "Lot 12, Jalan 2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "meditech_gloves", order: 8, name: "Meditech Gloves Sdn. Bhd.", area: "Lot 23, Jalan Seriemas 1, Kota Seriemas, 71800 Nilai, Negeri Sembilan" },
+    { id: "future_plastic", order: 9, name: "Future Plastic Industries Sdn. Bhd.", area: "Lot 1608, Jalan Nilai 3/10, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "jujutsu_industries", order: 10, name: "Jujutsu Industries Sdn Bhd", area: "Lot 83, Jalan Permata 2/3, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "polyplus_packages", order: 11, name: "Polyplus Packages Sdn. Bhd.", area: "Lot 18, Jalan Permata 1/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "jebsen_jessen", order: 12, name: "Jebsen & Jessen Packaging Sdn Bhd", area: "Lot 3297, Jalan Permata 2/1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "lti_industries", order: 13, name: "LTI Industries Sdn Bhd", area: "Lot 16, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "harta_packaging", order: 14, name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", area: "Lot 6, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "skf_bearing", order: 15, name: "SKF Bearing Industries (M) Sdn Bhd", area: "Lot 79, Jalan Permata 2, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "akzo_nobel", order: 16, name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", area: "Lot 5827, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
+    { id: "mapei_nilai", order: 17, name: "Mapei Malaysia Nilai Plant", area: "D3A, Lot 28, Jalan Industri 3/4, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "gf_one", order: 18, name: "GF One Chemicals Sdn. Bhd.", area: "Lot 12A, Jalan Nilai 3/7, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "dansoon", order: 19, name: "Dansoon Chemicals Sdn. Bhd.", area: "No. 5, Jalan Nilai 3/8, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "chuanplus", order: 20, name: "Chuanplus Industries Sdn. Bhd.", area: "Lot 27, Jalan Nilai 3/1, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "av_manufacturing", order: 21, name: "AV Manufacturing Sdn. Bhd.", area: "Lot 19, Jalan Nilai 3/5, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+    { id: "yec_chemical", order: 22, name: "YEC Chemical Compounds Sdn Bhd", area: "No. 16, Jalan Nilai 3/2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan" },
+
+    // NOTE: paste the rest of your array here (same structure: id, order, name, area)
   ];
 
-  // Assign Order Index automatically for display
-  plants.forEach((p, i) => p.order = i + 1);
-
-  // --- LOGIC ---
-  const VISITED_KEY = "plant_visit_dark_gps_v2";
-  const GPS_KEY = "my_gps_coords";
-
-  // Elements
+  // --- STATE ---
+  const VISITED_KEY = "plant_visit_dark_visited_v3";
   const listEl = document.getElementById("plantList");
   const statsEl = document.getElementById("stats");
-  const mapFrame = document.getElementById("mapFrame");
-  const labelEl = document.getElementById("currentCompanyLabel");
-  const gpsIndEl = document.getElementById("gpsIndicator");
-
-  // State
+  const hintEl = document.getElementById("hint");
   let visited = {};
   let selectedId = null;
-  let userCoords = null; // { lat, lng }
 
-  // Init
+  // --- INIT ---
   loadVisited();
-  loadGPS();
   buildList();
   updateStats();
-  if (plants[0]) selectPlant(plants[0]);
 
-  // --- FUNCTIONS ---
-
+  // --- STORAGE ---
   function loadVisited() {
     try {
       const s = localStorage.getItem(VISITED_KEY);
       visited = s ? JSON.parse(s) : {};
     } catch { visited = {}; }
   }
-
   function saveVisited() {
     localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
   }
 
-  function loadGPS() {
-    try {
-      const s = localStorage.getItem(GPS_KEY);
-      if (s) {
-        userCoords = JSON.parse(s);
-        gpsIndEl.textContent = "GPS: Saved";
-        gpsIndEl.classList.add("gps-active");
+  // --- MAP OPENERS (LET GOOGLE MAPS HANDLE LOCATION + DISTANCE) ---
+  // We use destination as "Company Name + Address" so Maps can disambiguate.
+  function buildQuery(plant) {
+    return `${plant.name} ${plant.area}`.trim();
+  }
+
+  function openDirections(plant) {
+    const q = encodeURIComponent(buildQuery(plant));
+
+    const ua = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    // Web fallback (always works; Maps will ask/assume current location)
+    const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${q}&travelmode=driving`;
+
+    // Android intent -> Google Maps app
+    if (isAndroid) {
+      const intentUrl = `intent://maps.google.com/maps?daddr=${q}#Intent;scheme=https;package=com.google.android.apps.maps;end`;
+      attemptOpen(intentUrl, webUrl);
+      return;
+    }
+
+    // iOS Google Maps scheme (opens Google Maps if installed)
+    if (isIOS) {
+      const appUrl = `comgooglemaps://?daddr=${q}&directionsmode=driving`;
+      attemptOpen(appUrl, webUrl);
+      return;
+    }
+
+    // Desktop
+    window.open(webUrl, "_blank");
+  }
+
+  function attemptOpen(appUrl, webUrl) {
+    const started = Date.now();
+    window.location.href = appUrl;
+    setTimeout(() => {
+      if (Date.now() - started < 1500) {
+        window.open(webUrl, "_blank");
       }
-    } catch {}
+    }, 900);
   }
 
-  // --- DISTANCE CALCULATION (Haversine Formula) ---
-  // Returns estimated Driving Distance (Straight line * 1.3 multiplier)
-  function getDistanceKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const straightDist = R * c;
-    return straightDist * 1.3; // Estimated driving factor
-  }
-
-  // Fallback for plants without coords (Cluster Center Points)
-  function getFallbackCoords(plant) {
-    // If plant already has lat/lng in data, return it
-    if (plant.lat && plant.lng) return { lat: plant.lat, lng: plant.lng };
-
-    // Otherwise guess based on name (generic fallback)
-    return { lat: 3.0738, lng: 101.5183 }; // Default to Shah Alam center
-  }
-
-  // --- ACTION HANDLERS ---
-
-  function refreshGPS() {
-    if (!navigator.geolocation) {
-      alert("Geolocation not supported");
-      return;
-    }
-    gpsIndEl.textContent = "GPS: Locating...";
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        localStorage.setItem(GPS_KEY, JSON.stringify(userCoords));
-        gpsIndEl.textContent = "GPS: Updated";
-        gpsIndEl.classList.add("gps-active");
-        alert("Location updated! Now click 'Sort by Distance'.");
-      },
-      (err) => {
-        gpsIndEl.textContent = "GPS: Error";
-        alert("Error getting location: " + err.message);
-      },
-      { enableHighAccuracy: true }
-    );
-  }
-
-  function sortListByDistance() {
-    if (!userCoords) {
-      alert("Please click 'Refresh GPS' first.");
-      return;
-    }
-
-    plants.forEach(p => {
-      const c = getFallbackCoords(p);
-      p._dist = getDistanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng);
-    });
-
-    plants.sort((a, b) => {
-      // 1. Unvisited first
-      const vA = !!visited[a.id];
-      const vB = !!visited[b.id];
-      if (vA !== vB) return vA - vB;
-
-      // 2. Distance
-      return a._dist - b._dist;
-    });
-
-    buildList();
-    // Auto select nearest unvisited
-    const nearest = plants.find(p => !visited[p.id]);
-    if (nearest) selectPlant(nearest);
-  }
-
+  // --- UI ---
   function buildList() {
     listEl.innerHTML = "";
-    plants.forEach(plant => {
+
+    // Sort by your fixed "order"
+    const sorted = [...plants].sort((a,b) => (a.order ?? 9999) - (b.order ?? 9999));
+
+    sorted.forEach((plant) => {
       const row = document.createElement("div");
       row.className = "stop-row";
       if (visited[plant.id]) row.classList.add("visited");
       if (plant.id === selectedId) row.classList.add("selected");
 
-      // Icon/Number
       const num = document.createElement("div");
       num.className = "stop-number";
-      num.textContent = plant.order; // This stays constant even if sorted
-      
-      // Name Block
+      num.textContent = plant.order ?? "";
+
+      const block = document.createElement("div");
+      block.className = "company-block";
+
       const name = document.createElement("div");
       name.className = "company-name";
-      
+
       const main = document.createElement("span");
       main.className = "company-name-main";
-      main.textContent = plant.name;
+      main.textContent = plant.name || "(No name)";
       name.appendChild(main);
 
-      // Distance & Coords display
-      if (typeof plant._dist === 'number') {
-        const d = document.createElement("span");
-        d.className = "company-distance";
-        d.textContent = `~${plant._dist.toFixed(1)} km drive`;
-        name.appendChild(d);
-      } else if (plant.lat) {
-        // Show coords if distance not calc yet
-        const c = document.createElement("span");
-        c.className = "company-coords";
-        c.textContent = `${plant.lat.toFixed(4)}, ${plant.lng.toFixed(4)}`;
-        // name.appendChild(c); // Optional: uncomment to see coords in list
-      }
+      const area = document.createElement("span");
+      area.className = "company-area";
+      area.textContent = plant.area || "";
+      name.appendChild(area);
 
-      // Checkbox
+      const actions = document.createElement("div");
+      actions.className = "row-actions";
+
+      const btnDir = document.createElement("button");
+      btnDir.className = "btn btn-primary";
+      btnDir.type = "button";
+      btnDir.textContent = "Open Directions";
+      btnDir.onclick = (e) => {
+        e.stopPropagation();
+        openDirections(plant);
+      };
+
+      actions.appendChild(btnDir);
+      block.appendChild(name);
+      block.appendChild(actions);
+
       const cbWrap = document.createElement("div");
       cbWrap.className = "checkbox-wrap";
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = !!visited[plant.id];
+      cb.title = "Mark visited";
       cb.onclick = (e) => {
         e.stopPropagation();
         visited[plant.id] = cb.checked;
@@ -536,28 +301,16 @@
       cbWrap.appendChild(cb);
 
       row.appendChild(num);
-      row.appendChild(name);
+      row.appendChild(block);
       row.appendChild(cbWrap);
 
-      row.onclick = () => selectPlant(plant);
+      row.onclick = () => {
+        selectedId = plant.id;
+        hintEl.innerHTML = `Selected: <b style="color:var(--accent)">${escapeHtml(plant.name || "")}</b>`;
+        buildList();
+      };
+
       listEl.appendChild(row);
-    });
-  }
-
-  function selectPlant(plant) {
-    selectedId = plant.id;
-    labelEl.textContent = `${plant.order}. ${plant.name}`;
-    
-    // Embed Google Map centered on coordinates
-    // Using standard embed API which works without key for basic pin dropping
-    const q = `${plant.lat},${plant.lng}`;
-    const url = `https://maps.google.com/maps?q=${q}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-    mapFrame.src = url;
-
-    // Refresh highlight
-    const rows = listEl.querySelectorAll(".stop-row");
-    rows.forEach(r => {
-      r.classList.toggle("selected", r.querySelector(".company-name").innerText.includes(plant.name));
     });
   }
 
@@ -566,30 +319,26 @@
     statsEl.innerHTML = `Visited <b>${done}</b> / <b>${plants.length}</b>`;
   }
 
-  function openGoogleMapsApp() {
-    if (!selectedId) return;
-    const plant = plants.find(p => p.id === selectedId);
-    
-    // Create Universal Link for Maps
-    // If we have user coords, we can trigger navigation
-    let url = "";
-    if (userCoords) {
-      url = `https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${plant.lat},${plant.lng}&travelmode=driving`;
-    } else {
-      // Just search destination
-      url = `https://www.google.com/maps/search/?api=1&query=${plant.lat},${plant.lng}`;
-    }
-    window.open(url, '_blank');
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
   // --- EVENTS ---
-  document.getElementById("btnRefreshGPS").onclick = refreshGPS;
-  document.getElementById("sortByDistance").onclick = sortListByDistance;
-  document.getElementById("openDirections").onclick = openGoogleMapsApp;
   document.getElementById("clearVisited").onclick = () => {
-    if(confirm("Reset all?")) { visited = {}; saveVisited(); buildList(); updateStats(); }
+    if (confirm("Reset all visited?")) {
+      visited = {};
+      saveVisited();
+      selectedId = null;
+      hintEl.textContent = "";
+      buildList();
+      updateStats();
+    }
   };
-
 </script>
 </body>
 </html>
