@@ -2,180 +2,233 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plant Visit Planner – Dark</title>
+  <title>Company Kiosk A–Z</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <style>
     :root{
-      --bg:#05070d; --bg-card:#151a24; --bg-card-soft:#1b2230;
-      --border-soft:#252b3a; --accent:#59b5ff; --accent-soft:rgba(89,181,255,.15);
-      --text-main:#f5f7ff; --text-muted:#9aa4c0;
+      --bg:#05070d; --card:#151a24; --card2:#1b2230;
+      --border:#252b3a; --accent:#59b5ff; --accentSoft:rgba(89,181,255,.15);
+      --text:#f5f7ff; --muted:#9aa4c0;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:radial-gradient(circle at top,#151a24 0,#05070d 45%,#020308 100%);
-      color:var(--text-main);
+      color:var(--text);
     }
-    .page{max-width:1400px;margin:0 auto;padding:.75rem}
-    h1{
-      margin:0 0 .75rem;
-      font-size:1.1rem; letter-spacing:.04em; text-transform:uppercase;
-      color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;
-      gap:.75rem; flex-wrap:wrap;
-    }
-    .main-card{
-      background:var(--bg-card);
+    .page{max-width:1400px;margin:0 auto;padding:14px}
+    .topbar{
+      background:var(--card);
+      border:1px solid var(--border);
       border-radius:16px;
-      border:1px solid var(--border-soft);
+      padding:14px;
       box-shadow:0 16px 40px rgba(0,0,0,.5);
-      padding:.75rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
     }
-    .card-inner{
-      background:var(--bg-card-soft);
-      border-radius:12px;
-      border:1px solid var(--border-soft);
-      padding:.75rem;
-      width:100%;
+    .title{
+      display:flex; flex-direction:column; gap:4px;
+      min-width:240px;
+    }
+    .title h1{
+      margin:0;
+      font-size:1.05rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .subtitle{font-size:.82rem;color:var(--muted);line-height:1.3}
+    .stats{
+      font-size:.9rem;
+      color:var(--muted);
+      text-align:right;
+      min-width:220px;
+    }
+    .stats b{color:var(--accent)}
+
+    .az-wrap{
+      margin-top:12px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 16px 40px rgba(0,0,0,.5);
+    }
+
+    /* Big kiosk buttons */
+    .az-grid{
+      display:grid;
+      grid-template-columns:repeat(13, minmax(0, 1fr));
+      gap:8px;
+    }
+    .az-btn{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#0f131d;
+      color:var(--text);
+      font-weight:750;
+      font-size:1.05rem;
+      padding:14px 0;
+      cursor:pointer;
+      transition:all .15s;
+      user-select:none;
+    }
+    .az-btn:hover{border-color:var(--accent); transform:translateY(-1px)}
+    .az-btn.active{
+      border-color:var(--accent);
+      background:var(--accentSoft);
+      color:var(--accent);
+    }
+
+    .content{
+      margin-top:12px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 16px 40px rgba(0,0,0,.5);
+      min-height:55vh;
       display:flex;
       flex-direction:column;
-      height:calc(100vh - 120px);
+      gap:12px;
     }
-    .card-title{
-      font-size:.9rem; text-transform:uppercase; letter-spacing:.08em;
-      color:var(--text-muted); margin-bottom:.35rem;
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    .subline{font-size:.78rem;color:var(--text-muted);margin-bottom:.6rem;line-height:1.35}
-
-    .controls{
-      display:flex; justify-content:space-between; align-items:center;
-      gap:.5rem; margin-bottom:.65rem; flex-wrap:wrap;
+    .section-title .left{
+      display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
     }
-    .controls-left{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
-
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--muted);
+      font-size:.82rem;
+      letter-spacing:.02em;
+      white-space:nowrap;
+    }
+    .badge b{color:var(--accent)}
     .btn{
       border-radius:999px;
-      border:1px solid var(--border-soft);
+      border:1px solid var(--border);
       background:#0f131d;
-      padding:.25rem .7rem;
-      color:var(--text-muted);
-      font-size:.78rem;
+      color:var(--muted);
+      font-size:.85rem;
+      padding:8px 12px;
       cursor:pointer;
-      transition:all .2s;
+      transition:all .15s;
       user-select:none;
       text-decoration:none;
       display:inline-flex;
       align-items:center;
-      gap:.35rem;
+      gap:8px;
       white-space:nowrap;
     }
     .btn:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-primary{border-color:var(--accent);color:var(--accent);background:rgba(89,181,255,.05)}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-
-    .stats{font-size:.8rem;color:var(--text-muted)}
-    .stats b{color:var(--accent)}
-
-    /* Search */
-    .search-wrap{
-      display:flex; align-items:center; gap:.45rem;
-      background:#0f131d;
-      border:1px solid var(--border-soft);
-      border-radius:999px;
-      padding:.25rem .6rem;
-      min-width:min(520px, 92vw);
+    .btn-primary{
+      border-color:var(--accent);
+      color:var(--accent);
+      background:rgba(89,181,255,.05);
     }
-    .search-wrap:focus-within{ border-color: var(--accent); }
-    .search-icon{ color: var(--text-muted); font-size: .85rem; }
-    .search{
-      flex:1 1 auto;
-      border:0;
-      outline:0;
-      background:transparent;
-      color:var(--text-main);
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:10px;
+    }
+    .card{
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:120px;
+    }
+    .name{
+      font-weight:750;
+      line-height:1.25;
+      font-size:.98rem;
+    }
+    .addr{
+      color:var(--muted);
       font-size:.82rem;
-      padding:.1rem .2rem;
+      line-height:1.35;
+      flex:1 1 auto;
     }
-    .search::placeholder{ color: #7f8ab0; }
-    .btn-clear{
-      border:0;
-      background:transparent;
-      color:var(--text-muted);
-      cursor:pointer;
-      font-size:.85rem;
-      padding:.15rem .25rem;
-      border-radius:8px;
-    }
-    .btn-clear:hover{ color: var(--accent); background: rgba(89,181,255,.06); }
-
-    .list{flex:1 1 auto;overflow-y:auto;padding-right:.25rem}
-
-    .stop-row{
-      display:flex; align-items:flex-start; gap:.55rem;
-      padding:.55rem .45rem; margin-bottom:.2rem;
-      border-radius:12px; cursor:pointer;
-      border:1px solid transparent; transition:all .15s;
-    }
-    .stop-row:hover{background:#202738}
-    .stop-row.selected{background:var(--accent-soft);border-color:var(--accent);transform:translateY(-1px)}
-    .stop-row.visited{background:rgba(20,80,40,.30);opacity:.85}
-    .stop-row.visited .company-name-main{ text-decoration:line-through; color:var(--text-muted); }
-
-    .stop-number{
-      width:30px;height:30px;border-radius:50%;background:#0d111c;
-      display:flex;align-items:center;justify-content:center;
-      font-size:.75rem;color:var(--accent);flex-shrink:0;margin-top:.1rem;
+    .row-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
     }
 
-    .company-block{flex:1 1 auto; min-width: 240px;}
-    .company-name{font-size:.88rem;line-height:1.25;}
-    .company-name-main{display:block;font-weight:650}
-    .company-area{display:block;margin-top:.2rem;font-size:.75rem;color:var(--text-muted);line-height:1.35}
-    .row-actions{margin-top:.45rem;display:flex;gap:.35rem;flex-wrap:wrap}
+    .empty{
+      padding:14px;
+      color:var(--muted);
+      border:1px dashed var(--border);
+      border-radius:14px;
+      background:rgba(255,255,255,.02);
+    }
 
-    .checkbox-wrap{flex-shrink:0;margin-top:.15rem}
-    .checkbox-wrap input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
-
-    .list::-webkit-scrollbar{width:6px}
-    .list::-webkit-scrollbar-track{background:transparent}
-    .list::-webkit-scrollbar-thumb{background:#343c4f;border-radius:3px}
-
-    @media (max-width: 960px){
-      .card-inner{height:78vh}
-      .search-wrap{min-width: 92vw;}
+    @media (max-width: 1100px){
+      .cards{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .az-grid{grid-template-columns:repeat(10, minmax(0, 1fr))}
+    }
+    @media (max-width: 720px){
+      .cards{grid-template-columns:1fr}
+      .az-grid{grid-template-columns:repeat(7, minmax(0, 1fr))}
+      .az-btn{padding:12px 0;font-size:1rem}
     }
   </style>
 </head>
 <body>
   <div class="page">
-
-
-    <div class="main-card">
-      <div class="card-inner">
-        <div class="card-title">Company List</div>
-     
-
-        <div class="controls">
-          <div class="controls-left">
-            <div class="search-wrap">
-              <span class="search-icon">🔎</span>
-              <input id="searchInput" class="search" type="text" placeholder="Search company or address..." />
-              <button id="clearSearch" class="btn-clear" title="Clear">✕</button>
-            </div>
-            <button id="clearVisited" class="btn">Reset Visited</button>
-          </div>
-
-          <div class="stats" id="hint"></div>
-        </div>
-
-        <div class="list" id="plantList"></div>
+    <div class="topbar">
+      <div class="title">
+        <h1>Company Kiosk A–Z</h1>
+        <div class="subtitle">Tap a letter to filter companies by the first character of the name.</div>
       </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="az-wrap">
+      <div class="az-grid" id="azGrid"></div>
+    </div>
+
+    <div class="content">
+      <div class="section-title">
+        <div class="left">
+          <div class="badge">Selected: <b id="selectedLetter">All</b></div>
+          <div class="badge">Showing: <b id="shownCount">0</b></div>
+          <div class="badge">Total: <b id="totalCount">0</b></div>
+        </div>
+        <div class="right">
+          <button class="btn" id="showAllBtn" type="button">Show All</button>
+        </div>
+      </div>
+
+      <div class="cards" id="cards"></div>
+      <div class="empty" id="empty" style="display:none;">No companies found for this letter.</div>
     </div>
   </div>
 
 <script>
-  // --- FULL LIST (NO LAT/LNG) ---
+  // --- COMPANY LIST ---
+  // Keep: { id, order, name, area }
   const plants = [
     { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
     { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
@@ -346,41 +399,49 @@
     { id: "air_liquide", order: 167, name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area: "Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka" }
   ];
 
-  // --- STATE ---
-  const VISITED_KEY = "plant_visit_dark_visited_v3";
-  const listEl = document.getElementById("plantList");
+  // --- ELEMENTS ---
+  const azGrid = document.getElementById("azGrid");
+  const cardsEl = document.getElementById("cards");
+  const emptyEl = document.getElementById("empty");
+  const selectedLetterEl = document.getElementById("selectedLetter");
+  const shownCountEl = document.getElementById("shownCount");
+  const totalCountEl = document.getElementById("totalCount");
   const statsEl = document.getElementById("stats");
-  const hintEl = document.getElementById("hint");
-  const searchInput = document.getElementById("searchInput");
-  const clearSearchBtn = document.getElementById("clearSearch");
+  const showAllBtn = document.getElementById("showAllBtn");
 
-  let visited = {};
-  let selectedId = null;
-  let query = "";
+  // --- STATE ---
+  let activeLetter = null; // null = All
 
   // --- INIT ---
-  loadVisited();
-  buildList();
-  updateStats();
+  buildAZ();
+  totalCountEl.textContent = String(plants.length);
+  render();
 
-  // --- STORAGE ---
-  function loadVisited() {
-    try {
-      const s = localStorage.getItem(VISITED_KEY);
-      visited = s ? JSON.parse(s) : {};
-    } catch { visited = {}; }
-  }
-  function saveVisited() {
-    localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
+  // --- HELPERS ---
+  function firstLetter(name) {
+    const s = (name || "").trim();
+    if (!s) return "#";
+    // Find first A-Z letter in the string (skip symbols like "(" or quotes)
+    const m = s.toUpperCase().match(/[A-Z]/);
+    return m ? m[0] : "#";
   }
 
-  // --- MAP OPENERS (LET GOOGLE MAPS HANDLE LOCATION + DISTANCE) ---
-  function buildQuery(plant) {
-    return `${plant.name} ${plant.area}`.trim();
+  function sortedPlants(arr) {
+    // stable sort: order then name
+    return [...arr].sort((a, b) => {
+      const ao = (a.order ?? 999999);
+      const bo = (b.order ?? 999999);
+      if (ao !== bo) return ao - bo;
+      return (a.name || "").localeCompare((b.name || ""));
+    });
   }
 
-  function openDirections(plant) {
-    const q = encodeURIComponent(buildQuery(plant));
+  function buildQuery(p) {
+    return `${p.name} ${p.area}`.trim();
+  }
+
+  function openDirections(p) {
+    const q = encodeURIComponent(buildQuery(p));
     const ua = navigator.userAgent || "";
     const isAndroid = /Android/i.test(ua);
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
@@ -392,13 +453,11 @@
       attemptOpen(intentUrl, webUrl);
       return;
     }
-
     if (isIOS) {
       const appUrl = `comgooglemaps://?daddr=${q}&directionsmode=driving`;
       attemptOpen(appUrl, webUrl);
       return;
     }
-
     window.open(webUrl, "_blank");
   }
 
@@ -410,119 +469,8 @@
     }, 900);
   }
 
-  // --- SEARCH / FILTER ---
-  function normalize(s) {
-    return (s || "").toString().toLowerCase().trim();
-  }
-
-  function getFilteredPlants() {
-    const q = normalize(query);
-    const base = [...plants].sort((a,b) => (a.order ?? 9999) - (b.order ?? 9999));
-    if (!q) return base;
-
-    return base.filter(p => {
-      const hay = `${p.name} ${p.area}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }
-
-  // --- UI ---
-  function buildList() {
-    const filtered = getFilteredPlants();
-    listEl.innerHTML = "";
-
-    if (filtered.length === 0) {
-      const empty = document.createElement("div");
-      empty.style.padding = "0.75rem";
-      empty.style.color = "var(--text-muted)";
-      empty.textContent = "No results. Try a different keyword.";
-      listEl.appendChild(empty);
-      updateStats(filtered.length);
-      return;
-    }
-
-    filtered.forEach((plant) => {
-      const row = document.createElement("div");
-      row.className = "stop-row";
-      if (visited[plant.id]) row.classList.add("visited");
-      if (plant.id === selectedId) row.classList.add("selected");
-
-      const num = document.createElement("div");
-      num.className = "stop-number";
-      num.textContent = plant.order ?? "";
-
-      const block = document.createElement("div");
-      block.className = "company-block";
-
-      const name = document.createElement("div");
-      name.className = "company-name";
-
-      const main = document.createElement("span");
-      main.className = "company-name-main";
-      main.textContent = plant.name || "(No name)";
-      name.appendChild(main);
-
-      const area = document.createElement("span");
-      area.className = "company-area";
-      area.textContent = plant.area || "";
-      name.appendChild(area);
-
-      const actions = document.createElement("div");
-      actions.className = "row-actions";
-
-      const btnDir = document.createElement("button");
-      btnDir.className = "btn btn-primary";
-      btnDir.type = "button";
-      btnDir.textContent = "Open Directions";
-      btnDir.onclick = (e) => {
-        e.stopPropagation();
-        openDirections(plant);
-      };
-
-      actions.appendChild(btnDir);
-      block.appendChild(name);
-      block.appendChild(actions);
-
-      const cbWrap = document.createElement("div");
-      cbWrap.className = "checkbox-wrap";
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = !!visited[plant.id];
-      cb.title = "Mark visited";
-      cb.onclick = (e) => {
-        e.stopPropagation();
-        visited[plant.id] = cb.checked;
-        saveVisited();
-        row.classList.toggle("visited", cb.checked);
-        updateStats(filtered.length);
-      };
-      cbWrap.appendChild(cb);
-
-      row.appendChild(num);
-      row.appendChild(block);
-      row.appendChild(cbWrap);
-
-      row.onclick = () => {
-        selectedId = plant.id;
-        hintEl.innerHTML = `Selected: <b style="color:var(--accent)">${escapeHtml(plant.name || "")}</b>`;
-        buildList();
-      };
-
-      listEl.appendChild(row);
-    });
-
-    updateStats(filtered.length);
-  }
-
-  function updateStats(filteredCount = plants.length) {
-    const done = Object.values(visited).filter(Boolean).length;
-    const q = normalize(query);
-    const extra = q ? ` • Showing <b>${filteredCount}</b> matches` : "";
-    statsEl.innerHTML = `Visited <b>${done}</b> / <b>${plants.length}</b>${extra}`;
-  }
-
   function escapeHtml(s) {
-    return String(s)
+    return String(s ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -530,37 +478,85 @@
       .replaceAll("'", "&#039;");
   }
 
+  // --- UI BUILD ---
+  function buildAZ() {
+    azGrid.innerHTML = "";
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+    letters.forEach((L) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "az-btn";
+      btn.textContent = L;
+      btn.dataset.letter = L;
+      btn.onclick = () => {
+        activeLetter = L;
+        setActiveButton();
+        render();
+      };
+      azGrid.appendChild(btn);
+    });
+
+    // default active (none)
+    setActiveButton();
+  }
+
+  function setActiveButton() {
+    const btns = azGrid.querySelectorAll(".az-btn");
+    btns.forEach(b => b.classList.toggle("active", b.dataset.letter === activeLetter));
+  }
+
+  function render() {
+    const filtered = activeLetter
+      ? plants.filter(p => firstLetter(p.name) === activeLetter)
+      : plants;
+
+    const sorted = sortedPlants(filtered);
+
+    selectedLetterEl.textContent = activeLetter || "All";
+    shownCountEl.textContent = String(sorted.length);
+
+    statsEl.innerHTML = `Tap A–Z • Total <b>${plants.length}</b> • Showing <b>${sorted.length}</b>`;
+
+    cardsEl.innerHTML = "";
+    emptyEl.style.display = sorted.length ? "none" : "block";
+
+    sorted.forEach((p) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.innerHTML = escapeHtml(p.name || "(No name)");
+
+      const addr = document.createElement("div");
+      addr.className = "addr";
+      addr.innerHTML = escapeHtml(p.area || "");
+
+      const actions = document.createElement("div");
+      actions.className = "row-actions";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-primary";
+      btn.textContent = "Open in Google Maps";
+      btn.onclick = () => openDirections(p);
+
+      actions.appendChild(btn);
+
+      card.appendChild(name);
+      card.appendChild(addr);
+      card.appendChild(actions);
+      cardsEl.appendChild(card);
+    });
+  }
+
   // --- EVENTS ---
-  document.getElementById("clearVisited").onclick = () => {
-    if (confirm("Reset all visited?")) {
-      visited = {};
-      saveVisited();
-      selectedId = null;
-      hintEl.textContent = "";
-      buildList();
-    }
+  showAllBtn.onclick = () => {
+    activeLetter = null;
+    setActiveButton();
+    render();
   };
-
-  searchInput.addEventListener("input", (e) => {
-    query = e.target.value || "";
-    buildList();
-  });
-
-  clearSearchBtn.addEventListener("click", () => {
-    query = "";
-    searchInput.value = "";
-    searchInput.focus();
-    buildList();
-  });
-
-  // Optional: press ESC to clear search
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.activeElement === searchInput) {
-      query = "";
-      searchInput.value = "";
-      buildList();
-    }
-  });
 </script>
 </body>
 </html>
