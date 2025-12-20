@@ -2,1031 +2,594 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plant Visit Planner – Revamp (No Google iFrame)</title>
+  <title>Plant Visit Planner – Dark</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
-
-  <!-- Leaflet (NO Google iframe, fixes X-Frame-Options blocking) -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
-
   <style>
-    :root{
-      --bg:#070A10;
-      --panel:#0D1220;
-      --panel2:#111A2E;
-      --border:#22304F;
-      --muted:#A7B2D6;
-      --text:#F3F6FF;
-      --accent:#7C3AED;
-      --accent2:#22C55E;
-      --warn:#F59E0B;
-      --danger:#EF4444;
-      --chip:#0B1020;
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
+    :root {
+      --bg: #05070d;
+      --bg-card: #151a24;
+      --bg-card-soft: #1b2230;
+      --border-soft: #252b3a;
+      --accent: #59b5ff;
+      --accent-soft: rgba(89,181,255,0.15);
+      --text-main: #f5f7ff;
+      --text-muted: #9aa4c0;
+      --success: #2ecc71;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(124,58,237,.20), transparent 60%),
-        radial-gradient(900px 600px at 80% 0%, rgba(34,197,94,.16), transparent 55%),
-        radial-gradient(900px 700px at 40% 100%, rgba(59,130,246,.10), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      overflow:hidden; /* we manage scroll inside panels */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151a24 0, #05070d 45%, #020308 100%);
+      color: var(--text-main);
     }
 
-    .app{
-      height:100vh;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      max-width: 1700px;
-      margin: 0 auto;
-      padding: 14px;
-      gap: 12px;
-      min-height:0;
-    }
+    .page { max-width: 1400px; margin: 0 auto; padding: 0.75rem; }
 
-    /* Top bar */
-    .topbar{
-      background: linear-gradient(180deg, rgba(17,26,46,.95), rgba(13,18,32,.92));
-      border:1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      padding: 12px;
-      display:flex;
-      align-items:center;
+    h1 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
       justify-content: space-between;
-      gap: 12px;
+      align-items: center;
     }
-    .brand{
-      display:flex;align-items:center;gap:10px;min-width:220px;
-    }
-    .logo{
-      width:38px;height:38px;border-radius:12px;
-      background: radial-gradient(circle at 30% 25%, rgba(124,58,237,.7), rgba(34,197,94,.25), rgba(255,255,255,.06));
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .brand h1{margin:0;font-size: 15px;letter-spacing:.3px}
-    .brand .sub{color:var(--muted);font-size: 12px;margin-top:2px}
 
-    .actions{
-      display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;
+    /* MAIN CARD */
+    .main-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      padding: 0.75rem;
     }
-    .btn{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 9px 12px;
+
+    .card-row { display: flex; gap: 0.75rem; flex-wrap: nowrap; }
+    .card-panel { flex: 0 0 50%; max-width: 50%; display: flex; }
+    .card-inner {
+      background: var(--bg-card-soft);
       border-radius: 12px;
-      font-weight: 800;
-      font-size: 12px;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
-      display:inline-flex;align-items:center;gap:8px;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.20); background: rgba(255,255,255,.09);}
-    .btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
-    .btn-primary{
-      background: rgba(124,58,237,.20);
-      border-color: rgba(124,58,237,.45);
-    }
-    .btn-good{
-      background: rgba(34,197,94,.16);
-      border-color: rgba(34,197,94,.40);
-    }
-    .btn-danger{
-      background: rgba(239,68,68,.14);
-      border-color: rgba(239,68,68,.35);
+      border: 1px solid var(--border-soft);
+      padding: 0.75rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 120px);
     }
 
-    .pill{
-      font-size: 12px;
-      color: var(--muted);
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      padding: 6px 10px;
+    .card-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .subline { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .stats { font-size: 0.8rem; color: var(--text-muted); }
+    .stats b { color: var(--accent); }
+
+    /* CONTROLS */
+    .controls { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .controls-left { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+
+    .btn {
       border-radius: 999px;
-      display:inline-flex;align-items:center;gap:6px;
-      white-space:nowrap;
+      border: 1px solid var(--border-soft);
+      background: #0f131d;
+      padding: 0.25rem 0.7rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .pill b{color:var(--text)}
-    .sep{width:1px;height:32px;background:rgba(255,255,255,.08); margin:0 2px;}
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { border-color: var(--accent); color: var(--accent); background: rgba(89,181,255,0.05); }
 
-    /* Main layout */
-    .main{
-      min-height:0;
-      display:grid;
-      grid-template-columns: 460px 1fr;
-      gap: 12px;
-    }
+    .gps-status { font-size: 0.7rem; margin-left: 5px; color: var(--text-muted); }
+    .gps-active { color: var(--success); }
 
-    .panel{
-      min-height:0;
-      background: linear-gradient(180deg, rgba(17,26,46,.92), rgba(13,18,32,.92));
-      border:1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-    }
+    .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+    .map-buttons { display: flex; gap: 0.35rem; }
+    .btn-sm { font-size: 0.75rem; padding: 0.18rem 0.6rem; }
 
-    /* Left: list */
-    .list-header{
-      padding: 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      flex-shrink:0;
+    /* LIST */
+    .list { flex: 1 1 auto; overflow-y: auto; padding-right: 0.25rem; }
+    .stop-row {
+      display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.4rem; margin-bottom: 0.15rem;
+      border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
     }
-    .search{
-      display:flex; gap:8px; align-items:center;
-    }
-    .search input{
-      width:100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
-      font-weight: 650;
+    .stop-row:hover { background: #202738; }
+    .stop-row.selected { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
+    .stop-row.visited { background: rgba(20, 80, 40, 0.4); opacity: 0.7; }
+    .stop-row.visited .company-name-main { text-decoration: line-through; color: var(--text-muted); }
+
+    .stop-number {
+      width: 30px; height: 30px; border-radius: 50%; background: #0d111c;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; color: var(--accent); flex-shrink: 0;
     }
 
-    .chips{
-      display:flex;flex-wrap:wrap;gap:8px;
-    }
-    .chip{
-      cursor:pointer;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.10);
-      color: var(--muted);
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      display:inline-flex; align-items:center; gap:6px;
-      user-select:none;
-      transition: background .12s ease, border-color .12s ease;
-    }
-    .chip.active{
-      background: rgba(124,58,237,.18);
-      border-color: rgba(124,58,237,.45);
-      color: var(--text);
-    }
+    .company-name { font-size: 0.86rem; line-height: 1.25; flex: 1 1 auto; }
+    .company-name-main { display: block; }
+    .company-distance { display: block; font-size: 0.72rem; color: #59b5ff; margin-top: 2px; font-weight: 600; }
+    .company-coords { font-size: 0.65rem; color: #555; font-family: monospace; }
 
-    .list{
-      /* THIS is the scroll container */
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      padding: 10px;
-    }
+    .checkbox-wrap { flex-shrink: 0; }
+    .checkbox-wrap input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 
-    .card{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.04);
-      margin-bottom: 8px;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      cursor:pointer;
-    }
-    .card:hover{
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-    }
-    .card.selected{
-      border-color: rgba(124,58,237,.55);
-      background: rgba(124,58,237,.12);
-    }
-    .card.visited{
-      opacity: .58;
-      background: rgba(0,0,0,.18);
-    }
-    .n{
-      width:32px;height:32px;border-radius: 12px;
-      display:flex;align-items:center;justify-content:center;
-      font-weight: 900; font-size: 12px;
-      color: var(--text);
-      background: rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.10);
-      flex-shrink:0;
-    }
-    .meta{min-width:0; flex:1}
-    .meta .name{
-      font-weight: 900;
-      font-size: 13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .meta .addr{
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .badge{
-      font-size: 11px;
-      font-weight: 900;
-      padding: 5px 8px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: var(--muted);
-      flex-shrink:0;
-      max-width: 120px;
-      text-overflow: ellipsis;
-      overflow:hidden;
-      white-space:nowrap;
-    }
-    .badge.good{color: #86efac; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12);}
-    .badge.wait{color: #c7d2fe; border-color: rgba(99,102,241,.35); background: rgba(99,102,241,.10);}
-    .badge.warn{color: #fde68a; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10);}
-    .badge.err{color: #fecaca; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10);}
+    /* MAP */
+    .map-caption { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .map-caption b { color: var(--accent); }
+    .map-wrapper { flex: 1 1 auto; border-radius: 10px; overflow: hidden; background: #000; border: 1px solid var(--border-soft); position: relative; }
+    .map-wrapper iframe { width: 100%; height: 100%; border: 0; }
 
-    .tick{
-      width: 28px; height: 28px; border-radius: 10px;
-      border:1px solid rgba(255,255,255,.14);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;
-      font-weight: 900;
-      color: var(--muted);
-      background: rgba(0,0,0,.20);
-      cursor:pointer;
-      user-select:none;
-      transition: background .12s ease, border-color .12s ease;
-    }
-    .tick.on{
-      color:#04130b;
-      background: rgba(34,197,94,.95);
-      border-color: rgba(34,197,94,.95);
-    }
+    /* SCROLLBAR */
+    .list::-webkit-scrollbar { width: 6px; }
+    .list::-webkit-scrollbar-track { background: transparent; }
+    .list::-webkit-scrollbar-thumb { background: #343c4f; border-radius: 3px; }
 
-    /* Right: map + details */
-    .map-wrap{
-      position:relative;
-      flex:1;
-      min-height:0;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .map-top{
-      flex-shrink:0;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.18);
-    }
-    .titleblock{min-width:0}
-    .titleblock .t1{
-      font-weight: 950;
-      font-size: 13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .titleblock .t2{
-      margin-top:2px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    .map-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    #map{
-      flex:1;
-      min-height:0;
-      background: #0a0d14;
-    }
-
-    /* Footer status */
-    .footer{
-      background: rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      padding: 10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 10px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .footer .left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .footer .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .dot{
-      width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.20);
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .dot.good{background: rgba(34,197,94,.9); border-color: rgba(34,197,94,.9);}
-    .dot.warn{background: rgba(245,158,11,.9); border-color: rgba(245,158,11,.9);}
-    .dot.err{background: rgba(239,68,68,.9); border-color: rgba(239,68,68,.9);}
-
-    /* Mobile */
-    @media (max-width: 980px){
-      body{overflow:auto}
-      .app{height:auto; overflow:visible}
-      .main{grid-template-columns: 1fr; }
-      .panel{height: 52vh;}
-      .panel.mapPanel{height: 48vh;}
+    @media (max-width: 960px) {
+      .card-row { flex-wrap: wrap; }
+      .card-panel { flex: 0 0 100%; max-width: 100%; }
+      .card-inner { height: 60vh; }
     }
   </style>
 </head>
-
 <body>
-<div class="app">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"></div>
-      <div>
-        <h1>Plant Visit Planner</h1>
-        <div class="sub">Revamp UI • Leaflet Map • OSRM driving distance</div>
-      </div>
-    </div>
+  <div class="page">
+    <h1>
+      Plant Visit Planner
+      <span id="gpsIndicator" class="gps-status">GPS: Not Saved</span>
+    </h1>
 
-    <div class="sep"></div>
+    <div class="main-card">
+      <div class="card-row">
+        <div class="card-panel">
+          <div class="card-inner">
+            <div class="card-title">Route List</div>
+            <div class="subline">1. Click <b>Refresh GPS</b>. 2. Click <b>Sort by Distance</b>.</div>
 
-    <div class="pill" id="pillGPS">📍 GPS: <b>Not set</b></div>
-    <div class="pill" id="pillProgress">✅ Visited: <b>0</b>/<span id="totalCount">0</span></div>
+            <div class="controls">
+              <div class="controls-left">
+                <button id="btnRefreshGPS" class="btn btn-primary">Refresh GPS</button>
+                <button id="sortByDistance" class="btn">Sort by Distance</button>
+                <button id="clearVisited" class="btn">Reset</button>
+              </div>
+              <div class="stats" id="stats"></div>
+            </div>
 
-    <div class="sep"></div>
-
-    <div class="actions">
-      <button class="btn btn-primary" id="btnGPS">Update GPS</button>
-      <button class="btn btn-good" id="btnSortDrive">Sort Unvisited by Driving Distance</button>
-      <button class="btn" id="btnShowAll">Show All</button>
-      <button class="btn" id="btnShowUnvisited">Unvisited Only</button>
-      <button class="btn btn-danger" id="btnReset">Reset Visited</button>
-    </div>
-  </div>
-
-  <!-- MAIN -->
-  <div class="main">
-    <!-- LEFT LIST -->
-    <div class="panel">
-      <div class="list-header">
-        <div class="search">
-          <input id="q" placeholder="Search company / address…" />
-        </div>
-        <div class="chips">
-          <div class="chip active" id="chipAll">All</div>
-          <div class="chip" id="chipUnvisited">Unvisited</div>
-          <div class="chip" id="chipVisited">Visited</div>
-          <div class="chip" id="chipHasDistance">Has distance</div>
-          <div class="chip" id="chipNoDistance">No distance</div>
-        </div>
-      </div>
-      <div class="list" id="list"></div>
-    </div>
-
-    <!-- RIGHT MAP -->
-    <div class="panel mapPanel">
-      <div class="map-wrap">
-        <div class="map-top">
-          <div class="titleblock">
-            <div class="t1" id="selTitle">Select a plant</div>
-            <div class="t2" id="selSub">Map + route will appear here (no Google iframe)</div>
-          </div>
-          <div class="map-actions">
-            <button class="btn" id="btnRoute">Draw Route</button>
-            <button class="btn" id="btnOpenOSM">Open OSM</button>
-            <button class="btn" id="btnOpenGoogle">Open Google</button>
-            <button class="btn" id="btnWaze">Waze</button>
+            <div class="list" id="plantList"></div>
           </div>
         </div>
-        <div id="map"></div>
+
+        <div class="card-panel">
+          <div class="card-inner">
+            <div class="card-header-row">
+              <div class="card-title">Map Preview</div>
+              <div class="map-buttons">
+                <button id="openDirections" class="btn btn-sm">Google Maps App</button>
+              </div>
+            </div>
+
+            <div class="map-caption">
+              Target: <b id="currentCompanyLabel">Select a company</b>
+            </div>
+
+            <div class="map-wrapper">
+              <iframe
+                id="mapFrame"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <div class="left">
-      <span class="dot" id="netDot"></span>
-      <span id="status">Ready.</span>
-    </div>
-    <div class="right">
-      <span class="pill">Distance source: <b>OSRM (driving)</b></span>
-      <span class="pill">Map source: <b>OpenStreetMap tiles</b></span>
-    </div>
-  </div>
-</div>
 
 <script>
-  /**************************************************************
-   *  DATA (keep your array; add more companies yourself later)
-   **************************************************************/
+  // --- DATA POPULATED FROM PREVIOUS REQUEST ---
   const plants = [
-    { id:"aureumaex", name:"Aureumaex Precision Plastics (M) Sdn Bhd", area:"Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat:2.8258, lng:101.8105 },
-    { id:"ichikoh", name:"Ichikoh (M) Sdn. Bhd.", area:"Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan", lat:2.8214, lng:101.8083 },
-    { id:"johnson_matthey", name:"Johnson Matthey Sdn. Bhd.", area:"Lot 12, Jalan 2, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat:2.8125, lng:101.7925 },
-    { id:"mapei_nilai", name:"Mapei Malaysia Nilai Plant", area:"D3A, Lot 28, Jalan Industri 3/4, Kawasan Perindustrian Nilai 3, 71800 Nilai, Negeri Sembilan", lat:2.8520, lng:101.7980 },
-    { id:"asachem_sa", name:"Asachem (M) Sdn. Bhd.", area:"Lot 10, Jalan Lada Sulah 16/11, Seksyen 16, 40200 Shah Alam, Selangor", lat:3.0300, lng:101.4800 },
-    { id:"edenor_oleo", name:"Edenor Oleochemicals (M) Sdn Bhd", area:"Lot 1, Jalan Lebuh Raya, Pelabuhan Klang, 42000 Port Klang, Selangor", lat:2.9150, lng:101.4550 },
-    { id:"ysp_industries", name:"Y.S.P Industries (M) Sdn Bhd", area:"Lot 3, 5 & 7, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat:2.9450, lng:101.7850 },
-    { id:"duopharma", name:"Duopharma Manufacturing (Bangi) Sdn Bhd", area:"Lot 2, 4, 6, 8 & 10, Jalan P/7, Section 13, Kawasan Perindustrian Bangi, 43650 Bandar Baru Bangi, Selangor", lat:2.9400, lng:101.7800 },
-    { id:"chembond", name:"Chembond Chemicals(Malaysia) Sdn Bhd", area:"No. 15, Jalan Utarid U5/15, Seksyen U5, 40150 Shah Alam, Selangor", lat:3.0500, lng:101.4800 },
-    { id:"air_liquide", name:"Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area:"Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka", lat:2.2500, lng:102.1500 }
+    { id: "aureumaex", name: "Aureumaex Precision Plastics (M) Sdn Bhd", lat: 2.8258, lng: 101.8105 },
+    { id: "ichikoh", name: "Ichikoh (M) Sdn. Bhd.", lat: 2.8214, lng: 101.8083 },
+    { id: "ouji_sekken", name: "Ouji Sekken Manufacturing (M) Sdn. Bhd.", lat: 2.8350, lng: 101.8150 },
+    { id: "alps_electric", name: "Alps Electric (Malaysia) Sdn Bhd - Nilai Plant", lat: 2.8228, lng: 101.8075 },
+    { id: "k_plastics", name: "K-Plastics Industries Sdn Bhd", lat: 2.8200, lng: 101.8100 },
+    { id: "pca_group", name: "PCA Group Sdn Bhd", lat: 2.8310, lng: 101.8185 },
+    { id: "johnson_matthey", name: "Johnson Matthey Sdn. Bhd.", lat: 2.8125, lng: 101.7925 },
+    { id: "meditech_gloves", name: "Meditech Gloves Sdn. Bhd.", lat: 2.7680, lng: 101.7650 },
+    { id: "future_plastic", name: "Future Plastic Industries Sdn. Bhd.", lat: 2.8550, lng: 101.7950 },
+    { id: "jujutsu_industries", name: "Jujutsu Industries Sdn Bhd", lat: 2.8330, lng: 101.8160 },
+    { id: "polyplus_packages", name: "Polyplus Packages Sdn. Bhd.", lat: 2.8250, lng: 101.8120 },
+    { id: "jebsen_jessen", name: "Jebsen & Jessen Packaging Sdn Bhd", lat: 2.8340, lng: 101.8170 },
+    { id: "lti_industries", name: "LTI Industries Sdn Bhd", lat: 2.8240, lng: 101.8110 },
+    { id: "harta_packaging", name: "Harta Packaging Industries (Selangor) Sdn. Bhd.", lat: 2.8400, lng: 101.8200 },
+    { id: "skf_bearing", name: "SKF Bearing Industries (M) Sdn Bhd", lat: 2.8265, lng: 101.8135 },
+    { id: "akzo_nobel", name: "Akzo Nobel Paints (Malaysia) Sdn Bhd", lat: 2.8300, lng: 101.8150 },
+    { id: "mapei_nilai", name: "Mapei Malaysia Nilai Plant", lat: 2.8520, lng: 101.7980 },
+    { id: "gf_one", name: "GF One Chemicals Sdn. Bhd.", lat: 2.8500, lng: 101.7950 },
+    { id: "dansoon", name: "Dansoon Chemicals Sdn. Bhd.", lat: 2.8480, lng: 101.7960 },
+    { id: "chuanplus", name: "Chuanplus Industries Sdn. Bhd.", lat: 2.8530, lng: 101.7970 },
+    { id: "av_manufacturing", name: "AV Manufacturing Sdn. Bhd.", lat: 2.8510, lng: 101.7990 },
+    { id: "yec_chemical", name: "YEC Chemical Compounds Sdn Bhd", lat: 2.8500, lng: 101.7980 },
+    { id: "vivasil_paints", name: "Vivasil Paints ( M ) Sdn Bhd", lat: 2.6800, lng: 101.9500 },
+    { id: "dongnam", name: "Dongnam Sdn. Bhd.", lat: 2.8230, lng: 101.8080 },
+    { id: "see_sen", name: "See Sen Chemical Berhad", lat: 2.8280, lng: 101.8140 },
+    { id: "cenviro", name: "Cenviro Sdn Bhd", lat: 2.7500, lng: 101.8500 },
+    { id: "schmidt_clemens", name: "Schmidt + Clemens (Asia) Sdn. Bhd.", lat: 2.7650, lng: 101.8900 },
+    { id: "jaewon_frontier", name: "Jaewon Frontier (M) Sdn Bhd", lat: 2.8320, lng: 101.8165 },
+    { id: "tecford_precision", name: "Tecford Precision Sdn Bhd", lat: 2.8250, lng: 101.8125 },
+    { id: "fibertex", name: "Fibertex Personal Care Sdn. Bhd.", lat: 2.8350, lng: 101.8180 },
+    { id: "sugihara_grand", name: "Sugihara Grand Industries (Sendayan Plant)", lat: 2.6680, lng: 101.8850 },
+    { id: "bluetech_env", name: "Bluetech Environmental Technology Sdn Bhd", lat: 2.6950, lng: 101.9250 },
+    { id: "cbt_petroleum", name: "CBT Petroleum Sdn Bhd", lat: 2.7200, lng: 101.9400 },
+    { id: "goodmaid", name: "Goodmaid Chemicals Corporation Sdn Bhd", lat: 2.6850, lng: 101.9800 },
+    { id: "ansell_seremban", name: "Ansell Seremban Sdn Bhd", lat: 2.6800, lng: 101.9850 },
+    { id: "toyochem_seremban", name: "Toyochem Specialty Chemicals Sdn Bhd", lat: 2.6900, lng: 101.9750 },
+    { id: "aica_malaysia", name: "Aica Malaysia Sdn. Bhd.", lat: 2.6880, lng: 101.9780 },
+    { id: "sumitomo_env", name: "Sumitomo Chemical Enviro-Agro Asia Pacific", lat: 2.6850, lng: 101.9800 },
+    { id: "careplus", name: "Careplus (M) Sdn Bhd", lat: 2.6820, lng: 101.9820 },
+    { id: "bostik", name: "Bostik Malaysia Sdn Bhd", lat: 2.6880, lng: 101.9760 },
+    { id: "aegis_materials", name: "Aegis Materials (M) Sdn. Bhd.", lat: 2.6860, lng: 101.9780 },
+    { id: "sun_rubber", name: "Sun Rubber Industry Sdn. Bhd.", lat: 2.6840, lng: 101.9800 },
+    { id: "conquest_chem", name: "Conquest Chemical Supply Sdn. Bhd.", lat: 2.6900, lng: 101.9750 },
+    { id: "ogosin_chem", name: "Ogosin Chemical Industries Sdn. Bhd.", lat: 2.7300, lng: 101.9350 },
+    { id: "allied_specialty", name: "Allied Specialty Compounds", lat: 2.6850, lng: 101.9800 },
+    { id: "ecogreen_monomer", name: "Ecogreen Monomer Sdn Bhd", lat: 2.6880, lng: 101.9760 },
+    { id: "sanyu_jushi", name: "Sanyu Jushi Sdn. Bhd.", lat: 2.6860, lng: 101.9780 },
+    { id: "gb_industries", name: "G.B. Industries Sdn Bhd", lat: 2.6840, lng: 101.9800 },
+    { id: "maytech", name: "Maytech Cleanroom Manufacturing Sdn Bhd", lat: 2.6850, lng: 101.9800 },
+    { id: "growchem_senawang", name: "Growchem Sdn Bhd", lat: 2.6880, lng: 101.9760 },
+    { id: "cp_chemie", name: "Cp Chemie Resources (M) Sdn Bhd", lat: 2.6900, lng: 101.9750 },
+    { id: "ccp_century", name: "Ccp Century Chemical Paints", lat: 3.0100, lng: 101.5500 },
+    { id: "m_xell", name: "M-Xell Chemicals Sdn Bhd", lat: 2.6850, lng: 101.9800 },
+    { id: "goldstab", name: "Goldstab Additives Sdn Bhd", lat: 2.6880, lng: 101.9760 },
+    { id: "zhe_ma", name: "Zhe Ma Advance Material Technology Sdn. Bhd.", lat: 2.8220, lng: 101.8080 },
+    { id: "dia_chemical", name: "Dia-Chemical Sdn. Bhd.", lat: 2.9900, lng: 101.5600 },
+    { id: "asachem_sa", name: "Asachem (M) Sdn. Bhd.", lat: 3.0300, lng: 101.4800 },
+    { id: "inventec", name: "Inventec Performance Chemicals South East Asia", lat: 2.8400, lng: 101.8200 },
+    { id: "bt_chemicals", name: "BT Chemicals Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "pro_chem", name: "Pro-Chem Industrial Sdn Bhd", lat: 3.0500, lng: 101.5000 },
+    { id: "helios_chem", name: "Helios Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "cyto_tech", name: "Cyto Tech Sdn Bhd", lat: 2.9800, lng: 101.5800 },
+    { id: "hexachem", name: "Hexachem (M) Sdn. Bhd.", lat: 2.9900, lng: 101.5600 },
+    { id: "tech_lab", name: "Tech-Lab Manufacturing Sdn Bhd", lat: 3.0150, lng: 101.5850 },
+    { id: "qemrich", name: "Qemrich Sdn Bhd", lat: 3.0000, lng: 101.5500 },
+    { id: "kraiburg_tpe", name: "KRAIBURG TPE Technology (M) Sdn Bhd", lat: 3.0350, lng: 101.7650 },
+    { id: "leivy", name: "Leivy Laboratories Sdn. Bhd", lat: 3.0300, lng: 101.7700 },
+    { id: "guppy_plastic", name: "Guppy Plastic Industries Sdn Bhd", lat: 3.0280, lng: 101.7680 },
+    { id: "miracon", name: "Miracon (M) Sdn Bhd", lat: 3.0320, lng: 101.7720 },
+    { id: "imec_hygiene", name: "iMEC Hygiene Sdn. Bhd.", lat: 2.9850, lng: 101.7200 },
+    { id: "ysp_industries", name: "Y.S.P Industries (M) Sdn Bhd", lat: 2.9450, lng: 101.7850 },
+    { id: "duopharma", name: "Duopharma Manufacturing (Bangi) Sdn Bhd", lat: 2.9400, lng: 101.7800 },
+    { id: "etika_beverages", name: "Etika Beverages Sdn Bhd", lat: 2.9420, lng: 101.7820 },
+    { id: "texchem_life", name: "Texchem Life Science Sdn Bhd", lat: 2.9380, lng: 101.7780 },
+    { id: "denso", name: "Denso (M) Sdn Bhd", lat: 2.9410, lng: 101.7790 },
+    { id: "ccm_polymers", name: "Ccm Polymers Sdn Bhd", lat: 2.9350, lng: 101.7750 },
+    { id: "compounding_colouring", name: "Compounding & Colouring Sdn Bhd", lat: 2.9360, lng: 101.7760 },
+    { id: "stenta_films", name: "Stenta Films (M) Sdn Bhd", lat: 2.9390, lng: 101.7770 },
+    { id: "tesa_tapes", name: "Tesa Tapes (M) Sdn Bhd", lat: 2.9400, lng: 101.7800 },
+    { id: "sapura_industrial", name: "Sapura Industrial Berhad", lat: 2.9420, lng: 101.7810 },
+    { id: "pharmaniaga", name: "Pharmaniaga Manufacturing Bhd", lat: 2.9450, lng: 101.7830 },
+    { id: "mlm_packaging", name: "Mlm Packaging Sdn Bhd", lat: 2.9800, lng: 101.5500 },
+    { id: "alsey_kimia", name: "Alsey Kimia (M) Sdn Bhd", lat: 3.0100, lng: 101.5300 },
+    { id: "ichem_solution", name: "i-Chem Solution Sdn Bhd", lat: 2.9850, lng: 101.5650 },
+    { id: "chembond", name: "Chembond Chemicals(Malaysia) Sdn Bhd", lat: 3.0500, lng: 101.4800 },
+    { id: "hb_laboratories", name: "HB Laboratories Sdn Bhd", lat: 3.0400, lng: 101.5000 },
+    { id: "ferrovic", name: "Ferrovic Corporation (M) Sdn. Bhd.", lat: 3.0200, lng: 101.5200 },
+    { id: "pavilion_coating", name: "Pavilion Coating (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "edenor_oleo", name: "Edenor Oleochemicals (M) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
+    { id: "primechem", name: "Primechem Malaysia Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "unigreen", name: "Unigreen Chemicals Sdn. Bhd.", lat: 3.0000, lng: 101.4200 },
+    { id: "synerchem", name: "Synerchem Group", lat: 3.0500, lng: 101.5500 },
+    { id: "bio_enviro", name: "Bio Enviro Industries Sdn Bhd", lat: 3.0100, lng: 101.5300 },
+    { id: "cb_palm", name: "Cb Palm Industrial Sdn. Bhd.", lat: 2.9500, lng: 101.4000 },
+    { id: "plantic_lab", name: "Plantic Lab Sdn Bhd", lat: 3.0200, lng: 101.5200 },
+    { id: "mildef", name: "Mildef International Technologies Sdn Bhd", lat: 2.9600, lng: 101.7500 },
+    { id: "techbond", name: "Techbond Manufacturing Sdn Bhd", lat: 3.0300, lng: 101.5300 },
+    { id: "wasco_thermal", name: "Wasco Thermal Sdn. Bhd", lat: 3.0600, lng: 101.5000 },
+    { id: "hicom_diecastings", name: "Hicom Diecastings Sdn Bhd", lat: 3.0200, lng: 101.5400 },
+    { id: "mettube", name: "Mettube Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "afcona", name: "Afcona Chemicals Sdn Bhd", lat: 2.9800, lng: 101.4000 },
+    { id: "apex_packaging", name: "Apex Packaging Sdn Bhd", lat: 2.9150, lng: 101.4550 },
+    { id: "shintako", name: "Shintako (M) Sdn Bhd", lat: 3.0300, lng: 101.4800 },
+    { id: "kaizen_packaging", name: "Kaizen Packaging Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "nichia_malaysia", name: "Nichia (Malaysia) Sdn Bhd", lat: 2.9450, lng: 101.7850 },
+    { id: "igl_coatings", name: "Igl Coatings Headquarters", lat: 3.0800, lng: 101.5800 },
+    { id: "jj_asia", name: "Jj Asia Manufacturing (M) Sdn Bhd", lat: 2.9800, lng: 101.4000 },
+    { id: "mre_group", name: "Mre Group Of Companies", lat: 3.0500, lng: 101.5500 },
+    { id: "suka_chemicals", name: "Suka Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "fnholdings", name: "Fraser & Neave Holdings Bhd", lat: 3.0600, lng: 101.5800 },
+    { id: "malaysian_diecast", name: "Malaysian Die-Casting Industries Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
+    { id: "globechem", name: "Globechem Sdn Bhd", lat: 3.0200, lng: 101.5400 },
+    { id: "finn_chem", name: "Finn Chemicals Sdn. Bhd.", lat: 3.0000, lng: 101.5500 },
+    { id: "japan_chemical", name: "Japan Chemical (M) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
+    { id: "gme_chemicals", name: "Gme Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "malayan_adhesives", name: "Malayan Adhesives And Chemicals Sdn Bhd", lat: 3.0600, lng: 101.5400 },
+    { id: "krischem", name: "Krischem Sdn. Bhd.", lat: 3.0200, lng: 101.5300 },
+    { id: "arobenz", name: "Arobenz Chemicals Sdn Bhd", lat: 2.9900, lng: 101.5600 },
+    { id: "ken_rich", name: "Ken-Rich Chemical Sdn Bhd.", lat: 3.0100, lng: 101.5200 },
+    { id: "dpi_chemicals", name: "Dpi Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "archem", name: "Archem Malaysia Sdn Bhd", lat: 2.9600, lng: 101.4000 },
+    { id: "gladron", name: "Gladron Chemicals Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
+    { id: "clariant", name: "Clariant (Malaysia) Sdn Bhd", lat: 2.9150, lng: 101.4550 },
+    { id: "zextron", name: "Zextron Chemical Industries (M) Sdn Bhd", lat: 3.0000, lng: 101.5500 },
+    { id: "fujikura", name: "Fujikura Chemicals Sdn Bhd", lat: 2.9800, lng: 101.4000 },
+    { id: "jintai", name: "Jintai (M) Sdn Bhd", lat: 2.9600, lng: 101.4000 },
+    { id: "tmk_chemical", name: "Tmk Chemical Banting Sdn Bhd", lat: 2.8000, lng: 101.5000 },
+    { id: "kc_chemicals", name: "KC Chemicals (M) Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "sunenergy", name: "Sunenergy Chemical & Pharmaceutical Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "ccm_berhad", name: "Chemical Company Of Malaysia Berhad", lat: 3.0600, lng: 101.5400 },
+    { id: "olen_port", name: "Olen Port Klang Sdn Bhd", lat: 2.9150, lng: 101.4550 },
+    { id: "mey_chern", name: "Mey Chern Chemical Sdn Bhd", lat: 3.0000, lng: 101.4200 },
+    { id: "acme_chemicals", name: "Acme Chemicals (M) Sdn Bhd", lat: 2.9200, lng: 101.4600 },
+    { id: "nylex_specialty", name: "Nylex Specialty Chemicals Sdn. Bhd.", lat: 2.9200, lng: 101.4600 },
+    { id: "nexuschem", name: "Nexuschem Engineering Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "govi_chemicals", name: "GOVI Chemicals Sdn. Bhd", lat: 2.9500, lng: 101.4000 },
+    { id: "mitsui_poly", name: "Mitsui Chemicals Polyurethanes Malaysia", lat: 2.9800, lng: 101.4000 },
+    { id: "lyondellbasell", name: "Lyondellbasell Polymers (Malaysia) Sdn. Bhd.", lat: 3.0100, lng: 101.5200 },
+    { id: "zagro_chem", name: "Zagro Chemicals Sdn. Bhd.", lat: 3.0300, lng: 101.5300 },
+    { id: "southern_acids", name: "Southern Acids Industries Sdn. Bhd.", lat: 2.9900, lng: 101.4300 },
+    { id: "klh_telok", name: "Kong Long Huat Chemicals Sdn Bhd Telok Gong", lat: 2.9600, lng: 101.4000 },
+    { id: "pkg_gemilang", name: "Perusahaan Kimia Gemilang Sdn. Bhd.", lat: 2.9900, lng: 101.4300 },
+    { id: "formosa_prosonic", name: "Formosa Prosonic Chemicals Sdn Bhd", lat: 2.9200, lng: 101.4600 },
+    { id: "w_clay", name: "The W Clay Industries Sdn. Bhd.", lat: 2.9500, lng: 101.4000 },
+    { id: "synergy_chem", name: "Synergy Chemicals Sdn Bhd", lat: 3.0200, lng: 101.5300 },
+    { id: "ksc_chem", name: "Ksc Chemical (Malaysia) Sdn. Bhd.", lat: 2.9800, lng: 101.4000 },
+    { id: "tg_chem", name: "Tg Chemical (M) Sdn Bhd", lat: 2.9600, lng: 101.4000 },
+    { id: "mah_sing", name: "Mah Sing Plastics Industries Sdn Bhd", lat: 3.0100, lng: 101.5200 },
+    { id: "growchem_pi", name: "Growchem Sdn Bhd (Pulau Indah Plant)", lat: 2.9400, lng: 101.3500 },
+    { id: "yara_industrial", name: "Yara International (M)Sdn Bhd - Industrial", lat: 2.9400, lng: 101.3500 },
+    { id: "mewah_oils", name: "Mewah Oils Sdn Bhd", lat: 2.9400, lng: 101.3500 },
+    { id: "mitsui_scientex", name: "Mitsui Chemicals Scientex Sdn. Bhd.", lat: 2.9600, lng: 101.4000 },
+    { id: "hextar", name: "Hextar Chemicals Sdn Bhd", lat: 2.9400, lng: 101.3500 },
+    { id: "ascendchem", name: "Ascendchem Sdn Bhd Pulau Indah", lat: 2.9400, lng: 101.3500 },
+    { id: "topmark", name: "Topmark Petroleum Products Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
+    { id: "cargill", name: "Cargill Palm Products Sdn Bhd", lat: 2.9800, lng: 101.3300 },
+    { id: "chevron_pi", name: "Chevron Pulau Indah Terminal", lat: 2.9400, lng: 101.3500 },
+    { id: "concord_chem", name: "Concord Chemicals Corporation Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
+    { id: "adhes_packaging", name: "Adhes Packaging Technology (Malaysia) Sdn Bhd", lat: 2.9400, lng: 101.3500 },
+    { id: "klk_oleomas", name: "Kl-Kepong Oleomas Sdn. Bhd.", lat: 2.9400, lng: 101.3500 },
+    { id: "gamalux", name: "Gamalux Sdn Bhd (Factory)", lat: 2.9400, lng: 101.3500 },
+    { id: "ancom_nylex", name: "Ancom Nylex Terminals Sdn Bhd", lat: 2.9800, lng: 101.3300 },
+    { id: "intco_malaysia", name: "Intco Malaysia Sdn Bhd", lat: 2.9800, lng: 101.3300 },
+    { id: "dh_hygiene", name: "Dh Hygience (Melaka) Sdn Bhd", lat: 2.2700, lng: 102.1500 },
+    { id: "tech_latex", name: "Tech-Latex Scientific Sdn. Bhd.", lat: 2.2900, lng: 102.1800 },
+    { id: "yakuhin", name: "Yakuhin Industries (M) Sdn Bhd", lat: 2.2800, lng: 102.2000 },
+    { id: "air_liquide", name: "Air Liquide Malaysia Sdn. Bhd. (Melaka)", lat: 2.2500, lng: 102.1500 }
   ];
 
-  /**************************************************************
-   *  STORAGE + STATE
-   **************************************************************/
-  const VISITED_KEY = "pv_revamp_visited_v1";
-  const GPS_KEY     = "pv_revamp_gps_v1";
+  // Assign Order Index automatically for display
+  plants.forEach((p, i) => p.order = i + 1);
 
+  // --- LOGIC ---
+  const VISITED_KEY = "plant_visit_dark_gps_v2";
+  const GPS_KEY = "my_gps_coords";
+
+  // Elements
+  const listEl = document.getElementById("plantList");
+  const statsEl = document.getElementById("stats");
+  const mapFrame = document.getElementById("mapFrame");
+  const labelEl = document.getElementById("currentCompanyLabel");
+  const gpsIndEl = document.getElementById("gpsIndicator");
+
+  // State
   let visited = {};
-  try { visited = JSON.parse(localStorage.getItem(VISITED_KEY) || "{}"); } catch { visited = {}; }
-
-  let user = null;
-  try {
-    const tmp = JSON.parse(localStorage.getItem(GPS_KEY) || "null");
-    if (tmp && typeof tmp.lat === "number" && typeof tmp.lng === "number") user = tmp;
-  } catch {}
-
   let selectedId = null;
-  let routeLine = null;
-  let userMarker = null;
-  let plantMarker = null;
+  let userCoords = null; // { lat, lng }
 
-  let filterMode = "all"; // all | unvisited | visited
-  let filterDist = "any"; // any | has | no
-  let unvisitedOnlyQuick = false;
+  // Init
+  loadVisited();
+  loadGPS();
+  buildList();
+  updateStats();
+  if (plants[0]) selectPlant(plants[0]);
 
-  let isBusy = false;
+  // --- FUNCTIONS ---
 
-  /**************************************************************
-   *  UI ELEMENTS
-   **************************************************************/
-  const elList = document.getElementById("list");
-  const elQ = document.getElementById("q");
-  const elStatus = document.getElementById("status");
-  const elGPSPill = document.getElementById("pillGPS");
-  const elProgress = document.getElementById("pillProgress");
-  const elTotal = document.getElementById("totalCount");
-  const elSelTitle = document.getElementById("selTitle");
-  const elSelSub = document.getElementById("selSub");
-  const netDot = document.getElementById("netDot");
-
-  const btnGPS = document.getElementById("btnGPS");
-  const btnSortDrive = document.getElementById("btnSortDrive");
-  const btnShowAll = document.getElementById("btnShowAll");
-  const btnShowUnvisited = document.getElementById("btnShowUnvisited");
-  const btnReset = document.getElementById("btnReset");
-
-  const btnRoute = document.getElementById("btnRoute");
-  const btnOpenOSM = document.getElementById("btnOpenOSM");
-  const btnOpenGoogle = document.getElementById("btnOpenGoogle");
-  const btnWaze = document.getElementById("btnWaze");
-
-  /**************************************************************
-   *  MAP INIT (Leaflet)
-   **************************************************************/
-  const map = L.map("map", { zoomControl: true });
-  const defaultCenter = [2.95, 101.75]; // MY-ish
-  map.setView(defaultCenter, 9);
-
-  // OSM tiles (no iframe, no Google X-Frame errors)
-  const tile = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap"
-  });
-  tile.addTo(map);
-
-  function setStatus(msg, level="ok"){
-    elStatus.textContent = msg;
-    netDot.className = "dot";
-    if (level==="ok") netDot.classList.add("good");
-    if (level==="warn") netDot.classList.add("warn");
-    if (level==="err") netDot.classList.add("err");
+  function loadVisited() {
+    try {
+      const s = localStorage.getItem(VISITED_KEY);
+      visited = s ? JSON.parse(s) : {};
+    } catch { visited = {}; }
   }
 
-  function saveVisited(){
+  function saveVisited() {
     localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
-    updateProgress();
   }
 
-  function updateProgress(){
-    elTotal.textContent = plants.length;
-    const done = Object.values(visited).filter(Boolean).length;
-    elProgress.innerHTML = `✅ Visited: <b>${done}</b>/${plants.length}`;
-  }
-
-  function updateGpsPill(){
-    if (!user){
-      elGPSPill.innerHTML = `📍 GPS: <b>Not set</b>`;
-      return;
-    }
-    elGPSPill.innerHTML = `📍 GPS: <b>${user.lat.toFixed(5)}, ${user.lng.toFixed(5)}</b>`;
-  }
-
-  function clearDistances(){
-    plants.forEach(p => { delete p._roadMeters; delete p._roadKm; delete p._roadErr; delete p._pending; });
-  }
-
-  function km1(m){ return (m/1000).toFixed(1); }
-
-  /**************************************************************
-   *  FILTER + SORT
-   **************************************************************/
-  function filteredPlants(){
-    const q = elQ.value.trim().toLowerCase();
-    return plants.filter(p => {
-      if (q){
-        const hay = (p.name + " " + p.area).toLowerCase();
-        if (!hay.includes(q)) return false;
+  function loadGPS() {
+    try {
+      const s = localStorage.getItem(GPS_KEY);
+      if (s) {
+        userCoords = JSON.parse(s);
+        gpsIndEl.textContent = "GPS: Saved";
+        gpsIndEl.classList.add("gps-active");
       }
-
-      const isV = !!visited[p.id];
-
-      if (filterMode === "visited" && !isV) return false;
-      if (filterMode === "unvisited" && isV) return false;
-
-      const hasDist = typeof p._roadMeters === "number";
-      if (filterDist === "has" && !hasDist) return false;
-      if (filterDist === "no" && hasDist) return false;
-
-      if (unvisitedOnlyQuick && isV) return false;
-
-      return true;
-    });
+    } catch {}
   }
 
-  function sortForDisplay(list){
-    // Unvisited first, then by driving distance (known), then unknown, then name.
-    return list.slice().sort((a,b)=>{
-      const av = !!visited[a.id];
-      const bv = !!visited[b.id];
-      if (av !== bv) return av - bv;
-
-      const da = (typeof a._roadMeters === "number") ? a._roadMeters : Number.POSITIVE_INFINITY;
-      const db = (typeof b._roadMeters === "number") ? b._roadMeters : Number.POSITIVE_INFINITY;
-      if (da !== db) return da - db;
-
-      return a.name.localeCompare(b.name);
-    });
+  // --- DISTANCE CALCULATION (Haversine Formula) ---
+  // Returns estimated Driving Distance (Straight line * 1.3 multiplier)
+  function getDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const straightDist = R * c;
+    return straightDist * 1.3; // Estimated driving factor
   }
 
-  /**************************************************************
-   *  OSRM (driving distance + route)
-   **************************************************************/
-  async function osrmTable(origin, dests){
-    // coords = lon,lat;lon,lat;...
-    const coords = [
-      `${origin.lng},${origin.lat}`,
-      ...dests.map(d => `${d.lng},${d.lat}`)
-    ].join(";");
+  // Fallback for plants without coords (Cluster Center Points)
+  function getFallbackCoords(plant) {
+    // If plant already has lat/lng in data, return it
+    if (plant.lat && plant.lng) return { lat: plant.lat, lng: plant.lng };
 
-    const destinations = dests.map((_,i)=> i+1).join(";");
-    const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&destinations=${destinations}&annotations=distance`;
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("OSRM table failed: " + res.status);
-    const data = await res.json();
-    const row = data?.distances?.[0];
-    if (!Array.isArray(row)) throw new Error("OSRM table invalid");
-    return row; // meters or null
+    // Otherwise guess based on name (generic fallback)
+    return { lat: 3.0738, lng: 101.5183 }; // Default to Shah Alam center
   }
 
-  async function osrmRoute(origin, dest){
-    const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("OSRM route failed: " + res.status);
-    const data = await res.json();
-    const r = data?.routes?.[0];
-    if (!r || !r.geometry) throw new Error("OSRM route invalid");
-    return r; // contains geometry, distance, duration
-  }
+  // --- ACTION HANDLERS ---
 
-  async function sortUnvisitedByDrivingDistance(){
-    if (!user){
-      alert("Update GPS first.");
+  function refreshGPS() {
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported");
       return;
     }
-    if (isBusy) return;
-
-    isBusy = true;
-    btnSortDrive.disabled = true;
-    btnGPS.disabled = true;
-
-    setStatus("Calculating driving distances for unvisited…", "warn");
-
-    const targets = plants.filter(p => !visited[p.id]);
-    if (!targets.length){
-      setStatus("All plants are visited. Nothing to sort.", "ok");
-      isBusy = false;
-      btnSortDrive.disabled = false;
-      btnGPS.disabled = false;
-      return;
-    }
-
-    // batch to avoid OSRM demo limits
-    const BATCH = 70;
-    for (let i=0; i<targets.length; i+=BATCH){
-      const chunk = targets.slice(i, i+BATCH);
-      chunk.forEach(p => p._pending = true);
-      render();
-
-      try{
-        const metersList = await osrmTable(user, chunk);
-        metersList.forEach((m, idx)=>{
-          const p = chunk[idx];
-          delete p._pending;
-          if (typeof m === "number" && isFinite(m)){
-            p._roadMeters = m;
-            p._roadKm = km1(m);
-            delete p._roadErr;
-          } else {
-            p._roadErr = true;
-            delete p._roadMeters;
-            delete p._roadKm;
-          }
-        });
-      } catch(e){
-        console.error(e);
-        chunk.forEach(p=>{
-          delete p._pending;
-          p._roadErr = true;
-          delete p._roadMeters;
-          delete p._roadKm;
-        });
-        setStatus("OSRM busy/blocked. Some distances may show error.", "warn");
-        // polite pause
-        await new Promise(r=>setTimeout(r, 900));
-      }
-
-      render();
-      await new Promise(r=>setTimeout(r, 250));
-    }
-
-    setStatus("Done. Unvisited sorted by driving distance.", "ok");
-    isBusy = false;
-    btnSortDrive.disabled = false;
-    btnGPS.disabled = false;
-  }
-
-  /**************************************************************
-   *  RENDER
-   **************************************************************/
-  function render(){
-    updateProgress();
-    updateGpsPill();
-
-    const list = sortForDisplay(filteredPlants());
-
-    elList.innerHTML = "";
-    list.forEach((p, idx)=>{
-      const isV = !!visited[p.id];
-      const sel = p.id === selectedId;
-
-      const card = document.createElement("div");
-      card.className = "card" + (isV ? " visited" : "") + (sel ? " selected" : "");
-
-      const n = document.createElement("div");
-      n.className = "n";
-      n.textContent = String(idx + 1);
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-
-      const nm = document.createElement("div");
-      nm.className = "name";
-      nm.textContent = p.name;
-
-      const addr = document.createElement("div");
-      addr.className = "addr";
-      addr.textContent = p.area;
-
-      meta.appendChild(nm);
-      meta.appendChild(addr);
-
-      const badge = document.createElement("div");
-      badge.className = "badge";
-
-      if (p._pending){
-        badge.classList.add("wait");
-        badge.textContent = "⏳ calc…";
-      } else if (typeof p._roadMeters === "number"){
-        badge.classList.add("good");
-        badge.textContent = `🚗 ${p._roadKm} km`;
-      } else if (p._roadErr){
-        badge.classList.add("err");
-        badge.textContent = "⚠ route?";
-      } else if (user){
-        badge.classList.add("warn");
-        badge.textContent = "— no dist";
-      } else {
-        badge.textContent = "GPS first";
-      }
-
-      const tick = document.createElement("div");
-      tick.className = "tick" + (isV ? " on" : "");
-      tick.textContent = isV ? "✓" : "";
-      tick.title = "Toggle visited";
-      tick.onclick = (e)=>{
-        e.stopPropagation();
-        visited[p.id] = !visited[p.id];
-        saveVisited();
-        // keep sorted feel
-        render();
-      };
-
-      card.appendChild(n);
-      card.appendChild(meta);
-      card.appendChild(badge);
-      card.appendChild(tick);
-
-      card.onclick = ()=> selectPlant(p.id);
-
-      elList.appendChild(card);
-    });
-
-    // enable/disable map action buttons
-    const hasSel = !!selectedId;
-    btnRoute.disabled = !hasSel || !user;
-    btnOpenOSM.disabled = !hasSel;
-    btnOpenGoogle.disabled = !hasSel;
-    btnWaze.disabled = !hasSel;
-  }
-
-  /**************************************************************
-   *  SELECT PLANT + MAP UPDATE
-   **************************************************************/
-  function selectPlant(id){
-    selectedId = id;
-    const p = plants.find(x=>x.id===id);
-    if (!p) return;
-
-    elSelTitle.textContent = p.name;
-    elSelSub.textContent = p.area;
-
-    // markers
-    if (plantMarker) plantMarker.remove();
-    plantMarker = L.marker([p.lat, p.lng]).addTo(map).bindPopup(p.name);
-
-    if (user){
-      if (userMarker) userMarker.remove();
-      userMarker = L.circleMarker([user.lat, user.lng], {
-        radius: 8,
-        color: "#22C55E",
-        weight: 3,
-        fillColor: "#22C55E",
-        fillOpacity: 0.35
-      }).addTo(map).bindPopup("You are here");
-      map.fitBounds(L.latLngBounds([[user.lat,user.lng],[p.lat,p.lng]]).pad(0.35));
-    } else {
-      map.setView([p.lat, p.lng], 13);
-    }
-
-    // clear any old route line when selecting new plant
-    if (routeLine) { routeLine.remove(); routeLine = null; }
-
-    render();
-  }
-
-  async function drawRoute(){
-    if (!user){
-      alert("Update GPS first.");
-      return;
-    }
-    if (!selectedId){
-      alert("Select a plant first.");
-      return;
-    }
-    if (isBusy) return;
-
-    const p = plants.find(x=>x.id===selectedId);
-    if (!p) return;
-
-    isBusy = true;
-    btnRoute.disabled = true;
-    setStatus("Fetching route polyline…", "warn");
-
-    try{
-      const r = await osrmRoute(user, p);
-
-      if (routeLine) routeLine.remove();
-      routeLine = L.geoJSON(r.geometry, {
-        style: { weight: 5, opacity: 0.85 } // default Leaflet color
-      }).addTo(map);
-
-      const km = km1(r.distance);
-      const min = Math.round(r.duration / 60);
-      setStatus(`Route drawn: ${km} km • ~${min} min`, "ok");
-      map.fitBounds(routeLine.getBounds().pad(0.25));
-
-    } catch(e){
-      console.error(e);
-      setStatus("Route failed (OSRM blocked or rate-limited). Try again.", "err");
-      alert("Could not fetch route. Your network may block OSRM or is rate-limited.");
-    }
-
-    isBusy = false;
-    btnRoute.disabled = !selectedId || !user;
-  }
-
-  function openOSM(){
-    const p = plants.find(x=>x.id===selectedId);
-    if (!p) return;
-    const url = `https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}`;
-    window.open(url, "_blank");
-  }
-
-  function openGoogle(){
-    const p = plants.find(x=>x.id===selectedId);
-    if (!p) return;
-
-    if (user){
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&origin=${user.lat},${user.lng}&destination=${p.lat},${p.lng}&travelmode=driving`,
-        "_blank"
-      );
-    } else {
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`,
-        "_blank"
-      );
-    }
-  }
-
-  function openWaze(){
-    const p = plants.find(x=>x.id===selectedId);
-    if (!p) return;
-    window.location.href = `https://waze.com/ul?ll=${p.lat},${p.lng}&navigate=yes`;
-  }
-
-  /**************************************************************
-   *  GPS
-   **************************************************************/
-  function updateGPS(){
-    if (!navigator.geolocation){
-      alert("Geolocation not supported in this browser.");
-      return;
-    }
-    if (isBusy) return;
-
-    setStatus("Getting GPS…", "warn");
-    btnGPS.disabled = true;
-
+    gpsIndEl.textContent = "GPS: Locating...";
     navigator.geolocation.getCurrentPosition(
-      pos=>{
-        user = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        localStorage.setItem(GPS_KEY, JSON.stringify(user));
-
-        // origin changed => clear distances + route
-        clearDistances();
-        if (routeLine) { routeLine.remove(); routeLine = null; }
-
-        // show marker
-        if (userMarker) userMarker.remove();
-        userMarker = L.circleMarker([user.lat, user.lng], {
-          radius: 8,
-          color: "#22C55E",
-          weight: 3,
-          fillColor: "#22C55E",
-          fillOpacity: 0.35
-        }).addTo(map).bindPopup("You are here");
-
-        map.setView([user.lat, user.lng], 12);
-
-        setStatus("GPS updated. Now click 'Sort Unvisited by Driving Distance'.", "ok");
-        btnGPS.disabled = false;
-        render();
+      (pos) => {
+        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        localStorage.setItem(GPS_KEY, JSON.stringify(userCoords));
+        gpsIndEl.textContent = "GPS: Updated";
+        gpsIndEl.classList.add("gps-active");
+        alert("Location updated! Now click 'Sort by Distance'.");
       },
-      err=>{
-        console.error(err);
-        setStatus("GPS error: " + err.message, "err");
-        btnGPS.disabled = false;
+      (err) => {
+        gpsIndEl.textContent = "GPS: Error";
+        alert("Error getting location: " + err.message);
       },
-      { enableHighAccuracy:true, maximumAge: 15000, timeout: 15000 }
+      { enableHighAccuracy: true }
     );
   }
 
-  /**************************************************************
-   *  CHIP FILTERS
-   **************************************************************/
-  function setChipActive(idActive){
-    const all = ["chipAll","chipUnvisited","chipVisited","chipHasDistance","chipNoDistance"];
-    all.forEach(id=>document.getElementById(id).classList.remove("active"));
-    document.getElementById(idActive).classList.add("active");
+  function sortListByDistance() {
+    if (!userCoords) {
+      alert("Please click 'Refresh GPS' first.");
+      return;
+    }
+
+    plants.forEach(p => {
+      const c = getFallbackCoords(p);
+      p._dist = getDistanceKm(userCoords.lat, userCoords.lng, c.lat, c.lng);
+    });
+
+    plants.sort((a, b) => {
+      // 1. Unvisited first
+      const vA = !!visited[a.id];
+      const vB = !!visited[b.id];
+      if (vA !== vB) return vA - vB;
+
+      // 2. Distance
+      return a._dist - b._dist;
+    });
+
+    buildList();
+    // Auto select nearest unvisited
+    const nearest = plants.find(p => !visited[p.id]);
+    if (nearest) selectPlant(nearest);
   }
 
-  document.getElementById("chipAll").onclick = ()=>{
-    filterMode="all"; filterDist="any"; unvisitedOnlyQuick=false;
-    setChipActive("chipAll");
-    render();
-  };
-  document.getElementById("chipUnvisited").onclick = ()=>{
-    filterMode="unvisited"; filterDist="any"; unvisitedOnlyQuick=false;
-    setChipActive("chipUnvisited");
-    render();
-  };
-  document.getElementById("chipVisited").onclick = ()=>{
-    filterMode="visited"; filterDist="any"; unvisitedOnlyQuick=false;
-    setChipActive("chipVisited");
-    render();
-  };
-  document.getElementById("chipHasDistance").onclick = ()=>{
-    filterMode="all"; filterDist="has"; unvisitedOnlyQuick=false;
-    setChipActive("chipHasDistance");
-    render();
-  };
-  document.getElementById("chipNoDistance").onclick = ()=>{
-    filterMode="all"; filterDist="no"; unvisitedOnlyQuick=false;
-    setChipActive("chipNoDistance");
-    render();
-  };
+  function buildList() {
+    listEl.innerHTML = "";
+    plants.forEach(plant => {
+      const row = document.createElement("div");
+      row.className = "stop-row";
+      if (visited[plant.id]) row.classList.add("visited");
+      if (plant.id === selectedId) row.classList.add("selected");
 
-  /**************************************************************
-   *  TOP BUTTONS
-   **************************************************************/
-  btnGPS.onclick = updateGPS;
-  btnSortDrive.onclick = sortUnvisitedByDrivingDistance;
+      // Icon/Number
+      const num = document.createElement("div");
+      num.className = "stop-number";
+      num.textContent = plant.order; // This stays constant even if sorted
+      
+      // Name Block
+      const name = document.createElement("div");
+      name.className = "company-name";
+      
+      const main = document.createElement("span");
+      main.className = "company-name-main";
+      main.textContent = plant.name;
+      name.appendChild(main);
 
-  btnShowAll.onclick = ()=>{
-    filterMode="all"; filterDist="any"; unvisitedOnlyQuick=false;
-    setChipActive("chipAll");
-    setStatus("Showing all plants.", "ok");
-    render();
-  };
+      // Distance & Coords display
+      if (typeof plant._dist === 'number') {
+        const d = document.createElement("span");
+        d.className = "company-distance";
+        d.textContent = `~${plant._dist.toFixed(1)} km drive`;
+        name.appendChild(d);
+      } else if (plant.lat) {
+        // Show coords if distance not calc yet
+        const c = document.createElement("span");
+        c.className = "company-coords";
+        c.textContent = `${plant.lat.toFixed(4)}, ${plant.lng.toFixed(4)}`;
+        // name.appendChild(c); // Optional: uncomment to see coords in list
+      }
 
-  btnShowUnvisited.onclick = ()=>{
-    filterMode="unvisited"; filterDist="any"; unvisitedOnlyQuick=true;
-    setChipActive("chipUnvisited");
-    setStatus("Showing unvisited only.", "ok");
-    render();
-  };
+      // Checkbox
+      const cbWrap = document.createElement("div");
+      cbWrap.className = "checkbox-wrap";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!visited[plant.id];
+      cb.onclick = (e) => {
+        e.stopPropagation();
+        visited[plant.id] = cb.checked;
+        saveVisited();
+        row.classList.toggle("visited", cb.checked);
+        updateStats();
+      };
+      cbWrap.appendChild(cb);
 
-  btnReset.onclick = ()=>{
-    if (!confirm("Reset all visited marks?")) return;
-    visited = {};
-    saveVisited();
-    setStatus("Visited reset.", "ok");
-    render();
-  };
+      row.appendChild(num);
+      row.appendChild(name);
+      row.appendChild(cbWrap);
 
-  btnRoute.onclick = drawRoute;
-  btnOpenOSM.onclick = openOSM;
-  btnOpenGoogle.onclick = openGoogle;
-  btnWaze.onclick = openWaze;
-
-  elQ.oninput = ()=> render();
-
-  /**************************************************************
-   *  STARTUP
-   **************************************************************/
-  updateProgress();
-  updateGpsPill();
-  elTotal.textContent = plants.length;
-
-  // If GPS exists, show it on map
-  if (user){
-    userMarker = L.circleMarker([user.lat, user.lng], {
-      radius: 8,
-      color: "#22C55E",
-      weight: 3,
-      fillColor: "#22C55E",
-      fillOpacity: 0.35
-    }).addTo(map).bindPopup("You are here");
-    map.setView([user.lat, user.lng], 12);
-    setStatus("GPS loaded. You can sort by driving distance now.", "ok");
-  } else {
-    setStatus("Click 'Update GPS' to start.", "warn");
+      row.onclick = () => selectPlant(plant);
+      listEl.appendChild(row);
+    });
   }
 
-  render();
+  function selectPlant(plant) {
+    selectedId = plant.id;
+    labelEl.textContent = `${plant.order}. ${plant.name}`;
+    
+    // Embed Google Map centered on coordinates
+    // Using standard embed API which works without key for basic pin dropping
+    const q = `${plant.lat},${plant.lng}`;
+    const url = `https://maps.google.com/maps?q=${q}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+    mapFrame.src = url;
+
+    // Refresh highlight
+    const rows = listEl.querySelectorAll(".stop-row");
+    rows.forEach(r => {
+      r.classList.toggle("selected", r.querySelector(".company-name").innerText.includes(plant.name));
+    });
+  }
+
+  function updateStats() {
+    const done = Object.values(visited).filter(Boolean).length;
+    statsEl.innerHTML = `Visited <b>${done}</b> / <b>${plants.length}</b>`;
+  }
+
+  function openGoogleMapsApp() {
+    if (!selectedId) return;
+    const plant = plants.find(p => p.id === selectedId);
+    
+    // Create Universal Link for Maps
+    // If we have user coords, we can trigger navigation
+    let url = "";
+    if (userCoords) {
+      url = `https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${plant.lat},${plant.lng}&travelmode=driving`;
+    } else {
+      // Just search destination
+      url = `https://www.google.com/maps/search/?api=1&query=${plant.lat},${plant.lng}`;
+    }
+    window.open(url, '_blank');
+  }
+
+  // --- EVENTS ---
+  document.getElementById("btnRefreshGPS").onclick = refreshGPS;
+  document.getElementById("sortByDistance").onclick = sortListByDistance;
+  document.getElementById("openDirections").onclick = openGoogleMapsApp;
+  document.getElementById("clearVisited").onclick = () => {
+    if(confirm("Reset all?")) { visited = {}; saveVisited(); buildList(); updateStats(); }
+  };
+
 </script>
 </body>
 </html>
