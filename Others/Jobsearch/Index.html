@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plant Visit Planner – Full</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plant Visit Planner – Fixed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="color-scheme" content="dark" />
   <style>
     :root {
@@ -11,101 +11,226 @@
       --bg-card: #151a24;
       --bg-card-hover: #1e2532;
       --border: #2a3245;
-      --accent: #8b5cf6; /* Violet for OSRM */
-      --accent-hover: #7c3aed;
+      --accent: #8b5cf6;
       --success: #10b981;
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
     }
 
     * { box-sizing: border-box; outline: none; }
-    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+    
+    /* 1. FORCE FULL HEIGHT & NO WINDOW SCROLL */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden; /* Prevent body scroll, force internal scroll */
+    }
 
-    .page { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; }
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
 
     /* HEADER */
-    header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg); flex-shrink: 0; }
-    h1 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-    .progress-container { flex: 1; max-width: 300px; margin-left: 20px; background: #1f2937; height: 8px; border-radius: 4px; overflow: hidden; }
+    header {
+      padding: 0.8rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0; /* Never shrink */
+    }
+    h1 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    
+    .progress-container {
+      flex: 1;
+      max-width: 200px;
+      margin-left: 15px;
+      background: #1f2937;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
     .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.3s ease; }
 
-    /* CONTENT */
-    .content-grid { display: flex; flex: 1; padding: 0.5rem 1rem 1rem 1rem; gap: 1rem; overflow: hidden; }
-    
+    /* CONTENT GRID - FLEX CONTAINER */
+    .content-grid {
+      display: flex;
+      flex: 1; /* Fill remaining height */
+      overflow: hidden; /* Contain children */
+      padding: 0.5rem;
+      gap: 0.5rem;
+    }
+
     /* LEFT PANEL */
-    .panel-list { flex: 0 0 450px; display: flex; flex-direction: column; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-    
-    .list-controls { padding: 1rem; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.75rem; z-index: 10; }
-    .search-box { width: 100%; background: #0f1219; border: 1px solid var(--border); padding: 0.6rem 1rem; border-radius: 8px; color: var(--text-main); }
-    
+    .panel-list {
+      flex: 0 0 400px; /* Fixed width on desktop */
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      overflow: hidden; /* Important for inner scroll */
+      min-height: 0; /* Flexbox scroll fix */
+    }
+
+    /* CONTROLS (Sticky top) */
+    .list-controls {
+      padding: 0.75rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      width: 100%;
+      background: #0f1219;
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
     .button-group { display: flex; gap: 0.5rem; }
-    .btn { flex: 1; background: #2d3748; color: var(--text-main); border: none; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: background 0.2s; white-space: nowrap; }
+    .btn {
+      flex: 1;
+      background: #2d3748;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+    }
     .btn:hover { background: #4a5568; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary { background: var(--accent); color: white; border: none; }
 
-    .status-bar { font-size: 0.75rem; color: var(--text-muted); text-align: center; height: 1.2em; }
-
-    .list-scroll { flex: 1; overflow-y: auto; padding: 0.5rem; }
+    /* 2. SCROLLABLE AREA FIX */
+    .list-scroll {
+      flex: 1; /* Take remaining height */
+      overflow-y: auto; /* Enable scroll */
+      padding: 0.5rem;
+      min-height: 0; /* Flexbox scroll fix */
+    }
 
     /* CARDS */
-    .plant-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card-hover); border: 1px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-    .plant-card:hover { border-color: var(--border); transform: translateY(-1px); }
+    .plant-card {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem;
+      margin-bottom: 0.4rem;
+      background: var(--bg-card-hover);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .plant-card:hover { background: #262e3d; }
     .plant-card.selected { border-color: var(--accent); background: rgba(139, 92, 246, 0.1); }
-    .plant-card.visited { opacity: 0.5; background: #111; }
+    .plant-card.visited { opacity: 0.5; }
     .plant-card.visited .plant-name { text-decoration: line-through; }
 
-    .plant-order { width: 26px; height: 26px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: var(--accent); flex-shrink: 0; }
+    .plant-order {
+      width: 24px; height: 24px;
+      background: #000;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: bold; color: var(--accent);
+      flex-shrink: 0;
+    }
+
     .plant-info { flex: 1; min-width: 0; }
-    .plant-name { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .plant-details { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .plant-name {
+      font-size: 0.85rem; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .plant-details { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .dist-badge { color: #a78bfa; font-weight: 600; margin-right: 4px; }
+
+    .action-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--accent); padding: 3px 8px; border-radius: 4px;
+      font-size: 0.7rem; cursor: pointer;
+    }
     
-    .dist-badge { display: inline-block; background: #1f2937; padding: 2px 6px; border-radius: 4px; color: #a78bfa; margin-right: 5px; font-weight: 600; }
-
-    .action-btn { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-    .action-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-
-    .check-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4b5563; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .check-circle:hover { border-color: var(--text-main); }
+    .check-circle {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid #4b5563; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
     .check-circle.checked { background: var(--success); border-color: var(--success); }
-    .check-circle.checked::after { content: '✓'; font-size: 14px; color: #000; font-weight: 800; }
+    .check-circle.checked::after { content: '✓'; font-size: 12px; color: #000; font-weight: 800; }
 
-    /* MAP PANEL */
-    .panel-map { flex: 1; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-    .map-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); }
-    .map-title { font-size: 0.9rem; color: var(--text-muted); } .map-title b { color: var(--accent); }
-    iframe { width: 100%; height: 100%; border: none; }
+    /* RIGHT PANEL (MAP) */
+    .panel-map {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .map-header {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-card);
+      flex-shrink: 0;
+    }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
 
-    @media (max-width: 900px) { .content-grid { flex-direction: column; overflow-y: auto; } .panel-list { flex: none; height: 50vh; width: 100%; } .panel-map { flex: none; height: 50vh; width: 100%; } }
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+      .content-grid { flex-direction: column; }
+      .panel-list { flex: 1; width: 100%; max-height: 50%; } /* Half screen list */
+      .panel-map { flex: 1; width: 100%; max-height: 50%; } /* Half screen map */
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🏭 Visit Planner <span style="font-size:0.6em; opacity:0.5; font-weight:400; vertical-align:middle; border:1px solid #333; padding:2px 6px; border-radius:4px;">Full List</span></h1>
+    <h1>🏭 Visit Planner</h1>
     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
   </header>
 
   <div class="content-grid">
     <div class="panel-list">
       <div class="list-controls">
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search company or area...">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search...">
         <div class="button-group">
-          <button id="btnRefreshGPS" class="btn btn-primary">1. Update GPS</button>
-          <button id="btnSort" class="btn">2. Calculate Distances</button>
+          <button id="btnRefreshGPS" class="btn btn-primary">1. GPS</button>
+          <button id="btnSort" class="btn">2. Calc Dist</button>
           <button id="btnClear" class="btn">Reset</button>
         </div>
-        <div class="status-bar" id="statusText">Ready</div>
+        <div id="statusText" style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 5px;">Ready</div>
       </div>
       <div class="list-scroll" id="plantList"></div>
     </div>
 
     <div class="panel-map">
       <div class="map-header">
-        <div class="map-title">Target: <b id="currentCompanyLabel">None</b></div>
+        <span style="font-size:0.8rem; color:#aaa">Map: <b id="currentCompanyLabel" style="color:#fff">None</b></span>
         <button class="action-btn" id="btnWaze">Open Waze</button>
       </div>
-      <iframe id="mapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe id="mapFrame" name="mapFrame" allowfullscreen></iframe>
     </div>
   </div>
 
@@ -281,7 +406,7 @@
     { id: "air_liquide", order: 167, name: "Air Liquide Malaysia Sdn. Bhd. (Melaka Plant)", area: "Lot 3, Jalan PK 1, Kawasan Perindustrian Krubong, 75250 Melaka", lat: 2.2500, lng: 102.1500 }
   ];
 
-  // --- STATE ---
+  // --- OSRM BATCH LOGIC ---
   const VISITED_KEY = "plant_visit_osrm_v1";
   let visited = {};
   let userCoords = null; 
@@ -290,13 +415,10 @@
 
   try { visited = JSON.parse(localStorage.getItem(VISITED_KEY) || "{}"); } catch {}
 
-  // --- UI ELEMENTS ---
   const listEl = document.getElementById("plantList");
   const mapFrame = document.getElementById("mapFrame");
   const labelEl = document.getElementById("currentCompanyLabel");
   const statusText = document.getElementById("statusText");
-
-  // --- FUNCTIONS ---
 
   function saveVisited() {
     localStorage.setItem(VISITED_KEY, JSON.stringify(visited));
@@ -310,22 +432,19 @@
     document.getElementById("progressBar").style.width = pct + "%";
   }
 
-  // 1. OSRM API Call (Single Route)
+  // OSRM: Fetch single
   async function fetchOsrmDistance(origin, dest) {
-    // API Format: {lon},{lat};{lon},{lat}
     const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=false`;
     try {
       const res = await fetch(url);
       if (!res.ok) return null;
       const data = await res.json();
-      if (data.routes && data.routes.length > 0) {
-        return data.routes[0].distance; // returns meters
-      }
+      if (data.routes && data.routes.length > 0) return data.routes[0].distance; 
     } catch (e) { console.error(e); }
     return null;
   }
 
-  // 2. Batch Processor (The Queue)
+  // BATCH PROCESS
   async function calculateAllDistances() {
     if (!userCoords) return alert("Please click 'Update GPS' first!");
     if (isCalculating) return;
@@ -335,26 +454,20 @@
     btn.disabled = true;
     btn.style.opacity = "0.5";
 
-    // Sort by Straight Line first (Haversine) to prioritize nearby ones
-    plants.forEach(p => {
-      p._tempDist = getHaversine(userCoords.lat, userCoords.lng, p.lat, p.lng);
-    });
+    // Rough sort first
+    plants.forEach(p => p._tempDist = getHaversine(userCoords.lat, userCoords.lng, p.lat, p.lng));
     plants.sort((a, b) => a._tempDist - b._tempDist);
 
     let processedCount = 0;
     const total = plants.length;
-
-    // Use a concurrency of 2 (fetch 2 at a time) to be polite
-    const BATCH_SIZE = 2; 
+    const BATCH_SIZE = 2; // Be polite to public API
     
     for (let i = 0; i < total; i += BATCH_SIZE) {
-      if (!isCalculating) break; // Allow cancelling
+      if (!isCalculating) break; 
 
       const batch = plants.slice(i, i + BATCH_SIZE);
       const promises = batch.map(async (p) => {
-        // Skip if we already have it from this session
         if (p._roadMeters) return;
-        
         const meters = await fetchOsrmDistance(userCoords, {lat: p.lat, lng: p.lng});
         if (meters !== null) {
           p._roadMeters = meters;
@@ -365,16 +478,13 @@
       await Promise.all(promises);
       
       processedCount += batch.length;
-      statusText.innerText = `Fetching routes: ${Math.min(processedCount, total)} / ${total}...`;
+      statusText.innerText = `Calculating: ${Math.min(processedCount, total)} / ${total}...`;
       
-      // Update list order every 10 items so user sees progress
-      if (processedCount % 10 === 0) sortAndRender();
-
-      // Artificial delay to prevent 429 Too Many Requests
-      await new Promise(r => setTimeout(r, 250));
+      if (processedCount % 6 === 0) sortAndRender();
+      await new Promise(r => setTimeout(r, 200)); // Delay
     }
 
-    statusText.innerText = "Calculation Complete.";
+    statusText.innerText = "Done.";
     isCalculating = false;
     btn.disabled = false;
     btn.style.opacity = "1";
@@ -382,18 +492,15 @@
   }
 
   function sortAndRender() {
-    // Sort logic: 1. Unvisited, 2. Road Dist (if known), 3. Straight Line
     plants.sort((a, b) => {
       const av = !!visited[a.id];
       const bv = !!visited[b.id];
-      if (av !== bv) return av - bv; // False < True
+      if (av !== bv) return av - bv; 
 
       const da = a._roadMeters || (a._tempDist * 1000); 
       const db = b._roadMeters || (b._tempDist * 1000);
-      
       return da - db;
     });
-
     renderList();
   }
 
@@ -407,7 +514,6 @@
     return R * c;
   }
 
-  // 3. Rendering
   function renderList() {
     listEl.innerHTML = "";
     const term = document.getElementById("searchInput").value.toLowerCase();
@@ -419,12 +525,10 @@
       const card = document.createElement("div");
       card.className = `plant-card ${isVisited ? 'visited' : ''} ${selectedId===p.id ? 'selected' : ''}`;
       
-      // Order
       const ord = document.createElement("div");
       ord.className = "plant-order";
       ord.innerText = p.order;
 
-      // Info
       const info = document.createElement("div");
       info.className = "plant-info";
       
@@ -448,13 +552,11 @@
       info.appendChild(name);
       info.appendChild(det);
 
-      // Map Button
       const btn = document.createElement("button");
       btn.className = "action-btn";
       btn.innerText = "Map";
       btn.onclick = (e) => { e.stopPropagation(); openMapApp(p); };
 
-      // Check
       const check = document.createElement("div");
       check.className = `check-circle ${isVisited ? 'checked' : ''}`;
       check.onclick = (e) => {
@@ -478,18 +580,16 @@
   function selectPlant(p) {
     selectedId = p.id;
     labelEl.innerText = p.name;
-    const q = `${p.lat},${p.lng}`;
-    // Use Embed API (Free)
-    mapFrame.src = `https://www.google.com/maps?q=3${q}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    // Updated to standard Google Maps Embed (Free tier compatible)
+    mapFrame.src = `https://maps.google.com/maps?q=${p.lat},${p.lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     renderList();
   }
 
   function openMapApp(p) {
-    // Universal link
     if(userCoords) {
-      window.open(`https://www.google.com/maps/dir/?api=1&origin=$${userCoords.lat},${userCoords.lng}&destination=${p.lat},${p.lng}&travelmode=driving`);
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${p.lat},${p.lng}&travelmode=driving`);
     } else {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=$${p.lat},${p.lng}`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`);
     }
   }
 
@@ -498,13 +598,10 @@
     statusText.innerText = "Locating...";
     navigator.geolocation.getCurrentPosition(pos => {
       userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      statusText.innerText = "GPS Updated. Now click 'Calculate Distances'.";
-      
-      // Initial rough sort
+      statusText.innerText = "GPS Updated. Click 'Calc Dist'.";
       plants.forEach(p => p._tempDist = getHaversine(userCoords.lat, userCoords.lng, p.lat, p.lng));
       plants.sort((a, b) => a._tempDist - b._tempDist);
       renderList();
-
     }, err => alert("Error: " + err.message));
   }
 
