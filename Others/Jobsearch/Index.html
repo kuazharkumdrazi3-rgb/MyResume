@@ -159,6 +159,10 @@
       gap:10px;
       min-height:120px;
     }
+    .card.visited{
+      opacity:.65;
+      outline:1px solid rgba(89,181,255,.25);
+    }
     .name{
       font-weight:750;
       line-height:1.25;
@@ -174,6 +178,18 @@
       display:flex;
       gap:8px;
       flex-wrap:wrap;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(89,181,255,.10);
+      color:var(--accent);
+      font-size:.78rem;
+      letter-spacing:.02em;
     }
 
     .empty{
@@ -210,6 +226,7 @@
           <div class="badge">Total: <b id="totalCount">0</b></div>
         </div>
         <div class="right">
+          <button class="btn" id="toggleVisitedBtn" type="button">Hide Visited: Off</button>
           <button class="btn" id="showAllBtn" type="button">Show All</button>
         </div>
       </div>
@@ -222,6 +239,7 @@
 <script>
   // --- COMPANY LIST ---
   // Keep: { id, order, name, area }
+  // Leave empty; you will fill later.
   const plants = [
   { id: "aureumaex", order: 1, name: "Aureumaex Precision Plastics (M) Sdn Bhd", area: "Lot 136, Jalan Permata 1, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
   { id: "ichikoh", order: 2, name: "Ichikoh (M) Sdn. Bhd.", area: "Lot 110, Jalan Permata 1/4, Arab Malaysian Industrial Park, 71800 Nilai, Negeri Sembilan" },
@@ -476,13 +494,22 @@
   const totalCountEl = document.getElementById("totalCount");
   const statsEl = document.getElementById("stats"); // (kept, even if not in HTML)
   const showAllBtn = document.getElementById("showAllBtn");
+  const toggleVisitedBtn = document.getElementById("toggleVisitedBtn");
 
-  // --- STATE ---
+  // --- STORAGE / STATE ---
+  const STORAGE = {
+    visited: "cc_visited_ids",
+    hideVisited: "cc_hide_visited"
+  };
+
+  let visitedIds = new Set(JSON.parse(localStorage.getItem(STORAGE.visited) || "[]"));
+  let hideVisited = JSON.parse(localStorage.getItem(STORAGE.hideVisited) || "false");
   let activeLetter = null; // null = All
 
   // --- INIT ---
   buildAZ();
   totalCountEl.textContent = String(plants.length);
+  updateHideVisitedUI();
   render();
 
   // --- HELPERS ---
@@ -527,10 +554,8 @@
     window.open(webUrl, "_blank");
   }
 
-  // ✅ NEW: Open in Waze
   function openWaze(p) {
     const q = encodeURIComponent(buildQuery(p));
-    // Waze universal link (opens app if installed, otherwise browser)
     const wazeUrl = `https://waze.com/ul?q=${q}&navigate=yes`;
     window.open(wazeUrl, "_blank");
   }
@@ -550,6 +575,22 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function isVisited(p){ return visitedIds.has(p.id); }
+
+  function saveVisited(){
+    localStorage.setItem(STORAGE.visited, JSON.stringify([...visitedIds]));
+  }
+
+  function saveHideVisited(){
+    localStorage.setItem(STORAGE.hideVisited, JSON.stringify(hideVisited));
+  }
+
+  function updateHideVisitedUI(){
+    if (!toggleVisitedBtn) return;
+    toggleVisitedBtn.textContent = `Hide Visited: ${hideVisited ? "On" : "Off"}`;
+    toggleVisitedBtn.classList.toggle("btn-primary", hideVisited);
   }
 
   // --- UI BUILD ---
@@ -580,16 +621,20 @@
   }
 
   function render() {
-    const filtered = activeLetter
+    let filtered = activeLetter
       ? plants.filter(p => firstLetter(p.name) === activeLetter)
       : plants;
+
+    if (hideVisited) {
+      filtered = filtered.filter(p => !isVisited(p));
+    }
 
     const sorted = sortedPlants(filtered);
 
     selectedLetterEl.textContent = activeLetter || "All";
     shownCountEl.textContent = String(sorted.length);
+    totalCountEl.textContent = String(plants.length);
 
-    // (statsEl is not in your HTML now; keep this safe)
     if (statsEl) {
       statsEl.innerHTML = `Tap A–Z • Total <b>${plants.length}</b> • Showing <b>${sorted.length}</b>`;
     }
@@ -599,11 +644,19 @@
 
     sorted.forEach((p) => {
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = "card" + (isVisited(p) ? " visited" : "");
 
       const name = document.createElement("div");
       name.className = "name";
       name.innerHTML = escapeHtml(p.name || "(No name)");
+
+      const pillWrap = document.createElement("div");
+      if (isVisited(p)) {
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.textContent = "Visited";
+        pillWrap.appendChild(pill);
+      }
 
       const addr = document.createElement("div");
       addr.className = "addr";
@@ -624,17 +677,39 @@
       btnW.textContent = "Open in Waze";
       btnW.onclick = () => openWaze(p);
 
+      const btnV = document.createElement("button");
+      btnV.type = "button";
+      btnV.className = "btn";
+      btnV.textContent = isVisited(p) ? "Unmark Visited" : "Mark Visited";
+      btnV.onclick = () => {
+        if (!p.id) return; // safety
+        if (isVisited(p)) visitedIds.delete(p.id);
+        else visitedIds.add(p.id);
+        saveVisited();
+        render();
+      };
+
       actions.appendChild(btnG);
       actions.appendChild(btnW);
+      actions.appendChild(btnV);
 
       card.appendChild(name);
+      if (pillWrap.childNodes.length) card.appendChild(pillWrap);
       card.appendChild(addr);
       card.appendChild(actions);
+
       cardsEl.appendChild(card);
     });
   }
 
   // --- EVENTS ---
+  toggleVisitedBtn.onclick = () => {
+    hideVisited = !hideVisited;
+    saveHideVisited();
+    updateHideVisitedUI();
+    render();
+  };
+
   showAllBtn.onclick = () => {
     activeLetter = null;
     setActiveButton();
